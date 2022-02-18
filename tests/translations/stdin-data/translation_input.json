@@ -1,0 +1,385 @@
+{
+    "phrases": [
+        {
+            "hashToText": {
+                "4a709aa92b186ddab2026e89affdb34b": "{name1} commented on a photo that you're tagged in"
+            },
+            "desc": "Notification about commenting on a photo.",
+            "project": "website app",
+            "author": "richard",
+            "type": "table",
+            "jsfbt": {
+                "t": {
+                    "*": "{name1} commented on a photo that you're tagged in"
+                },
+                "m": [
+                    {
+                        "token": "name1",
+                        "type": 1
+                    }
+                ]
+            }
+        },
+        {
+            "hashToText": {
+                "83adaa7f54994a8618db798bff8ae330": "Followed by {=[number of followers] person}"
+            },
+            "desc": "Text indicating the number of followers of a user",
+            "subject": "1",
+            "project": "website app",
+            "author": "richard",
+            "type": "table",
+            "jsfbt": {
+                "t": {
+                    "*": "Followed by {=[number of followers] person}"
+                },
+                "m": [
+                    {
+                        "token": "__subject__",
+                        "type": 1
+                    }
+                ]
+            }
+        },
+        {
+            "hashToText": {
+                "6d9c05aee1cb13cef24cc12d4a96fcfd": "{number of followers} person"
+            },
+            "desc": "In the phrase: \"Followed by {=[number of followers] person}\"",
+            "implicitFbt": true,
+            "subject": "1",
+            "project": "website app",
+            "author": "richard",
+            "type": "table",
+            "jsfbt": {
+                "t": {
+                    "*": {
+                        "*": "{number of followers} person"
+                    }
+                },
+                "m": [
+                    {
+                        "token": "__subject__",
+                        "type": 1
+                    },
+                    {
+                        "token": "number of followers",
+                        "type": 2
+                    }
+                ]
+            }
+        },
+        {
+            "hashToText": {
+                "148292f3d1dae83c3f973f80d331923b": "{name1} {=poked you}."
+            },
+            "desc": "User(s) have poked the viewer",
+            "subject": "1",
+            "project": "website app",
+            "author": "richard",
+            "type": "table",
+            "jsfbt": {
+                "t": {
+                    "*": "{name1} {=poked you}."
+                },
+                "m": [
+                    {
+                        "token": "__subject__",
+                        "type": 1
+                    }
+                ]
+            }
+        },
+        {
+            "hashToText": {
+                "e8e4d19a2eb0896533722debfca881d9": "poked you"
+            },
+            "desc": "In the phrase: \"{=} {=poked you}.\"",
+            "implicitFbt": true,
+            "subject": "1",
+            "project": "website app",
+            "author": "richard",
+            "type": "table",
+            "jsfbt": {
+                "t": {
+                    "*": "poked you"
+                },
+                "m": [
+                    {
+                        "token": "__subject__",
+                        "type": 1
+                    }
+                ]
+            }
+        }
+    ],
+    "translationGroups": [
+        {
+            "fb-locale": "cs_CZ",
+            "translations": {
+                "4a709aa92b186ddab2026e89affdb34b": {
+                    "translations": [
+                        {
+                            "translation": "{name1} okomentoval fotku, ve které jste označeni",
+                            "variations": [
+                                1
+                            ]
+                        },
+                        {
+                            "translation": "{name1} okomentovala fotku, ve které jste označeni",
+                            "variations": [
+                                2
+                            ]
+                        },
+                        {
+                            "translation": "{name1} okomentoval(a) fotku, ve které jste označeni",
+                            "variations": [
+                                3
+                            ]
+                        }
+                    ],
+                    "tokens": [
+                        "name1"
+                    ],
+                    "types": [
+                        3
+                    ]
+                },
+                "83adaa7f54994a8618db798bff8ae330": {
+                    "translations": [
+                        {
+                            "translation": "Sledovaný {=[number of followers] person}",
+                            "variations": [
+                                1
+                            ]
+                        },
+                        {
+                            "translation": "Sledovaná {=[number of followers] person}",
+                            "variations": [
+                                2
+                            ]
+                        },
+                        {
+                            "translation": "Sledovaný(á) {=[number of followers] person}",
+                            "variations": [
+                                3
+                            ]
+                        }
+                    ],
+                    "tokens": [
+                        "__subject__"
+                    ],
+                    "types": [
+                        3
+                    ]
+                },
+                "6d9c05aee1cb13cef24cc12d4a96fcfd": {
+                    "translations": [
+                        {
+                            "translation": "{number of followers} osobou",
+                            "variations": [
+                                4
+                            ]
+                        },
+                        {
+                            "translation": "{number of followers} lidmi",
+                            "variations": [
+                                20
+                            ]
+                        },
+                        {
+                            "translation": "{number of followers} lidmi",
+                            "variations": [
+                                24
+                            ]
+                        }
+                    ],
+                    "tokens": [
+                        "number of followers"
+                    ],
+                    "types": [
+                        28
+                    ]
+                },
+                "e8e4d19a2eb0896533722debfca881d9": {
+                    "translations": [
+                        {
+                            "translation": "vás šťouchl(a)",
+                            "variations": []
+                        }
+                    ],
+                    "tokens": [],
+                    "types": []
+                }
+            }
+        },
+        {
+            "fb-locale": "de_DE",
+            "translations": {
+                "e8e4d19a2eb0896533722debfca881d9": {
+                    "translations": [
+                        {
+                            "translation": "hat dich angestupst",
+                            "variations": []
+                        }
+                    ],
+                    "tokens": [],
+                    "types": []
+                }
+            }
+        },
+        {
+            "fb-locale": "sk_SK",
+            "translations": {
+                "4a709aa92b186ddab2026e89affdb34b": {
+                    "translations": [
+                        {
+                            "translation": "{name1} komentoval fotku, kde ste označený",
+                            "variations": [
+                                1, 1
+                            ]
+                        },
+                        {
+                            "translation": "{name1} komentovala fotku, kde ste označený",
+                            "variations": [
+                                2, 1
+                            ]
+                        },
+                        {
+                            "translation": "Používateľ {name1} komentoval fotku, kde ste označený",
+                            "variations": [
+                                3, 1
+                            ]
+                        },
+                        {
+                            "translation": "{name1} komentoval fotku, kde ste označená",
+                            "variations": [
+                                1, 2
+                            ]
+                        },
+                        {
+                            "translation": "{name1} komentovala fotku, kde ste označená",
+                            "variations": [
+                                2, 2
+                            ]
+                        },
+                        {
+                            "translation": "Používateľ {name1} komentoval fotku, kde ste označená",
+                            "variations": [
+                                3, 2
+                            ]
+                        },
+                        {
+                            "translation": "{name1} komentoval fotku, kde ste označený/á",
+                            "variations": [
+                                1, 3
+                            ]
+                        },
+                        {
+                            "translation": "{name1} komentovala fotku, kde ste označený/á",
+                            "variations": [
+                                2, 3
+                            ]
+                        },
+                        {
+                            "translation": "Používateľ {name1} komentoval fotku, kde ste označený/á",
+                            "variations": [
+                                3, 3
+                            ]
+                        }
+                    ],
+                    "tokens": [
+                        "name1", "__viewing_user__"
+                    ],
+                    "types": [
+                        3, 3
+                    ]
+                },
+                "83adaa7f54994a8618db798bff8ae330": {
+                    "translations": [
+                        {
+                            "translation": "Sledovaný {=[number of followers] person}",
+                            "variations": [
+                                1
+                            ]
+                        },
+                        {
+                            "translation": "Sledovaná {=[number of followers] person}",
+                            "variations": [
+                                2
+                            ]
+                        },
+                        {
+                            "translation": "Sledovaný/á {=[number of followers] person}",
+                            "variations": [
+                                3
+                            ]
+                        }
+                    ],
+                    "tokens": [
+                        "__subject__"
+                    ],
+                    "types": [
+                        3
+                    ]
+                },
+                "6d9c05aee1cb13cef24cc12d4a96fcfd": {
+                    "translations": [
+                        {
+                            "translation": "{number of followers} osobou",
+                            "variations": [
+                                4
+                            ]
+                        },
+                        {
+                            "translation": "{number of followers} ľuďmi",
+                            "variations": [
+                                20
+                            ]
+                        },
+                        {
+                            "translation": "{number of followers} ľuďmi",
+                            "variations": [
+                                24
+                            ]
+                        }
+                    ],
+                    "tokens": [
+                        "number of followers"
+                    ],
+                    "types": [
+                        28
+                    ]
+                },
+                "e8e4d19a2eb0896533722debfca881d9": {
+                    "translations": [
+                        {
+                            "translation": "vás šťuchol",
+                            "variations": [
+                                1
+                            ]
+                        },
+                        {
+                            "translation": "vás šťuchla",
+                            "variations": [
+                                2
+                            ]
+                        },
+                        {
+                            "translation": "vás štuchol/a",
+                            "variations": [
+                                3
+                            ]
+                        }
+                    ],
+                    "tokens": [
+                        "__subject__"
+                    ],
+                    "types": [
+                        3
+                    ]
+                }
+            }
+        }
+    ]
+}

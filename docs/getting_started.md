@@ -1,0 +1,165 @@
+# Integrating into your app
+
+We recommend you read the [best practices](best_practices.md) for advice on how to best prepare your applications. We strongly encourage you to do so.
+
+## 📦 Installing
+
+```shell
+$ composer require richarddobron/fbt
+```
+These steps are required:
+
+1. Publish config file:
+    - _We recommend setting the **author**, **project** and **path** options._
+```php
+\fbt\FbtConfig::set('author', 'your name');
+\fbt\FbtConfig::set('project', 'project');
+\fbt\FbtConfig::set('path', '/path/to/storage');
+```
+
+2. Run migrations:
+
+```php
+$ php artisan migrate
+```
+
+## 🔧 Configuration
+
+### Options
+
+The following options can be defined:
+
+* **project** `string`: (Default: `website app`) Project to which the text belongs
+* **author** `string`: Text author
+* **collectFbt** `bool`: (Default: `true`) Collect fbt instances from the source and store them to a JSON file.
+* **preserveWhitespace** `bool`: (Default: `false`)
+  - FBT normally consolidates whitespace down to one space (`' '`).
+  - Turn this off by setting this to `true`
+* **viewerContext** `string`: (Default: `\fbt\Runtime\Shared\IntlViewerContext::class`)
+* **locale** `string`: (Default: `en_US`) User locale.
+* **hash_module** `string`: (Default: `md5`) Hash module.
+* **md5_digest** `string`: (Default: `hex`) MD5 digest.
+* **fbtCommon** `string`: (Default: `[]`) common string's, e.g. `[['text' => 'desc'], ...]`
+* **fbtCommonPath** `string`: (Default: `null`) Path to the common string's module.
+* **path** `string`: Cache storage path for generated translations & source strings.
+
+Below are the less important parameters.
+
+* **driver** `string`: (Default: `json`) Currently, only JSON storage is supported.
+
+
+## 	🙋 IntlInterface
+Optional implementation of IntlInterface on UserDTO.
+
+Example code:
+
+```php
+<?php
+
+namespace App;
+
+use fbt\Transform\FbtTransform\Translate\IntlVariations;
+use fbt\Lib\IntlViewerContextInterface;
+use fbt\Runtime\Gender;
+
+class UserDTO implements IntlViewerContextInterface
+{
+    public function getLocale(): ?string
+    {
+        return $this->locale;
+    }
+
+    public static function getGender(): int
+    {
+        if ($this->gender === 'male') {
+            return IntlVariations::GENDER_MALE;
+        }
+
+        if ($this->gender === 'female') {
+            return IntlVariations::GENDER_FEMALE;
+        }
+
+        return IntlVariations::GENDER_UNKNOWN;
+    }
+}
+```
+
+After implementation, set `viewerContext`:
+
+```php
+$loggedUserDto = ...;
+
+\fbt\FbtConfig::get('viewerContext', $loggedUserDto)
+```
+
+## 	🚀  Command
+This command creates translation payloads stored in JSON file.
+```shell
+php bin/fbt translate
+```
+Read more about [translating](translating.md).
+
+## 📘 API
+
+- [fbt(...);](api_intro.md)
+- [fbt::param(...);](params.md)
+- [fbt::enum(...);](enums.md)
+- [fbt::name(...);](params.md)
+- [fbt::plural(...);](plurals.md)
+- [fbt::pronoun(...);](pronouns.md)
+- [fbt::sameParam(...);](params.md)
+- [fbt::c(...);](commmon.md)
+
+```php
+echo fbt('You just friended ' . \fbt\fbt::name('name', 'Sarah', 2 /* gender */), 'names');
+```
+
+## 🎨 Example Usage
+
+### fbtTransform() & endFbtTransform()
+**fbtTransform()**: _This function will turn output buffering on. While output buffering is active no output is sent from the script (other than headers), instead the output is stored in an internal buffer._
+
+**endFbtTransform()**: _This function will send the contents of the topmost output buffer (if any) and turn this output buffer off._
+
+```php
+<?php fbtTransform(); ?>
+   ...
+   <fbt desc="auto-wrap example">
+     Go on an
+     <a href="#">
+       <span>awesome</span> vacation
+     </a>
+   </fbt>
+   ...
+<?php endFbtTransform(); ?>
+
+// result: Go on an <a href="#"><span>awesome</span> vacation</a>
+```
+
+### fbt()
+
+```php
+fbt(
+ [
+  'Go on an ',
+  \fbt\createElement('a', \fbt\createElement('span', 'awesome'), ['href' => '#']),
+  ' vacation',
+ ],
+ 'It\'s simple',
+ ['project' => "foo"]
+)
+
+// result: Go on an <a href="#"><span>awesome</span> vacation</a>
+```
+
+```php
+fbt('You just friended ' . \fbt\fbt::name('name', 'Sarah', 2 /* gender */), 'names')
+
+// result: You just friended Sarah
+```
+
+```php
+fbt('A simple string', 'It\'s simple', ['project' => "foo"])
+
+// result: A simple string
+```

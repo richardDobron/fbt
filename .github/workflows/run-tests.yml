@@ -1,0 +1,30 @@
+on: push
+name: CI
+jobs:
+    phpunit:
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                php-version: ['7.0', '7.1', '7.2', '7.3', '7.4']
+
+        name: PHP ${{ matrix.php-version }}
+
+        steps:
+            - uses: actions/checkout@v1
+              with:
+                  fetch-depth: 1
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: ${{ matrix.php-version }}
+                  extensions: mbstring, intl
+                  coverage: none
+
+            - name: composer install
+              run: |
+                  composer install
+            - name: Run PHPUnit
+              run: |
+                  set -e && composer test

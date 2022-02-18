@@ -1,0 +1,35 @@
+{
+    "cs_CZ": {
+        "fb-locale": "cs_CZ",
+        "translations": {
+            "4a709aa92b186ddab2026e89affdb34b": {
+                "translations": [
+                    {
+                        "translation": "{name1} okomentoval fotku, ve které jste označeni",
+                        "variations": [
+                            1
+                        ]
+                    },
+                    {
+                        "translation": "{name1} okomentovala fotku, ve které jste označeni",
+                        "variations": [
+                            2
+                        ]
+                    },
+                    {
+                        "translation": "{name1} okomentoval(a) fotku, ve které jste označeni",
+                        "variations": [
+                            3
+                        ]
+                    }
+                ],
+                "tokens": [
+                    "name1"
+                ],
+                "types": [
+                    3
+                ]
+            }
+        }
+    }
+}

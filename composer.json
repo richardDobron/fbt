@@ -1,0 +1,49 @@
+{
+    "name": "richarddobron/fbt",
+    "description": "A PHP Internationalization Framework for PHP.",
+    "keywords": ["php", "i18n", "framework", "internationalization", "translations"],
+    "require": {
+        "php": "^7.0",
+        "ext-json": "*",
+        "ext-dom": "*",
+        "ext-iconv": "*",
+        "minicli/minicli": "1.0.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.0"
+    },
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Richard Dobroň"
+        },
+        {
+            "name": "Meta Platforms, Inc. and affiliates."
+        }
+    ],
+    "autoload": {
+        "files": [
+            "src/fbt/Util/SimpleHtmlDom/index.php",
+            "src/fbt/helpers.php"
+        ],
+        "psr-0": {
+            "fbt\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "post-merge": "composer install",
+        "test": "vendor/bin/phpunit --colors=always"
+    },
+    "scripts-descriptions": {
+        "test": "Run all tests."
+    },
+    "bin": [
+        "bin/fbt"
+    ]
+}
