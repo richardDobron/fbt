@@ -7,7 +7,7 @@ use fbt\Runtime\Shared\FbtHooks;
 
 class FbtTranslations
 {
-    const DEFAULT_SRC_LOCALE = 'en_US';
+    public const DEFAULT_SRC_LOCALE = 'en_US';
     /** @var array */
     public static $translatedFbts = [];
 

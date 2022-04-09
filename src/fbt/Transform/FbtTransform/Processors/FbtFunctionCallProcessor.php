@@ -33,7 +33,7 @@ class FbtFunctionCallProcessor
     /* @var array */
     protected $runtimeArgs = [];
 
-    const VARIATION = [
+    public const VARIATION = [
         'number' => 0,
         'gender' => 1,
     ];

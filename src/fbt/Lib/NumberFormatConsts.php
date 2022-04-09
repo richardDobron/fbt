@@ -4,9 +4,9 @@ namespace fbt\Lib;
 
 class NumberFormatConsts
 {
-    const DEFAULT_LOCALE = 'en_US';
+    public const DEFAULT_LOCALE = 'en_US';
 
-    const DEFAULT_CONFIG = [
+    public const DEFAULT_CONFIG = [
         "decimalSeparator" => '.',
         "numberDelimiter" => ',',
         "minDigitsForThousandsSeparator" => 0,
@@ -17,7 +17,7 @@ class NumberFormatConsts
         "numberingSystemData" => null,
     ];
 
-    const CONFIGS = [
+    public const CONFIGS = [
         [
             "decimalSeparator" => '.',
             "numberDelimiter" => ',',
@@ -174,7 +174,7 @@ class NumberFormatConsts
         ],
     ];
 
-    const LOCALE_TO_INDEX = [
+    public const LOCALE_TO_INDEX = [
         "en_US" => 0,
         "ca_ES" => 1,
         "cs_CZ" => 2,

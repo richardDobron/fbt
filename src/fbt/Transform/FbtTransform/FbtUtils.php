@@ -10,7 +10,7 @@ use fbt\Util\SimpleHtmlDom\Node;
 
 class FbtUtils
 {
-    const FBT_CORE_ATTRIBUTES = [ // js~php diff
+    public const FBT_CORE_ATTRIBUTES = [ // js~php diff
         'implicitDesc' => true,
         'implicitFbt' => true,
         'paramName' => true,
@@ -69,7 +69,7 @@ class FbtUtils
         return $handlerName;
     }
 
-    const SHORT_BOOL_CANDIDATES = [
+    public const SHORT_BOOL_CANDIDATES = [
         'common' => 'common',
         'doNotExtract' => 'doNotExtract',
         'number' => 'number',

@@ -6,7 +6,7 @@ use fbt\Util\SimpleHtmlDom\Node;
 
 class FbtAutoWrap
 {
-    const FBT_PARAM_TYPE = [
+    public const FBT_PARAM_TYPE = [
         'IMPLICIT' => 'implicit',
         'EXPLICIT' => 'explicit',
         'NULL' => 'null',

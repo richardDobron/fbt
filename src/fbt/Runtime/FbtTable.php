@@ -8,7 +8,7 @@ class FbtTable
      * fbt::XXX calls return arguments in the form of
      * [<INDEX>, <SUBSTITUTION>] to be processed by fbt::_
      */
-    const ARG = [
+    public const ARG = [
         "INDEX" => 0,
         "SUBSTITUTION" => 1,
     ];

@@ -8,7 +8,7 @@ class IntlPunctuation
      * Regular expression snippet containing all the characters that we
      * count as sentence-final punctuation.
      */
-    const PUNCT_CHAR_CLASS = '[.!?' .
+    public const PUNCT_CHAR_CLASS = '[.!?' .
         "\u{3002}" . // Chinese/Japanese period
         "\u{FF01}" . // Fullwidth exclamation point
         "\u{FF1F}" . // Fullwidth question mark
@@ -20,7 +20,7 @@ class IntlPunctuation
         "\u{FF0E}" . // Fullwidth full stop
         ']';
 
-    const ENDS_IN_PUNCT_REGEXP = '/' .
+    public const ENDS_IN_PUNCT_REGEXP = '/' .
         self::PUNCT_CHAR_CLASS .
         "[)\"'" .
         // JavaScript doesn't support Unicode character

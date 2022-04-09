@@ -8,7 +8,7 @@ use fbt\Transform\FbtTransform\Translate\IntlVariations;
 
 class IntlVariationResolverImpl
 {
-    const EXACTLY_ONE = '_1';
+    public const EXACTLY_ONE = '_1';
 
     /**
      * Wrapper around FbtNumberType::getVariation that special cases our EXACTLY_ONE

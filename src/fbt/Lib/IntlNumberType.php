@@ -7,11 +7,11 @@ use fbt\Transform\FbtTransform\Translate\FBLocaleToLang;
 
 class IntlNumberType
 {
-    const LOCALE_TO_NUMBER_TYPE = [
+    public const LOCALE_TO_NUMBER_TYPE = [
         "pt_PT" => \fbt\Transform\FbtTransform\Translate\CLDR\IntlCLDRNumberType05::class,
     ];
 
-    const LANG_TO_NUMBER_TYPE = [
+    public const LANG_TO_NUMBER_TYPE = [
         "bm" => \fbt\Transform\FbtTransform\Translate\CLDR\IntlCLDRNumberType01::class,
         "bo" => \fbt\Transform\FbtTransform\Translate\CLDR\IntlCLDRNumberType01::class,
         "dz" => \fbt\Transform\FbtTransform\Translate\CLDR\IntlCLDRNumberType01::class,

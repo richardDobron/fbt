@@ -7,7 +7,7 @@ use fbt\Runtime\Shared\FbtHooks;
 
 abstract class TestCase extends \PHPUnit\Framework\TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         FbtConfig::set('author', 'richard');
         FbtConfig::set('locale', 'sk_SK');
@@ -18,7 +18,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         });
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         parent::tearDown();
 

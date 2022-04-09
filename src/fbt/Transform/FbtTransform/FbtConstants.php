@@ -12,31 +12,31 @@ namespace fbt\Transform\FbtTransform;
 
 class FbtConstants
 {
-    const VALID_PRONOUN_USAGES = [
+    public const VALID_PRONOUN_USAGES = [
         "object" => 0,
         "possessive" => 1,
         "reflexive" => 2,
         "subject" => 3,
     ];
 
-    const PRONOUN_USAGE = [
+    public const PRONOUN_USAGE = [
         "OBJECT" => 0,
         "POSSESSIVE" => 1,
         "REFLEXIVE" => 2,
         "SUBJECT" => 3,
     ];
 
-    const PLURAL_REQUIRED_ATTRIBUTES = [
+    public const PLURAL_REQUIRED_ATTRIBUTES = [
         'count' => true,
     ];
 
-    const SHOW_COUNT = [
+    public const SHOW_COUNT = [
         'yes' => true,
         'no' => true,
         'ifMany' => true,
     ];
 
-    const PLURAL_OPTIONS = [
+    public const PLURAL_OPTIONS = [
         'value' => true, // optional value to replace token (rather than count)
         'showCount' => self::SHOW_COUNT,
         'name' => true, // token
@@ -52,7 +52,7 @@ class FbtConstants
         );
     }
 
-    const VALID_PRONOUN_OPTIONS = [ // js~php diff
+    public const VALID_PRONOUN_OPTIONS = [ // js~php diff
         'human' => ['true' => true, 'false' => true],
         'capitalize' => ['true' => true, 'false' => true],
     ];
@@ -60,7 +60,7 @@ class FbtConstants
     /**
      * Valid options allowed in the fbt(...) calls.
      */
-    const VALID_FBT_OPTIONS = [
+    public const VALID_FBT_OPTIONS = [
         'project' => true,
         'author' => true,
         'preserveWhitespace' => true,
@@ -70,25 +70,25 @@ class FbtConstants
         'reporting' => true, // fbt diff
     ];
 
-    const FBT_BOOLEAN_OPTIONS = [
+    public const FBT_BOOLEAN_OPTIONS = [
         'preserveWhitespace' => true,
         'doNotExtract' => true,
     ];
 
-    const FBT_CALL_MUST_HAVE_AT_LEAST_ONE_OF_THESE_ATTRIBUTES = ['desc', 'common'];
+    public const FBT_CALL_MUST_HAVE_AT_LEAST_ONE_OF_THESE_ATTRIBUTES = ['desc', 'common'];
 
-    const FBT_REQUIRED_ATTRIBUTES = [
+    public const FBT_REQUIRED_ATTRIBUTES = [
         'desc' => true,
     ];
 
-    const PRONOUN_REQUIRED_ATTRIBUTES = [
+    public const PRONOUN_REQUIRED_ATTRIBUTES = [
         'type' => true,
         'gender' => true,
     ];
 
-    const PLURAL_PARAM_TOKEN = 'number';
+    public const PLURAL_PARAM_TOKEN = 'number';
 
-    const REQUIRED_PARAM_OPTIONS = [
+    public const REQUIRED_PARAM_OPTIONS = [
         'name' => true,
     ];
 
@@ -103,12 +103,12 @@ class FbtConstants
         );
     }
 
-    const FBT_TYPE = [
+    public const FBT_TYPE = [
         'TABLE' => 'table',
         'TEXT' => 'text',
     ];
 
-    const MODULE_NAME = [
+    public const MODULE_NAME = [
         'FBT' => 'fbt',
         // 'REACT_FBT' => 'Fbt',
         'FBS' => 'fbs',

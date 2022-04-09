@@ -7,7 +7,7 @@ use function fbt\unsignedRightShift;
 
 class fbtHash
 {
-    const BASE_N_SYMBOLS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    public const BASE_N_SYMBOLS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
     // Compute the baseN string for a given unsigned integer.
     public static function uintToBaseN($numberArg, $base): string

@@ -25,9 +25,10 @@ $ composer require richarddobron/fbt
 
 ## Version Guidance
 
-| Version | Released   | Status | Repo             | PHP Version |
-|---------|------------|--------|------------------|-------------|
-| 3.x     | 2022-02-18 | Latest | [v3][fbt-3-repo] | >= 7.0      |
+| Version | Released   | Status     | Repo             | PHP Version |
+|---------|------------|------------|------------------|-------------|
+| 3.x     | 2022-02-18 | Maintained | [v3][fbt-3-repo] | >= 7.0      |
+| 4.x     | 2022-04-09 | Latest     | [v4][fbt-4-repo] | >= 7.2      |
 
 ## Official integrations
 
@@ -55,6 +56,7 @@ https://github.com/richardDobron/fbt/tree/main/docs
 ## License
 FBT is MIT licensed, as found in the [LICENSE](LICENSE) file.
 
-[fbt-3-repo]: https://github.com/richarddobron/fbt
+[fbt-3-repo]: https://github.com/richarddobron/fbt/tree/3.x
+[fbt-4-repo]: https://github.com/richarddobron/fbt
 [link-facebook-fbt]: https://github.com/facebook/fbt
 [simplehtmldom]: https://sourceforge.net/projects/simplehtmldom/files/simplehtmldom/1.9.1/

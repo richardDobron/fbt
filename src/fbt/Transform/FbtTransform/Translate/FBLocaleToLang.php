@@ -4,7 +4,7 @@ namespace fbt\Transform\FbtTransform\Translate;
 
 class FBLocaleToLang
 {
-    const LOC_TO_LANG = [
+    public const LOC_TO_LANG = [
         "cx_PH" => "ceb",
         "ck_US" => "chr",
         "fb_AA" => "en",

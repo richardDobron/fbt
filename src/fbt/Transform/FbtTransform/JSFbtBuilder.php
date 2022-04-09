@@ -18,7 +18,7 @@ class JSFbtBuilder
     /** @var bool */
     private $reactNativeMode;
 
-    const PLURAL_KEY_TO_TYPE = [
+    public const PLURAL_KEY_TO_TYPE = [
         '*' => 'many',
         IntlVariations::EXACTLY_ONE => 'singular',
     ];

@@ -4,7 +4,7 @@ namespace fbt\Runtime;
 
 class Gender
 {
-    const GENDER_CONST = [
+    public const GENDER_CONST = [
         'NOT_A_PERSON' => 0,
         'FEMALE_SINGULAR' => 1,
         'MALE_SINGULAR' => 2,
@@ -20,7 +20,7 @@ class Gender
         'UNKNOWN_PLURAL' => 11,
     ];
 
-    const DATA = [
+    public const DATA = [
         self::GENDER_CONST['NOT_A_PERSON'] => [
             "is_male" => false,
             "is_female" => false,
