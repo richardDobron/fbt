@@ -218,8 +218,8 @@ FBT;
 
         FbtHooks::locale(null);
 
-        $this->assertEquals('John <span>vás šťuchol</span>.', self::transform($translateFbt(1)));
-        $this->assertEquals('John <span>vás šťuchla</span>.', self::transform($translateFbt(2)));
+        $this->assertEquals('John <span>vás štuchol</span>.', self::transform($translateFbt(1)));
+        $this->assertEquals('John <span>vás štuchla</span>.', self::transform($translateFbt(2)));
         $this->assertEquals('John <span>vás štuchol/a</span>.', self::transform($translateFbt(3)));
     }
 
