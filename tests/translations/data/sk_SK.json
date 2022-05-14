@@ -125,13 +125,13 @@
             "e8e4d19a2eb0896533722debfca881d9": {
                 "translations": [
                     {
-                        "translation": "vás šťuchol",
+                        "translation": "vás štuchol",
                         "variations": [
                             1
                         ]
                     },
                     {
-                        "translation": "vás šťuchla",
+                        "translation": "vás štuchla",
                         "variations": [
                             2
                         ]
@@ -153,55 +153,55 @@
             "e619210d438f124ae101f6dd7d76071b": {
                 "translations": [
                     {
-                        "translation": "Alex pridal {number} novú fotku.",
+                        "translation": "{name1} pridal {number} novú fotku.",
                         "variations": [
                             1, 4
                         ]
                     },
                     {
-                        "translation": "Alex pridal {number} nové fotky.",
+                        "translation": "{name1} pridal {number} nové fotky.",
                         "variations": [
                             1, 20
                         ]
                     },
                     {
-                        "translation": "Alex pridal {number} nových fotiek.",
+                        "translation": "{name1} pridal {number} nových fotiek.",
                         "variations": [
                             1, 24
                         ]
                     },
                     {
-                        "translation": "Alex pridala {number} novú fotku.",
+                        "translation": "{name1} pridala {number} novú fotku.",
                         "variations": [
                             2, 4
                         ]
                     },
                     {
-                        "translation": "Alex pridala {number} nové fotky.",
+                        "translation": "{name1} pridala {number} nové fotky.",
                         "variations": [
                             2, 20
                         ]
                     },
                     {
-                        "translation": "Alex pridala {number} nových fotiek.",
+                        "translation": "{name1} pridala {number} nových fotiek.",
                         "variations": [
                             2, 24
                         ]
                     },
                     {
-                        "translation": "Používateľ Alex pridal 1 novú fotku.",
+                        "translation": "Používateľ {name1} pridal 1 novú fotku.",
                         "variations": [
                             3, 4
                         ]
                     },
                     {
-                        "translation": "Používateľ Alex pridal {number} nové fotky.",
+                        "translation": "Používateľ {name1} pridal {number} nové fotky.",
                         "variations": [
                             3, 20
                         ]
                     },
                     {
-                        "translation": "Používateľ Alex pridal {number} nových fotiek.",
+                        "translation": "Používateľ {name1} pridal {number} nových fotiek.",
                         "variations": [
                             3, 24
                         ]
