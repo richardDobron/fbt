@@ -18,10 +18,6 @@ Add this lines to your code:
 \fbt\FbtConfig::set('author', 'your name');
 \fbt\FbtConfig::set('project', 'project');
 \fbt\FbtConfig::set('path', '/path/to/storage');
-
-register_shutdown_function(function () {
-    \fbt\Runtime\Shared\FbtHooks::onTerminating();
-});
 ```
 
 ## 🔧 Configuration
