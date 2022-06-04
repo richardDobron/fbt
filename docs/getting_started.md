@@ -7,20 +7,21 @@ We recommend you read the [best practices](best_practices.md) for advice on how 
 ```shell
 $ composer require richarddobron/fbt
 ```
-These steps are required:
 
-1. Publish config file:
-    - _We recommend setting the **author**, **project** and **path** options._
+Add this lines to your code:
+
+- _We recommend setting the **author**, **project** and **path** options._
 ```php
+<?php
+// require ("vendor/autoload.php");
+
 \fbt\FbtConfig::set('author', 'your name');
 \fbt\FbtConfig::set('project', 'project');
 \fbt\FbtConfig::set('path', '/path/to/storage');
-```
 
-2. Run migrations:
-
-```php
-$ php artisan migrate
+register_shutdown_function(function () {
+    \fbt\Runtime\Shared\FbtHooks::onTerminating();
+});
 ```
 
 ## 🔧 Configuration
