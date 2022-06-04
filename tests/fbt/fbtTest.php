@@ -568,6 +568,27 @@ FBT;
         $this->assertSame('Bar<br/> Bar<br/> Bar', self::transform($fbt));
     }
 
+    public function testCheckAlreadyStoredHashes()
+    {
+        for ($i = 0; $i < 10; $i++) {
+            $fbt = <<<FBT
+<fbt desc="Description of a top-level Page category">
+    Local business or place
+</fbt>
+FBT;
+
+            $this->assertSame('Local business or place', self::transform($fbt));
+
+            $fbt = <<<FBT
+<fbt desc="Full legal disclaimer text for placing orders">
+    By clicking "Order" you agree to the <a href="/terms">Terms of Use</a>.
+</fbt>
+FBT;
+
+            $this->assertSame('By clicking "Order" you agree to the <a href="/terms">Terms of Use</a>.', self::transform($fbt));
+        }
+    }
+
     public function testUsingFbtSubject()
     {
         $fbt = <<<FBT

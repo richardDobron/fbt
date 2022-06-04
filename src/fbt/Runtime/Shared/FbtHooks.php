@@ -125,6 +125,10 @@ class FbtHooks
             return self::$actions[__FUNCTION__](...func_get_args());
         }
 
+        foreach ($phrase['hashToText'] as $hash => $text) {
+            FbtHooks::$storedHashes[$hash] = true;
+        }
+
         $phraseSource = [
             'type' => $phrase['type'],
             'jsfbt' => $phrase['jsfbt'],
