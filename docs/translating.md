@@ -6,9 +6,9 @@ There are two ways to translate phrases:
 
 ## Command:
 ```shell
-php bin/fbt translate --path=/path/to/storage --stdin < translation_input.json
+php ./vendor/bin/fbt translate --path=/path/to/storage --stdin < translation_input.json
 # or
-php bin/fbt translate --path=/path/to/storage --translations=/path/to/translations/*.json
+php ./vendor/bin/fbt translate --path=/path/to/storage --translations=/path/to/translations/*.json
 ```
 ### Options:
 | name                             | default | description                                                                                           |
