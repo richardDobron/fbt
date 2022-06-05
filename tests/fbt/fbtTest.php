@@ -616,7 +616,6 @@ FBT;
 
         $this->assertSame(1, $check1);
         $this->assertSame(1, $check2);
-
     }
 
     public function testUsingFbtSubject()
