@@ -38,14 +38,16 @@ class FbtTransform
      */
     public static function transform($html): string
     {
-        if (! self::$init) {
-            self::initDefaultOptions();
-            FbtCommon::init([
-                'fbtCommon' => FbtConfig::get('fbtCommon'),
-                'fbtCommonPath' => FbtConfig::get('fbtCommonPath'),
-            ]);
+        self::initDefaultOptions();
+        FbtCommon::init([
+            'fbtCommon' => FbtConfig::get('fbtCommon'),
+            'fbtCommonPath' => FbtConfig::get('fbtCommonPath'),
+        ]);
 
+        if (! self::$init) {
             FbtHooks::onTerminating();
+
+            self::$init = true;
         }
 
         $dom = NodeParser::parse($html, false, true, DEFAULT_TARGET_CHARSET, false);

@@ -570,6 +570,9 @@ FBT;
 
     public function testCheckAlreadyStoredHashes()
     {
+        $hash1 = null;
+        $hash2 = null;
+
         for ($i = 0; $i < 10; $i++) {
             $fbt = <<<FBT
 <fbt desc="Description of a top-level Page category">
@@ -579,6 +582,10 @@ FBT;
 
             $this->assertSame('Local business or place', self::transform($fbt));
 
+            if (! $hash1) {
+                $hash1 = array_keys(current(FbtTransform::toArray()['phrases'])['hashToText'])[0];
+            }
+
             $fbt = <<<FBT
 <fbt desc="Full legal disclaimer text for placing orders">
     By clicking "Order" you agree to the <a href="/terms">Terms of Use</a>.
@@ -586,7 +593,30 @@ FBT;
 FBT;
 
             $this->assertSame('By clicking "Order" you agree to the <a href="/terms">Terms of Use</a>.', self::transform($fbt));
+
+            if (! $hash2) {
+                $hash2 = array_keys(current(FbtTransform::toArray()['phrases'])['hashToText'])[0];
+            }
         }
+
+        FbtHooks::storePhrases();
+
+        $check1 = 0;
+        $check2 = 0;
+
+        foreach (FbtHooks::$sourceStrings['phrases'] as $phrase) {
+            if (array_key_exists($hash1, $phrase['hashToText'])) {
+                $check1++;
+            }
+
+            if (array_key_exists($hash2, $phrase['hashToText'])) {
+                $check2++;
+            }
+        }
+
+        $this->assertSame(1, $check1);
+        $this->assertSame(1, $check2);
+
     }
 
     public function testUsingFbtSubject()
