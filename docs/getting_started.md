@@ -92,7 +92,7 @@ $loggedUserDto = ...;
 ## 	🚀  Command
 This command creates translation payloads stored in JSON file.
 ```shell
-php bin/fbt translate
+php ./vendor/bin/fbt translate
 ```
 Read more about [translating](translating.md).
 
