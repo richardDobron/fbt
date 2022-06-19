@@ -22,8 +22,8 @@ $app->registerCommand('translate', function (Minicli\Command\CommandCall $app) {
     $generateTranslationsService->exportTranslations(
         $app->getParam('--path'),
         $app->getParam('--translations'),
-        $app->hasFlag('stdin') ? file_get_contents("php://stdin") : null,
-        $app->hasFlag('pretty')
+        $app->hasFlag('--stdin') ? file_get_contents("php://stdin") : null,
+        $app->hasFlag('--pretty')
     );
 });
 
