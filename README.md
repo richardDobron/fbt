@@ -2,6 +2,12 @@
   <img src="icon.png" height="150" width="150" alt="FBT"/>
 </h1>
 
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/richardDobron/fbt.svg?style=flat-square)](https://packagist.org/packages/richardDobron/fbt)
+[![MIT Licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
+![Test Status](https://img.shields.io/github/workflow/status/richardDobron/fbt/run-tests/3.x?label=tests)
+![Code Style Status](https://img.shields.io/github/workflow/status/richardDobron/fbt/Check%20&%20fix%20styling?label=code%20style)
+[![Total Downloads](https://img.shields.io/packagist/dt/richardDobron/fbt.svg?style=flat-square)](https://packagist.org/packages/richardDobron/fbt)
+
 FBT is an internationalization framework for PHP designed to be not just **powerful** and **flexible**, but also **simple** and **intuitive**.  It helps with the following:
 * Organizing your source text for translation
 * Composing grammatically correct translatable UI
