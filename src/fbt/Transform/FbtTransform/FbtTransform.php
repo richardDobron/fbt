@@ -4,6 +4,7 @@ namespace fbt\Transform\FbtTransform;
 
 use fbt\fbt;
 use fbt\FbtConfig;
+use fbt\Runtime\FbtTranslations;
 use fbt\Runtime\Shared\FbtHooks;
 use fbt\Transform\FbtTransform\Processors\HTMLFbtProcessor;
 use fbt\Util\NodeParser;
@@ -45,6 +46,11 @@ class FbtTransform
         ]);
 
         if (! self::$init) {
+            $translations = FbtConfig::get('path') . '/translatedFbts.json';
+            if (file_exists($translations)) {
+                FbtTranslations::registerTranslations(json_decode(file_get_contents($translations), true));
+            }
+
             FbtHooks::onTerminating();
 
             self::$init = true;
