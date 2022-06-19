@@ -86,7 +86,7 @@ After implementation, set `viewerContext`:
 ```php
 $loggedUserDto = ...;
 
-\fbt\FbtConfig::get('viewerContext', $loggedUserDto)
+\fbt\FbtConfig::set('viewerContext', $loggedUserDto)
 ```
 
 ## 	🚀  Command
