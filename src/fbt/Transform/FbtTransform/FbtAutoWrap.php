@@ -3,6 +3,7 @@
 namespace fbt\Transform\FbtTransform;
 
 use fbt\Util\SimpleHtmlDom\Node;
+use function fbt\check_parent_tags;
 
 class FbtAutoWrap
 {
@@ -61,8 +62,12 @@ class FbtAutoWrap
      */
     public static function getLeafNodeString(Node $node): string
     {
+        $excludedTags = ['fbt:name', 'fbt:param'];
+
         return $node->isText()
-            && $node->parent->tag !== 'fbt:param' // js~php diff
+            // js~php diff:
+            && ! in_array($node->tag, $excludedTags)
+            && ! check_parent_tags($node, $excludedTags)
             ? FbtUtils::normalizeSpaces($node->innertext()) : '';
     }
 
