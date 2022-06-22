@@ -77,6 +77,7 @@ namespace fbt {
     use fbt\Exceptions\FbtException;
     use fbt\Transform\FbtTransform\FbtConstants;
     use fbt\Util\SimpleHtmlDom\DOM;
+    use fbt\Util\SimpleHtmlDom\Node;
 
     /**
      * @return void
@@ -118,6 +119,17 @@ namespace fbt {
     function fbs($text, string $desc, array $options = [])
     {
         return (new \fbt\Runtime\fbtNamespace($text, $desc, $options, FbtConstants::MODULE_NAME['FBS']));
+    }
+
+    function check_parent_tags(Node $node, array $tags): bool
+    {
+        while ($node = $node->parent()) {
+            if (in_array($node->tag, $tags)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     function unsignedRightShift($a, $b): int
