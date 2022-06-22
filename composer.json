@@ -1,6 +1,6 @@
 {
     "name": "richarddobron/fbt",
-    "description": "A PHP Internationalization Framework for PHP.",
+    "description": "An Internationalization Framework for PHP.",
     "keywords": ["php", "i18n", "framework", "internationalization", "translations"],
     "require": {
         "php": "^7.2 || ^8.0",
