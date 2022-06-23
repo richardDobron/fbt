@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace tests\fbt;
 
-use fbt\Exceptions\FbtException;
 use fbt\Lib\IntlViewerContext;
 use fbt\Runtime\Shared\fbt;
 use fbt\Runtime\Shared\FbtHooks;
@@ -22,7 +21,8 @@ class fbtTest extends \tests\TestCase
     {
         self::expectExceptionMessage('text cannot be null');
 
-        self::transform(<<<FBT
+        self::transform(
+            <<<FBT
 <fbt desc="Empty tags test">
     first <fbt:param name="text">test</fbt:param>
     <p></p>

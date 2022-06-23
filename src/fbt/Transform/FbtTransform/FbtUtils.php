@@ -2,7 +2,6 @@
 
 namespace fbt\Transform\FbtTransform;
 
-use fbt\Exceptions\FbtException;
 use fbt\Exceptions\FbtParserException;
 use function fbt\invariant;
 use fbt\Runtime\fbtElement;
