@@ -4,10 +4,13 @@ All notable changes to `fbt` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
-## v3.0 - 2022-02-18
+## v3.0.2 - 2022-06-23
+
+### Fixed
+- Raw string collecting.
 
 ### Added
-- PHP Internationalization Framework for PHP 7.
+- Check for tags without content.
 
 ## v3.0.1 - 2022-06-19
 
@@ -17,3 +20,8 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ### Added
 - Automatic registration of translations.
+
+## v3.0 - 2022-02-18
+
+### Added
+- PHP Internationalization Framework for PHP 7.
