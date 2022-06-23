@@ -2,6 +2,7 @@
 
 namespace fbt\Transform\FbtTransform;
 
+use fbt\Exceptions\FbtException;
 use fbt\Exceptions\FbtParserException;
 use function fbt\invariant;
 use fbt\Runtime\fbtElement;
@@ -379,6 +380,11 @@ class FbtUtils
                 );
 
                 return $node->innertext;
+            }
+
+            if ($node->isElement() && ! $node->isNamespacedElement() && ! $node->innertext()) {
+                // todo: this should catch in _createFbtFunctionCallNode
+                invariant(false, 'text cannot be null');
             }
 
             return ! $node->isComment();
