@@ -58,8 +58,8 @@ class InlineFbtResult
         $this->contents = $contents;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
-        return em($this->contents, $this->inlineMode, $this->translation, $this->hash);
+        return (string) em($this->contents, $this->inlineMode, $this->translation, $this->hash);
     }
 }
