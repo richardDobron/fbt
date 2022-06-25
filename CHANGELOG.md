@@ -4,6 +4,10 @@ All notable changes to `fbt` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## v4.0.3 - 2022-06-25
+### Fixed
+- __toString() issue when using inline mode in php < 8.0
+
 ## v4.0.2 - 2022-06-23
 
 ### Fixed
