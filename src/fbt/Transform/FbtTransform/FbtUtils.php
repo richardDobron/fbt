@@ -381,7 +381,7 @@ class FbtUtils
                 return $node->innertext;
             }
 
-            if ($node->isElement() && ! $node->isNamespacedElement() && ! $node->innertext()) {
+            if ($node->isElement() && ! $node->isNamespacedElement() && $node->innertext() == '') {
                 // todo: this should catch in _createFbtFunctionCallNode
                 invariant(false, 'text cannot be null');
             }
