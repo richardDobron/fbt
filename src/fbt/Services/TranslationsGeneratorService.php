@@ -178,10 +178,10 @@ class TranslationsGeneratorService
                         [
                             'translation' => '',
                             'variations' => [],
-                            'tokens' => [],
-                            'types' => [],
                         ],
                     ],
+                    'tokens' => [],
+                    'types' => [],
                 ];
             }
         }

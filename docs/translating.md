@@ -14,7 +14,7 @@ php ./vendor/bin/fbt generate-translations --src=./path/to/.source_strings.json 
 ### Options:
 | name                    | default                  | description                                                                                           |
 |-------------------------|--------------------------|-------------------------------------------------------------------------------------------------------|
-| --src                   | ./.source_strings.json   | Path to colleccted source strings file                                                                |
+| --src                   | ./.source_strings.json   | Path to collected source strings file                                                                 |
 | --translation-input     | ./translation_input.json | Path to translation input file                                                                        |
 | --translations=`[path]` | *none*                   | The translation files containing translations.<br>E.g. `--translations=./path/to/translations/*.json` |
 
@@ -32,6 +32,8 @@ php ./vendor/bin/fbt translate --path=/path/to/storage --translations=/path/to/t
 | --pretty                         | no      | Pretty print the translation output                                                                   |
 | --translations=`[path]`          | *none*  | The translation files containing translations.<br>E.g. `--translations=/path/to/translations/*.json`  |
 | --stdin < translation_input.json | *none*  | Instead of reading translation files and source file separately, read monolithic JSON file from STDIN |
+
+## JSON schema:
 
 In addition to the below example, the `translation_input.json`
 provided in our [tests](https://github.com/richardDobron/fbt/blob/main/tests/translations/stdin-data/translation_input.json)
