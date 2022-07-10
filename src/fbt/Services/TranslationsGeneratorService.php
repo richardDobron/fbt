@@ -150,6 +150,112 @@ class TranslationsGeneratorService
     }
 
     /**
+     * Generate missing translation hashes from collected source strings
+     *
+     * @param string $source
+     * @param $translationsPath
+     * @param $inputPath
+     *
+     * @throws \Exception
+     */
+    public function generateTranslations(string $source, $translationsPath, $inputPath)
+    {
+        if (! file_exists($source)) {
+            throw new \Exception('Source strings file does not exist: ' . $source);
+        }
+
+        $flags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT;
+
+        $sourceStrings = json_decode(file_get_contents($source), true);
+        $phrases = $sourceStrings['phrases'];
+        $hashToTexts = array_column($phrases, 'hashToText');
+
+        $translations = [];
+        foreach ($hashToTexts as $hashToTextGroups) {
+            foreach ($hashToTextGroups as $hash => $text) {
+                $translations[$hash] = [
+                    'translations' => [
+                        [
+                            'translation' => '',
+                            'variations' => [],
+                            'tokens' => [],
+                            'types' => [],
+                        ],
+                    ]
+                ];
+            }
+        }
+
+        if (! empty($translationsPath)) {
+            foreach (glob($translationsPath) as $file) {
+                preg_match('/^(\w{2}_\w{2}).json$/', basename($file), $match);
+
+                if (! $match) {
+                    continue;
+                }
+
+                $localeTranslations = json_decode(file_get_contents($file), true);
+
+                if (! $localeTranslations) {
+                    $localeTranslations = [
+                        $match[1] => [
+                            "fb-locale" => $match[1],
+                            "translations" => $translations,
+                        ]
+                    ];
+                } else {
+                    $localeTranslations[$match[1]]['translations'] += $translations;
+                }
+
+                file_put_contents($file, json_encode($localeTranslations, $flags));
+            }
+        } else {
+            if (! file_exists($inputPath)) {
+                $default = [
+                    'phrases' => [],
+                    'translationGroups' => [],
+                ];
+
+                file_put_contents($inputPath, json_encode($default));
+            }
+
+            $translationInput = json_decode(file_get_contents($inputPath), true);
+            $translationInput['phrases'] = $phrases;
+
+            foreach ($translationInput['translationGroups'] as &$group) {
+                $group['translations'] += $translations;
+            }
+
+            file_put_contents($inputPath, json_encode($translationInput, $flags));
+
+            if (! $translationInput['translationGroups']) {
+                throw new \Exception(
+                    'You have not yet defined any locales for which you want to translate.'
+                    . PHP_EOL
+                    . 'Set them in the file ' . $inputPath . ' for example like this:'
+                    . PHP_EOL
+                    . '
+{
+    "phrases": [ ... ],
+    "translationGroups": [
+        {
+            "fb-locale": "cs_CZ",
+            "translations": []
+        },
+        {
+            "fb-locale": "sk_SK",
+            "translations": []
+        },
+    }
+}'
+                );
+            }
+        }
+    }
+
+    /**
+     * Translate fbt phrases with provided translations
+     *
      * @param string $path
      * @param string|null $translationsPath
      * @param string|null $stdin

@@ -4,6 +4,10 @@ namespace fbt\Transform\FbtTransform\Translate;
 
 class TranslationData
 {
+    public $tokens;
+    public $types;
+    public $translations;
+
     public function __construct(
         $tokens,
         $types,

@@ -4,12 +4,27 @@ There are two ways to translate phrases:
 1. Manually translate generated JSON file.
 2. Use the app editor [Swiftyper Translations](https://github.com/swiftyper-sk/fbt-sync).
 
-## Command:
+## Command to generate missing translation hashes from collected source strings:
+```shell
+php ./vendor/bin/fbt generate-translations --src=./path/to/.source_strings.json --translation-input=./path/to/translation_input.json
+# or
+php ./vendor/bin/fbt generate-translations --src=./path/to/.source_strings.json --translations=./path/to/translations/*.json
+```
+
+### Options:
+| name                    | default                  | description                                                                                           |
+|-------------------------|--------------------------|-------------------------------------------------------------------------------------------------------|
+| --src                   | ./.source_strings.json   | Path to colleccted source strings file                                                                |
+| --translation-input     | ./translation_input.json | Path to translation input file                                                                        |
+| --translations=`[path]` | *none*                   | The translation files containing translations.<br>E.g. `--translations=./path/to/translations/*.json` |
+
+## Command to convert provided translations to jenkins:
 ```shell
 php ./vendor/bin/fbt translate --path=/path/to/storage --stdin < translation_input.json
 # or
 php ./vendor/bin/fbt translate --path=/path/to/storage --translations=/path/to/translations/*.json
 ```
+
 ### Options:
 | name                             | default | description                                                                                           |
 |----------------------------------|---------|-------------------------------------------------------------------------------------------------------|
