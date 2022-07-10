@@ -168,11 +168,14 @@ class TranslationsGeneratorService
 
         $sourceStrings = json_decode(file_get_contents($source), true);
         $phrases = $sourceStrings['phrases'];
-        $hashToTexts = array_column($phrases, 'hashToText');
 
         $translations = [];
-        foreach ($hashToTexts as $hashToTextGroups) {
-            foreach ($hashToTextGroups as $hash => $text) {
+        foreach ($phrases as $phrase) {
+            $metadata = $phrase['jsfbt']['m'] ?? [];
+
+            $tokens = array_column($metadata, "token");
+            $types = array_column($metadata, "type");
+            foreach ($phrase['hashToText'] as $hash => $text) {
                 $translations[$hash] = [
                     'translations' => [
                         [
@@ -180,8 +183,8 @@ class TranslationsGeneratorService
                             'variations' => [],
                         ],
                     ],
-                    'tokens' => [],
-                    'types' => [],
+                    'tokens' => $tokens,
+                    'types' => array_map("fbt\Transform\FbtTransform\Translate\FbtSiteMetaEntry::getVariationMaskFromType", $types),
                 ];
             }
         }
