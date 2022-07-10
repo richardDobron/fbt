@@ -181,7 +181,7 @@ class TranslationsGeneratorService
                             'tokens' => [],
                             'types' => [],
                         ],
-                    ]
+                    ],
                 ];
             }
         }
@@ -201,7 +201,7 @@ class TranslationsGeneratorService
                         $match[1] => [
                             "fb-locale" => $match[1],
                             "translations" => $translations,
-                        ]
+                        ],
                     ];
                 } else {
                     $localeTranslations[$match[1]]['translations'] += $translations;
