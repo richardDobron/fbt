@@ -17,6 +17,15 @@ use Minicli\App;
 
 $app = new App([]);
 
+$app->registerCommand('generate-translations', function (Minicli\Command\CommandCall $app) {
+    $generateTranslationsService = new \fbt\Services\TranslationsGeneratorService();
+    $generateTranslationsService->generateTranslations(
+        $app->getParam('--src') ?: ".source_strings.json",
+        $app->getParam('--translations'),
+        $app->getParam('--translation-input') ?: "translation_input.json"
+    );
+});
+
 $app->registerCommand('translate', function (Minicli\Command\CommandCall $app) {
     $generateTranslationsService = new \fbt\Services\TranslationsGeneratorService();
     $generateTranslationsService->exportTranslations(
