@@ -749,4 +749,11 @@ FBT;
 
         FbtHooks::locale(null);
     }
+
+    public function testJsonSerialization()
+    {
+        $fbt = fbt('simple text', 'desc');
+
+        $this->assertSame('["simple text"]', json_encode([$fbt]));
+    }
 }
