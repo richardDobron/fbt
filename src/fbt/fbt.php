@@ -5,7 +5,7 @@ namespace fbt;
 use fbt\Transform\FbtTransform\FbtTransform;
 use fbt\Transform\FbtTransform\FbtUtils;
 
-class fbt
+class fbt implements \JsonSerializable
 {
     /* @var string */
     protected static $moduleName = 'fbt';
@@ -117,5 +117,10 @@ class fbt
         }
 
         return $fbt;
+    }
+
+    public function jsonSerialize(): string
+    {
+        return (string) $this;
     }
 }
