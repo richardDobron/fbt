@@ -3,8 +3,10 @@
 namespace fbt\Transform\FbtTransform\Processors;
 
 use fbt\Exceptions\FbtParserException;
+
 use function fbt\fbt;
 use function fbt\invariant;
+
 use fbt\Runtime\fbtElement;
 use fbt\Runtime\fbtNamespace;
 use fbt\Transform\FbtTransform\FbtAutoWrap;

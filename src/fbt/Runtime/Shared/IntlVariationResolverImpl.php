@@ -3,6 +3,7 @@
 namespace fbt\Runtime\Shared;
 
 use function fbt\invariant;
+
 use fbt\Lib\IntlNumberType;
 use fbt\Transform\FbtTransform\Translate\IntlVariations;
 

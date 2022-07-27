@@ -6,6 +6,7 @@ namespace tests\builder;
 
 use function fbt;
 use function fbt\createElement;
+
 use fbt\fbt;
 
 class fbtBuilderTest extends \tests\TestCase

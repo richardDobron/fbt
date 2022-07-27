@@ -3,7 +3,9 @@
 namespace fbt\Transform\FbtTransform;
 
 use fbt\Exceptions\FbtException;
+
 use function fbt\invariant;
+
 use fbt\Runtime\Gender;
 use fbt\Transform\FbtTransform\Translate\IntlVariations;
 
@@ -105,9 +107,9 @@ class JSFbtBuilder
 
                     break;
 
-                // We ensure we have placeholders in our metadata because enums and
-                // pronouns don't have metadata and will add "levels" to our resulting
-                // table. In the example in the docblock of buildTable(), we'd expect
+                    // We ensure we have placeholders in our metadata because enums and
+                    // pronouns don't have metadata and will add "levels" to our resulting
+                    // table. In the example in the docblock of buildTable(), we'd expect
                 //     array({range: ...}, array('token' => 'count', 'type' => ...))
                 case 'enum':
                     // Only add an enum if it adds a level. Duplicated enum values do not

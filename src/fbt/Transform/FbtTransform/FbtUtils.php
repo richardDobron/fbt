@@ -3,7 +3,9 @@
 namespace fbt\Transform\FbtTransform;
 
 use fbt\Exceptions\FbtParserException;
+
 use function fbt\invariant;
+
 use fbt\Runtime\fbtElement;
 use fbt\Runtime\Shared\IntlPunctuation;
 use fbt\Util\SimpleHtmlDom\Node;

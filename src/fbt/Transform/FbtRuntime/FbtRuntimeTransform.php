@@ -3,6 +3,7 @@
 namespace fbt\Transform\FbtRuntime;
 
 use function fbt\invariant;
+
 use fbt\Transform\FbtTransform\fbtHash;
 
 class FbtRuntimeTransform

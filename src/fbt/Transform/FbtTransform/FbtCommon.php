@@ -3,6 +3,7 @@
 namespace fbt\Transform\FbtTransform;
 
 use fbt\Exceptions\FbtException;
+
 use function fbt\invariant;
 
 class FbtCommon

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace tests\builder;
 
 use function fbs;
+
 use fbt\fbs;
 use fbt\fbt;
 

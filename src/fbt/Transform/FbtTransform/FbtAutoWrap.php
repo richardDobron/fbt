@@ -3,6 +3,7 @@
 namespace fbt\Transform\FbtTransform;
 
 use function fbt\check_parent_tags;
+
 use fbt\Util\SimpleHtmlDom\Node;
 
 class FbtAutoWrap
