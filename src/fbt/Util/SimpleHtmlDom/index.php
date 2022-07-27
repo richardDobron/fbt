@@ -508,10 +508,10 @@ class Node
                 switch ($this->_[HDOM_INFO_QUOTE][$i]) {
                     case HDOM_QUOTE_DOUBLE: $quote = '"';
 
-break;
+                        break;
                     case HDOM_QUOTE_SINGLE: $quote = '\'';
 
-break;
+                        break;
                     default: $quote = '';
                 }
 
@@ -712,7 +712,7 @@ break;
                         $att_val,
                         $att_inv,
                         $att_case_sensitivity
-                        ) = $a;
+                    ) = $a;
 
                     // Handle indexing attributes (i.e. "[2]")
                     /**

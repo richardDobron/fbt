@@ -312,7 +312,7 @@ FBT;
         $this->assertSame(<<<FBT
 <em class="intlInlineMode_normal" data-intl-hash="c119116e3a5d3f69b55d8aa5545c036e" data-intl-locale="sk_SK"><strong><em class="intlInlineMode_normal" data-intl-hash="36bf03959a0b3b8a4303657c703c7aba" data-intl-locale="sk_SK">Upozornenie:</em></strong> Ak si zmeníte meno na Facebooku, najbližších 60 dní si ho nebudete môcť znova zmeniť. V mene nepoužite žiadne neštandardné veľké písmená, interpunkčné znamienka, znaky ani nezvyčajné slová. <a href="/help/" target="_blank"><em class="intlInlineMode_normal" data-intl-hash="9cbb0c31a8f765e110243d61e870f56b" data-intl-locale="sk_SK">Prečítajte si viac</em></a>.</em>
 FBT
-, self::transform($fbt));
+            , self::transform($fbt));
 
 
         FbtTranslations::mergeTranslations([
@@ -330,7 +330,7 @@ FBT;
         $this->assertSame(<<<FBT
 <title>Názov produktu</title>
 FBT
-, self::transform($fbt));
+            , self::transform($fbt));
 
         FbtHooks::unregister('canInline');
     }
