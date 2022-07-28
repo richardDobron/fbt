@@ -70,7 +70,7 @@ function _replaceWithNativeDigits($number, $digits)
 {
     $result = '';
     $number = strVal($number);
-    $d = null;
+
     for ($ii = 0, $iiMax = mb_strlen($number); $ii < $iiMax; $ii++) {
         $d = $digits[ord(mb_substr($number, $ii, 1)) - 48]; /* 48 === '0' */
         $result += $d ?? $number[$ii];
@@ -104,7 +104,7 @@ function _getNumberOfPowersOfTen($value)
 }
 
 
-function _roundNumber($valueParam, $decimalsParam = null)
+function _roundNumber($valueParam, $decimalsParam = null): string
 {
     $decimals = $decimalsParam ?? 0;
     $pow = 10 ** $decimals;
@@ -140,9 +140,7 @@ function _roundNumber($valueParam, $decimalsParam = null)
 function addZeros($x, $count)
 {
     $result = $x;
-    for ($i = 0; $i < $count; $i++) {
-        $result .= '0';
-    }
+    $result .= str_repeat('0', $count);
 
     return $result;
 }
@@ -151,7 +149,7 @@ function addZeros($x, $count)
  * A codified number has \u0001 in the place of a decimal separator and a
  * \u0002 in the place of a negative sign.
  */
-function _parseCodifiedNumber($text)
+function _parseCodifiedNumber($text): ?float
 {
     $_text = preg_replace("/[^0-9\u{0001}\u{0002}]/", '', $text);// decimal separator and negative sign
     $_text = preg_replace("/\u{0001}/", '.', $_text);// restore decimal separator
@@ -162,7 +160,7 @@ function _parseCodifiedNumber($text)
     return $_text === '' || is_nan($value) ? null : $value;
 }
 
-function _getNativeDigitsMap()
+function _getNativeDigitsMap(): ?array
 {
     $NumberFormatConfig = NumberFormatConsts::get(FbtHooks::locale());
     $nativeDigitMap = [];
@@ -304,7 +302,7 @@ class intlNumUtils
         // Bring it back to whatever the number's magnitude was before.
         if ($power < $numSigFigs) {
             $truncatedValue /= pow(10, -$power + $numSigFigs);
-            // Determine numer of decimals based on sig figs
+            // Determine number of decimals based on sig figs
             if ($decimals == null) {
                 return self::formatNumberWithThousandDelimiters($truncatedValue, $numSigFigs - $power - 1);
             }
@@ -314,7 +312,7 @@ class intlNumUtils
         return self::formatNumberWithThousandDelimiters($truncatedValue, $decimals);
     }
 
-    public static function parseNumber($text)
+    public static function parseNumber($text): ?float
     {
         $NumberFormatConfig = NumberFormatConsts::get(FbtHooks::locale());
 
@@ -332,7 +330,7 @@ class intlNumUtils
      * Calling this function directly is discouraged, unless you know
      * exactly what you're doing. Consider using `parseNumber` below.
      */
-    public static function parseNumberRaw($text, $decimalDelimiter, $numberDelimiter = '')
+    public static function parseNumberRaw($text, $decimalDelimiter, $numberDelimiter = ''): ?float
     {
         // Replace numerals based on current locale data
         $digitsMap = _getNativeDigitsMap();

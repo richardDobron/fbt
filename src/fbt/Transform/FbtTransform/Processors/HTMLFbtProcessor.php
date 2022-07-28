@@ -37,7 +37,7 @@ class HTMLFbtProcessor
      * @param Node $node
      * @return HTMLFbtProcessor|null
      */
-    public static function create(Node $node)
+    public static function create(Node $node): ?HTMLFbtProcessor
     {
         $nodeChecker = FbtNodeChecker::forFbt($node);
 
@@ -89,7 +89,7 @@ class HTMLFbtProcessor
      * @return null|array
      * @throws \fbt\Exceptions\FbtParserException
      */
-    private function _getOptions()
+    private function _getOptions(): ?array
     {
         // Optional attributes to be passed as options.
 
@@ -103,7 +103,7 @@ class HTMLFbtProcessor
     /**
      * @throws \fbt\Exceptions\FbtParserException
      */
-    private function _assertHasMandatoryAttributes()
+    private function _assertHasMandatoryAttributes(): void
     {
         if (! count(array_intersect(array_keys($this->node->getAllAttributes()), FbtConstants::FBT_CALL_MUST_HAVE_AT_LEAST_ONE_OF_THESE_ATTRIBUTES))) {
             throw FbtUtils::errorAt($this->node, "<$this->moduleName> must have at least one of these attributes: " . implode(', ', FbtConstants::FBT_CALL_MUST_HAVE_AT_LEAST_ONE_OF_THESE_ATTRIBUTES));
@@ -112,6 +112,7 @@ class HTMLFbtProcessor
 
     /**
      * @throws \fbt\Exceptions\FbtException
+     * @throws \fbt\Exceptions\FbtParserException
      */
     private function _createFbtFunctionCallNode($text, $desc, $options): fbtNamespace
     {
@@ -144,11 +145,9 @@ class HTMLFbtProcessor
     /**
      * @throws \fbt\Exceptions\FbtParserException
      */
-    private function _addImplicitDescriptionsToChildrenRecursively(): self
+    private function _addImplicitDescriptionsToChildrenRecursively(): void
     {
         FbtAutoWrap::createImplicitDescriptions($this->moduleName, $this->node);
-
-        return $this;
     }
 
     /**
@@ -264,7 +263,7 @@ class HTMLFbtProcessor
      * @return null|bool
      * @throws \fbt\Exceptions\FbtParserException
      */
-    private function _getCommonAttributeValue()
+    private function _getCommonAttributeValue(): ?bool
     {
         $commonAttr = FbtUtils::getAttributeByName($this->node, 'common');
 

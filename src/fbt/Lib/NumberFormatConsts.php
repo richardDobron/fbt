@@ -359,7 +359,7 @@ class NumberFormatConsts
      * @param string|null $localeTag
      * @return array
      */
-    public static function get($localeTag): array
+    public static function get(?string $localeTag): array
     {
         $key = $localeTag ?? self::DEFAULT_LOCALE;
         $idx = self::LOCALE_TO_INDEX[$key] ?? null;

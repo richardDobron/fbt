@@ -64,7 +64,10 @@ class FbtTransform
 
     /**
      * Transform <fbt> to fbt() calls.
+     * @param Node $node
      * @return void
+     * @throws \fbt\Exceptions\FbtException
+     * @throws \fbt\Exceptions\FbtParserException
      */
     public static function _fbtTraverse(Node $node)
     {

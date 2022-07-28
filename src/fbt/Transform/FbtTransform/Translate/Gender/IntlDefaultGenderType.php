@@ -6,7 +6,7 @@ use fbt\Transform\FbtTransform\Translate\IntlVariations;
 
 class IntlDefaultGenderType
 {
-    public static function getFallback()
+    public static function getFallback(): int
     {
         return IntlVariations::INTL_GENDER_VARIATIONS['UNKNOWN'];
     }

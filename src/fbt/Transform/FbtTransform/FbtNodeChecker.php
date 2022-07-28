@@ -35,7 +35,7 @@ class FbtNodeChecker
      * @param Node $node
      * @return FbtNodeChecker|null
      */
-    public static function forFbt(Node $node)
+    public static function forFbt(Node $node): ?FbtNodeChecker
     {
         if (self::fbtChecker()->isElement($node)) {
             return self::fbtChecker();

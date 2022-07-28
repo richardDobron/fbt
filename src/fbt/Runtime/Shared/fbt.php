@@ -40,7 +40,7 @@ class fbt
      * -or-
      *    ["You have a cat in a photo album named {title}", <hash>]
      *
-     * @param null|array $inputArgs - arguments from which to pull substitutions
+     * @param array|null $inputArgs - arguments from which to pull substitutions
      *    Example: [["singular", null], [null, ['title' => "felines!"]]]
      *
      * @param array $options - options for runtime
@@ -55,7 +55,7 @@ class fbt
      * @throws FbtException
      * @throws \fbt\Exceptions\FbtInvalidConfigurationException
      */
-    public function _($inputTable, $inputArgs, array $options = [], bool $reporting = true)
+    public function _($inputTable, ?array $inputArgs, array $options = [], bool $reporting = true)
     {
         // Adapt the input payload to the translated table and arguments we expect
         //
@@ -147,6 +147,7 @@ class fbt
      * @param $range - Example: ["id1" => "groups", "id2" => "videos", ...]
      *
      * @throws \fbt\Exceptions\FbtException
+     * @throws \fbt\Exceptions\FbtInvalidConfigurationException
      */
     public static function _enum(string $value, array $range): array
     {
@@ -254,7 +255,7 @@ class fbt
      * @return array
      * @throws FbtException
      */
-    public static function _plural(float $count,  $label = null, $value = null): array
+    public static function _plural(float $count, string $label = null, $value = null): array
     {
         $variation = IntlVariationResolverImpl::getNumberVariations($count);
         $substitution = [];

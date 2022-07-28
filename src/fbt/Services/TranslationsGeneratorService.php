@@ -83,7 +83,7 @@ class TranslationsGeneratorService
      *
      * @return void
      */
-    private function prepareTranslations(string $path, $translationsPath, bool $pretty)
+    private function prepareTranslations(string $path, ?string $translationsPath, bool $pretty)
     {
         $fbtDir = $path . '/';
 
@@ -266,7 +266,7 @@ class TranslationsGeneratorService
      *
      * @throws \fbt\Exceptions\FbtException
      */
-    public function exportTranslations(string $path, $translationsPath, $stdin, bool $pretty)
+    public function exportTranslations(string $path, ?string $translationsPath, ?string $stdin, bool $pretty)
     {
         if (empty($stdin)) {
             $this->prepareTranslations($path, $translationsPath, $pretty);

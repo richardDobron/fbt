@@ -41,7 +41,7 @@ class JSFbtBuilder
      *
      * @throws FbtException
      */
-    public static function build($type, $texts, $reactNativeMode = false)
+    public static function build($type, $texts, bool $reactNativeMode = false)
     {
         $builder = new JSFbtBuilder($reactNativeMode);
         if ($type === FbtConstants::FBT_TYPE['TEXT']) {
@@ -314,7 +314,7 @@ class JSFbtBuilder
      * @return int|null
      * @throws FbtException
      */
-    public static function getPronounGenderKey(string $usage, int $gender)
+    public static function getPronounGenderKey(string $usage, int $gender): ?int
     {
         switch ($gender) {
             case Gender::GENDER_CONST['NOT_A_PERSON']:

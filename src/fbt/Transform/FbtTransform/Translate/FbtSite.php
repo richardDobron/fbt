@@ -56,12 +56,12 @@ class FbtSite
         return $this->_hashToText;
     }
 
-    public function getMetadata()
+    public function getMetadata(): array
     {
         return $this->_metadata ?? [];
     }
 
-    public function getProject()
+    public function getProject(): string
     {
         return $this->_project;
     }
@@ -108,7 +108,7 @@ class FbtSite
      *  } | text
      * }
      */
-    public static function fromScan($json)
+    public static function fromScan($json): FbtSite
     {
         $tableData = $json['jsfbt'];
         if ($json['type'] === FbtConstants::FBT_TYPE['TABLE']) {
@@ -136,7 +136,7 @@ class FbtSite
         return $fbtSite;
     }
 
-    public function serialize()
+    public function serialize(): array
     {
         $json = [
             '_t' => $this->getType(),
@@ -153,7 +153,7 @@ class FbtSite
         return $json;
     }
 
-    public static function deserialize($json)
+    public static function deserialize($json): FbtSite
     {
         return new FbtSite($json['_t'], $json['h2t'], $json['_d'], $json['p']);
     }

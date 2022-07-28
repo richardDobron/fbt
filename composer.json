@@ -6,6 +6,7 @@
         "php": "^7.2 || ^8.0",
         "ext-json": "*",
         "ext-dom": "*",
+        "ext-mbstring": "*",
         "ext-iconv": "*",
         "minicli/minicli": "1.0.4"
     },

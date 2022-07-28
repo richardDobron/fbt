@@ -19,7 +19,7 @@ class IntlCLDRNumberType44 implements IntlNumberConsistency
         return IntlVariations::INTL_NUMBER_VARIATIONS['OTHER'];
     }
 
-    public function getExample(int $variation)
+    public function getExample(int $variation): ?string
     {
         $examples = [
             IntlVariations::INTL_NUMBER_VARIATIONS['ONE'] => "a number like 0, 1.",

@@ -20,7 +20,7 @@ class IntlCLDRNumberType14 implements IntlNumberConsistency
         return IntlVariations::INTL_NUMBER_VARIATIONS['OTHER'];
     }
 
-    public function getExample(int $variation)
+    public function getExample(int $variation): ?string
     {
         $examples = [
             IntlVariations::INTL_NUMBER_VARIATIONS['ZERO'] => "a number like 0, 10~20, 30, 40, 50, 60, 100, 1000, 10000, 100000, 1000000, …",

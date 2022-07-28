@@ -11,6 +11,9 @@ use fbt\Transform\FbtTransform\Translate\Gender\IntlGenderType;
  */
 class TranslationConfig
 {
+    private $numberType;
+    private $genderType;
+
     public function __construct($numberType, $genderType)
     {
         $this->numberType = $numberType;
@@ -19,7 +22,8 @@ class TranslationConfig
 
     public function getTypesFromMask(
         $mask // IntlVariationType
-    ) {
+    ): array
+    {
         if ($mask === IntlVariations::INTL_FBT_VARIATION_TYPE['NUMBER']) {
             $types = $this->numberType->getNumberVariations();
 
@@ -31,7 +35,8 @@ class TranslationConfig
 
     public function isDefaultVariation(
         $variation // mixed
-    ) {
+    ): bool
+    {
         $value = intval($variation);
         if (is_nan($value)) {
             return false;

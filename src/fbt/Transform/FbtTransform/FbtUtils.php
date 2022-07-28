@@ -224,7 +224,7 @@ class FbtUtils
      * @return bool
      * @throws FbtParserException
      */
-    public static function getOptionBooleanValue(array $options, string $name, $node = null): bool
+    public static function getOptionBooleanValue(array $options, string $name, ?Node $node = null): bool
     {
         if (! isset($options[$name])) {
             return false;
@@ -256,7 +256,7 @@ class FbtUtils
      * @return int|null
      * @throws FbtParserException
      */
-    public static function getVariationValue($moduleName, $variationName, $variationInfo, Node $node)
+    public static function getVariationValue($moduleName, $variationName, $variationInfo, Node $node): ?int
     {
         // Numbers allow only `true` or expression.
         if (
@@ -285,7 +285,7 @@ class FbtUtils
      * @return string|null
      * @throws FbtParserException
      */
-    public static function getAttributeByNameOrThrow(Node $node, string $name)
+    public static function getAttributeByNameOrThrow(Node $node, string $name): ?string
     {
         if (! isset($node->{$name})) {
             throw new FbtParserException("Unable to find attribute \"$name\".");
@@ -300,7 +300,7 @@ class FbtUtils
      *
      * @return string|null
      */
-    public static function getAttributeByName(Node $node, string $name)
+    public static function getAttributeByName(Node $node, string $name): ?string
     {
         return $node->{$name};
     }
@@ -327,7 +327,7 @@ class FbtUtils
         } elseif (is_object($rangeArg)) {
             $rangeProps = $rangeArg;
         } else {
-            throw new \Exception("fbt enum range value must be array or object, got " . getType($rangeArg));
+            throw new Exception("fbt enum range value must be array or object, got " . getType($rangeArg));
         }
 
 

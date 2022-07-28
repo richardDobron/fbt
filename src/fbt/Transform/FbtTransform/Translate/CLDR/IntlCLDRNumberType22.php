@@ -21,7 +21,7 @@ class IntlCLDRNumberType22 implements IntlNumberConsistency
         return IntlVariations::INTL_NUMBER_VARIATIONS['OTHER'];
     }
 
-    public function getExample(int $variation)
+    public function getExample(int $variation): ?string
     {
         $examples = [
             IntlVariations::INTL_NUMBER_VARIATIONS['ONE'] => "a number like 1, 101, 201, 301, 401, 501, 601, 701, 1001, …",

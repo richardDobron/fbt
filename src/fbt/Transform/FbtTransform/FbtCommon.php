@@ -44,7 +44,7 @@ class FbtCommon
      * @param string $text
      * @return string|null
      */
-    public static function getDesc(string $text)
+    public static function getDesc(string $text): ?string
     {
         return self::$textToDesc[$text] ?? null;
     }

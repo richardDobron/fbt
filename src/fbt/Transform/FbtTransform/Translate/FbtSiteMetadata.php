@@ -20,8 +20,7 @@ class FbtSiteMetadata
 
     public static function unwrap(array $metaEntries): array
     {
-        return array_map(function ($entry) {
-            /** @var $entry null|FbtSiteMetaEntry */
+        return array_map(function (?FbtSiteMetaEntry $entry) {
             return $entry ? $entry->unwrap() : null;
         }, $metaEntries);
     }

@@ -38,7 +38,7 @@ class fbtNamespace extends FbtFunctionCallProcessor
         return self::{$method}(...$args);
     }
 
-    protected static function plural(Node $node, array $args)
+    protected static function plural(Node $node, array $args): fbtNode
     {
         return new fbtNode('plural', $node, $args);
     }
@@ -50,17 +50,17 @@ class fbtNamespace extends FbtFunctionCallProcessor
      *
      * @return fbtNode
      */
-    protected static function param(Node $node, array $args, $value = '')
+    protected static function param(Node $node, array $args, $value = ''): fbtNode
     {
         return new fbtNode('param', $node, $args, $value);
     }
 
-    protected static function enum(Node $node, array $args)
+    protected static function enum(Node $node, array $args): fbtNode
     {
         return new fbtNode('enum', $node, $args);
     }
 
-    protected static function pronoun(Node $node, array $args)
+    protected static function pronoun(Node $node, array $args): fbtNode
     {
         return new fbtNode('pronoun', $node, $args);
     }
@@ -72,12 +72,12 @@ class fbtNamespace extends FbtFunctionCallProcessor
      *
      * @return fbtNode
      */
-    protected static function name(Node $node, array $args, $value = '')
+    protected static function name(Node $node, array $args, $value = ''): fbtNode
     {
         return new fbtNode('name', $node, $args, $value);
     }
 
-    protected static function sameParam(Node $node, array $args)
+    protected static function sameParam(Node $node, array $args): fbtNode
     {
         return new fbtNode('sameParam', $node, $args);
     }
@@ -85,6 +85,7 @@ class fbtNamespace extends FbtFunctionCallProcessor
     /**
      * @throws \fbt\Exceptions\FbtException
      * @throws \fbt\Exceptions\FbtParserException
+     * @throws \fbt\Exceptions\FbtInvalidConfigurationException
      */
     public function __toString(): string
     {
