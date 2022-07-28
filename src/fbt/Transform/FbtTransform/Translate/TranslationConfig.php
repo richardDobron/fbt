@@ -22,8 +22,7 @@ class TranslationConfig
 
     public function getTypesFromMask(
         $mask // IntlVariationType
-    ): array
-    {
+    ): array {
         if ($mask === IntlVariations::INTL_FBT_VARIATION_TYPE['NUMBER']) {
             $types = $this->numberType->getNumberVariations();
 
@@ -35,8 +34,7 @@ class TranslationConfig
 
     public function isDefaultVariation(
         $variation // mixed
-    ): bool
-    {
+    ): bool {
         $value = intval($variation);
         if (is_nan($value)) {
             return false;
