@@ -38,7 +38,7 @@ class fbt
      * -or-
      *    ["You have a cat in a photo album named {title}", <hash>]
      *
-     * @param null|array $inputArgs - arguments from which to pull substitutions
+     * @param array|null $inputArgs - arguments from which to pull substitutions
      *    Example: [["singular", null], [null, ['title' => "felines!"]]]
      *
      * @param array $options - options for runtime
@@ -252,7 +252,7 @@ class fbt
      * @return array
      * @throws FbtException
      */
-    public static function _plural(float $count,  $label = null, $value = null): array
+    public static function _plural(float $count, string $label = null, $value = null): array
     {
         $variation = IntlVariationResolverImpl::getNumberVariations($count);
         $substitution = [];

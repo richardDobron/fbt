@@ -70,7 +70,7 @@ function _replaceWithNativeDigits($number, $digits)
 {
     $result = '';
     $number = strVal($number);
-    $d = null;
+
     for ($ii = 0, $iiMax = mb_strlen($number); $ii < $iiMax; $ii++) {
         $d = $digits[ord(mb_substr($number, $ii, 1)) - 48]; /* 48 === '0' */
         $result += $d ?? $number[$ii];
@@ -104,7 +104,7 @@ function _getNumberOfPowersOfTen($value)
 }
 
 
-function _roundNumber($valueParam, $decimalsParam = null)
+function _roundNumber($valueParam, $decimalsParam = null): string
 {
     $decimals = $decimalsParam ?? 0;
     $pow = 10 ** $decimals;
@@ -137,12 +137,10 @@ function _roundNumber($valueParam, $decimalsParam = null)
     return $value;
 }
 
-function addZeros($x, $count)
+function addZeros($x, $count): string
 {
     $result = $x;
-    for ($i = 0; $i < $count; $i++) {
-        $result .= '0';
-    }
+    $result .= str_repeat('0', $count);
 
     return $result;
 }
@@ -304,7 +302,7 @@ class intlNumUtils
         // Bring it back to whatever the number's magnitude was before.
         if ($power < $numSigFigs) {
             $truncatedValue /= pow(10, -$power + $numSigFigs);
-            // Determine numer of decimals based on sig figs
+            // Determine number of decimals based on sig figs
             if ($decimals == null) {
                 return self::formatNumberWithThousandDelimiters($truncatedValue, $numSigFigs - $power - 1);
             }

@@ -93,7 +93,7 @@ class fbt implements \JsonSerializable
 
     /**
      * @throws \Exception
-     * @throws Exceptions\FbtParserException
+     * @throws Exceptions\FbtParserException|\Throwable
      */
     public function __toString(): string
     {

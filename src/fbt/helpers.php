@@ -2,7 +2,7 @@
 
 namespace {
     if (! function_exists('mb_str_split')) {
-        function mb_str_split(string $str, int $length = 1)
+        function mb_str_split(string $str, int $length = 1): array
         {
             if ($length < 1) {
                 return [];
@@ -17,7 +17,7 @@ namespace {
     }
 
     if (! function_exists("mb_ord")) {
-        function mb_ord($charUTF8)
+        function mb_ord($charUTF8): int
         {
             $charUCS4 = mb_convert_encoding($charUTF8, 'UCS-4BE', 'UTF-8');
             $byte1 = ord(substr($charUCS4, 0, 1));
@@ -35,9 +35,9 @@ namespace {
          * @param string $description
          * @param array $options
          *
-         * @return \fbt\fbt
+         * @return fbt\fbt
          */
-        function fbt($text, string $description, array $options = [])
+        function fbt($text, string $description, array $options = []): fbt\fbt
         {
             return new fbt\fbt($text, $description, $options);
         }
@@ -75,6 +75,7 @@ namespace {
 namespace fbt {
 
     use fbt\Exceptions\FbtException;
+    use fbt\Runtime\fbtNamespace;
     use fbt\Transform\FbtTransform\FbtConstants;
     use fbt\Util\SimpleHtmlDom\DOM;
     use fbt\Util\SimpleHtmlDom\Node;
@@ -103,9 +104,9 @@ namespace fbt {
      *
      * @throws Exceptions\FbtParserException
      */
-    function fbt($text, string $desc, array $options = [])
+    function fbt($text, string $desc, array $options = []): Runtime\fbtNamespace
     {
-        return (new \fbt\Runtime\fbtNamespace($text, $desc, $options, FbtConstants::MODULE_NAME['FBT']));
+        return (new fbtNamespace($text, $desc, $options, FbtConstants::MODULE_NAME['FBT']));
     }
 
     /**
@@ -116,12 +117,12 @@ namespace fbt {
      *
      * @throws Exceptions\FbtParserException
      */
-    function fbs($text, string $desc, array $options = [])
+    function fbs($text, string $desc, array $options = []): Runtime\fbtNamespace
     {
-        return (new \fbt\Runtime\fbtNamespace($text, $desc, $options, FbtConstants::MODULE_NAME['FBS']));
+        return (new fbtNamespace($text, $desc, $options, FbtConstants::MODULE_NAME['FBS']));
     }
 
-    function check_parent_tags(Node $node, array $tags): bool
+    function checkParentTags(Node $node, array $tags): bool
     {
         while ($node = $node->parent()) {
             if (in_array($node->tag, $tags)) {

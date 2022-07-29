@@ -110,6 +110,7 @@ class HTMLFbtProcessor
 
     /**
      * @throws \fbt\Exceptions\FbtException
+     * @throws \fbt\Exceptions\FbtParserException
      */
     private function _createFbtFunctionCallNode($text, $desc, $options): fbtNamespace
     {

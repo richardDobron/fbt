@@ -39,7 +39,7 @@ class JSFbtBuilder
      *
      * @throws FbtException
      */
-    public static function build($type, $texts, $reactNativeMode = false)
+    public static function build($type, $texts, bool $reactNativeMode = false)
     {
         $builder = new JSFbtBuilder($reactNativeMode);
         if ($type === FbtConstants::FBT_TYPE['TEXT']) {

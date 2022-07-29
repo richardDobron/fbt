@@ -2,7 +2,7 @@
 
 namespace fbt\Transform\FbtTransform;
 
-use function fbt\check_parent_tags;
+use function fbt\checkParentTags;
 use fbt\Util\SimpleHtmlDom\Node;
 
 class FbtAutoWrap
@@ -46,7 +46,7 @@ class FbtAutoWrap
     }
 
     /**
-     * Given a node, this function creates a JSXIdentifier with the the node's
+     * Given a node, this function creates a JSXIdentifier with the node's
      * implicit description as the description.
      * @return void
      */
@@ -67,7 +67,7 @@ class FbtAutoWrap
         return $node->isText()
             // js~php diff:
             && ! in_array($node->tag, $excludedTags)
-            && ! check_parent_tags($node, $excludedTags)
+            && ! checkParentTags($node, $excludedTags)
             ? FbtUtils::normalizeSpaces($node->innertext()) : '';
     }
 
