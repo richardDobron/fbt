@@ -310,6 +310,7 @@ class FbtUtils
      * @return array
      *
      * @throws FbtParserException
+     * @throws \Exception
      */
     public static function extractEnumRange($range): array
     {
@@ -327,7 +328,7 @@ class FbtUtils
         } elseif (is_object($rangeArg)) {
             $rangeProps = $rangeArg;
         } else {
-            throw new Exception("fbt enum range value must be array or object, got " . getType($rangeArg));
+            throw new \Exception("fbt enum range value must be array or object, got " . getType($rangeArg));
         }
 
 
@@ -380,7 +381,7 @@ class FbtUtils
                     : ' '
                 );
 
-                return $node->innertext;
+                return $node->innertext();
             }
 
             if ($node->isElement() && ! $node->isNamespacedElement() && $node->innertext() == '') {
@@ -469,7 +470,7 @@ class FbtUtils
 
         foreach ($nodes as $node) {
             $children = self::makeFbtElementArrayFromNode($node->children());
-            $tree[] = new fbtElement($node->tag, $node->innertext, $node->getAllAttributes(), $children);
+            $tree[] = new fbtElement($node->tag, $node->innertext(), $node->getAllAttributes(), $children);
         }
 
         return $tree;

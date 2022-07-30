@@ -46,7 +46,7 @@ class FbtFunctionCallProcessor
     {
         $this->options = $options;
 
-        foreach (FbtConstants::FBT_BOOLEAN_OPTIONS as $key) {
+        foreach (array_keys(FbtConstants::FBT_BOOLEAN_OPTIONS) as $key) {
             if (isset($this->options[$key])) {
                 $this->options[$key] = FbtUtils::getOptionBooleanValue($this->options, $key);
             }
