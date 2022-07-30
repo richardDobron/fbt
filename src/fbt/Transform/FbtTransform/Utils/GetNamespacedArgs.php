@@ -59,9 +59,8 @@ class GetNamespacedArgs
             ->find('html', 0);
 
         $value = FbtUtils::makeFbtElementArrayFromNode($node->children() ?: $node->nodes)[0] ?? '';
-        if (! empty($options['number'])) {
-            $value = (string)$value;
-        }
+
+        $value = (string)$value;
 
         $paramArgs = [$nameAttr, $value];
 
