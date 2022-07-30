@@ -781,7 +781,7 @@ FBT;
             ' and ' .
             \fbt\fbt::param('tokenB', 'B'),
             'test'
-      );
+        );
 
         $this->assertSame('with tokens {tokenB} and B', $fbt);
     }
