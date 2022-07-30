@@ -118,7 +118,7 @@ function _roundNumber($valueParam, $decimalsParam = null): string
     // if value is small and
     // was converted to scientific notation, don't append anything
     // as we are already done
-    if (str_contains($value, 'E-')) {
+    if (strstr($value, 'E-')) {
         return $value;
     }
 
@@ -336,9 +336,9 @@ class intlNumUtils
         $digitsMap = _getNativeDigitsMap();
         $_text = $text;
         if ($digitsMap) {
-            $_text = trim(implode('', array_map(function ($character) {
+            $_text = trim(implode('', array_map(function ($character) use ($digitsMap) {
                 return $digitsMap[$character] ?? $character;
-            }, explode('', $text))));
+            }, str_split($text))));
         }
 
         $_text = preg_replace("/^[^\d]*\-/", "\u{0002}", $_text); // preserve negative sign
@@ -391,7 +391,7 @@ class intlNumUtils
         $pieces = explode('.', $str);
 
         $intPart = self::getIntegerString($pieces[0], $thousandDelimiter);
-        if (mb_strlen($pieces) === 1) {
+        if (count($pieces) === 1) {
             return $intPart;
         }
 

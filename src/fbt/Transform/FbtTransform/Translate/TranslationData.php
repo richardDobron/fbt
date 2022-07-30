@@ -7,6 +7,7 @@ class TranslationData
     public $tokens;
     public $types;
     public $translations;
+    private $_defaultTranslation;
 
     public function __construct(
         $tokens,

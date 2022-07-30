@@ -194,9 +194,9 @@ class HTMLFbtProcessor
             case HDOM_TYPE_ELEMENT:
                 return $this->_toFbtNamespacedCall($node);
             case HDOM_TYPE_TEXT:
-                return FbtUtils::normalizeSpaces($node->innertext);
+                return FbtUtils::normalizeSpaces($node->innertext());
             default:
-                throw FbtUtils::errorAt($node, "Unknown namespace fbt type $node->type");
+                throw FbtUtils::errorAt($node, "Unknown namespace fbt type $node->nodetype ($node->tag)");
         }
     }
 

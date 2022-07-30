@@ -24,9 +24,9 @@ class FbtResult
         $contents = $this->flattenToArray($this->content);
         foreach ($contents as $content) {
             if (is_string($content) || $content instanceof FbtResult) {
-                $stringValue .= (string)$content;
+                $stringValue .= $content;
             } else {
-                $this->onStringSerializationError($content);
+                // $this->onStringSerializationError($content);
             }
         }
 

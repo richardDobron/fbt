@@ -47,7 +47,7 @@ class GetNamespacedArgs
         }));
 
         if (count($paramChildren) === 0 && count($node->nodes) === 1 && $node->nodes[0]->isText()) {
-            $paramChildren = [$node->nodes[0]->innertext];
+            $paramChildren = [$node->nodes[0]->innertext()];
         }
 
         if (count($paramChildren) !== 1) {
@@ -88,7 +88,7 @@ class GetNamespacedArgs
         }
 
         $singularNode = $pluralChildren[0];
-        $singularText = $singularNode->innertext;
+        $singularText = $singularNode->innertext();
         $singularArg = trim(FbtUtils::normalizeSpaces($singularText)); // fbt diff rtrim()
 
         return [$singularArg, $countAttr, $options];
@@ -141,7 +141,7 @@ class GetNamespacedArgs
         $singularArg = $nameChildren[0];
 
         if ($singularArg->isText()) {
-            $singularArg = FbtUtils::normalizeSpaces($singularArg->innertext);
+            $singularArg = FbtUtils::normalizeSpaces($singularArg->innertext());
         }
 
         return [$nameAttribute, $singularArg, $genderAttribute];
