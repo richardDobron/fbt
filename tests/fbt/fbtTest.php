@@ -750,6 +750,13 @@ FBT;
         FbtHooks::locale(null);
     }
 
+    public function testRemovePunctuationWhenAValueEndsWithIt()
+    {
+        $fbt = (string)fbt('Play ' . \fbt\fbt::param('game', 'Chess!') . '!', 'test');
+
+        $this->assertSame('Play Chess!', $fbt);
+    }
+
     public function testJsonSerialization()
     {
         $fbt = fbt('simple text', 'desc');

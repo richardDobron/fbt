@@ -418,18 +418,17 @@ class FbtUtils
         // Splice in the arguments while keeping rich object ones separate.
         $objectPieces = [];
         $argNames = [];
-        $stringPieces = explode("\x17", preg_replace_callback("/{([^}]+)}/", function ($matches) use ($args, &$argNames, &$objectPieces) {
-            $match = $matches[0];
+        $stringPieces = explode("\x17", preg_replace_callback("/{([^}]+)}(" . IntlPunctuation::PUNCT_CHAR_CLASS . "*)/", function ($matches) use ($args, &$argNames, &$objectPieces) {
             $parameter = $matches[1];
             $punctuation = $matches[2] ?? '';
 
             $argument = $args[$parameter] ?? null;
 
-            if ($argument && is_array($argument)) {
+            if (is_object($argument)) {
                 $objectPieces[] = $argument;
-                $argNames[] = $parameter; // End of Transmission Block sentinel marker
-
-                return '\x17' . $punctuation;
+                $argNames[] = $parameter;
+                // End of Transmission Block sentinel marker
+                return "\x17" . $punctuation;
             } elseif ($argument === null) {
                 return '';
             }
