@@ -560,6 +560,17 @@ FBT;
         $this->assertSame('There are 1 000 000 items on stock.', self::transform($fbt));
     }
 
+    public function testNumberLiteralValueAsIs()
+    {
+        $fbt = <<<FBT
+<fbt desc="Stock information">
+    A total amount is <fbt:param name="count">10000</fbt:param>
+</fbt>
+FBT;
+
+        $this->assertSame('A total amount is 10000', self::transform($fbt));
+    }
+
     public function testHtmlBreak()
     {
         $fbt = <<<FBT
@@ -755,6 +766,24 @@ FBT;
         $fbt = (string)fbt('Play ' . \fbt\fbt::param('game', 'Chess!') . '!', 'test');
 
         $this->assertSame('Play Chess!', $fbt);
+
+        // todo: Don't strip punctuation that isn't redundant
+        // $fbt = (string)fbt("What's on your mind " . \fbt\fbt::param('name', 'T.J.') . '?', 'test');
+
+        // $this->assertSame('What\'s on your mind T.J.?', $fbt);
+    }
+
+    public function testValuesThatLookLikeTokenPatterns()
+    {
+        $fbt = (string)fbt(
+            'with tokens ' .
+            \fbt\fbt::param('tokenA', '{tokenB}') .
+            ' and ' .
+            \fbt\fbt::param('tokenB', 'B'),
+            'test'
+      );
+
+        $this->assertSame('with tokens {tokenB} and B', $fbt);
     }
 
     public function testJsonSerialization()
