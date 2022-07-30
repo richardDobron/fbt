@@ -4,6 +4,18 @@ All notable changes to `fbt` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## v4.0.5 - 2022-07-30
+### Fixed
+- Punctuation when a value ends with it
+
+### Added
+- `JsonSerializable` interface to fbt
+- `ext-mbstring` requirement to composer.json
+
+## v3.0.4 - 2022-07-10
+### Fixed
+- Empty node checking
+- 
 ## v4.0.4 - 2022-07-10
 ### Fixed
 - Empty node checking
