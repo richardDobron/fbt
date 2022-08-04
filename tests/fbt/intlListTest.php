@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace tests\fbt;
 
-use fbt\Runtime\Shared\IntlList;
 use function fbt\intlList;
+use fbt\Runtime\Shared\IntlList;
 
 class intlListTest extends \tests\TestCase
 {

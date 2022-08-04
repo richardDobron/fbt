@@ -2,8 +2,8 @@
 
 namespace fbt\Runtime\Shared;
 
-use fbt\fbt;
 use function fbt;
+use fbt\fbt;
 use function fbt\invariant;
 
 class IntlList
@@ -36,11 +36,10 @@ class IntlList
      */
     public function format()
     {
-
         $count = count($this->items);
         if ($count === 0) {
             return '';
-        } else if ($count === 1) {
+        } elseif ($count === 1) {
             return $this->items[0];
         }
 
@@ -58,6 +57,7 @@ class IntlList
                         '"Menlo Park, CA; Seattle, WA; New York City, NY". ' .
                         '{previous items} and {following items} are themselves ' .
                         'lists that contain one or more items.');
+
                     break;
                 default:
                     $output = fbt([
@@ -111,14 +111,17 @@ class IntlList
                             ' "Menlo Park, CA; Seattle, WA; New York City, NY". ' .
                             '{previous items} itself contains one or more items.');
                     default:
-                        return fbt([
+                        return fbt(
+                            [
                             fbt::param('list of items', $list),
                             ', ',
                             fbt::param('last item', $lastItem),
-                        ], 'A list of items of various types, for example:' .
+                        ],
+                            'A list of items of various types, for example:' .
                             ' "item1, item2, item3, item4"'
                         );
                 }
+                // no break
             default:
                 invariant(
                     false,
@@ -127,5 +130,4 @@ class IntlList
                 );
         }
     }
-
 }
