@@ -132,6 +132,9 @@ class TranslationsGeneratorService
         ];
     }
 
+    /**
+     * @throws \fbt\Exceptions\FbtException
+     */
     private function processGroups($phrases, $translatedGroups): array
     {
         $localeToHashToFbt = [];
