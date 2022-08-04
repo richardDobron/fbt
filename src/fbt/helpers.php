@@ -76,6 +76,7 @@ namespace fbt {
 
     use fbt\Exceptions\FbtException;
     use fbt\Runtime\fbtNamespace;
+    use fbt\Runtime\Shared\IntlList;
     use fbt\Transform\FbtTransform\FbtConstants;
     use fbt\Util\SimpleHtmlDom\DOM;
     use fbt\Util\SimpleHtmlDom\Node;
@@ -136,6 +137,17 @@ namespace fbt {
     function unsignedRightShift($a, $b): int
     {
         return ($a & 0xFFFFFFFF) >> ($b & 0x1F);
+    }
+
+    /**
+     * @throws FbtException
+     * @return \fbt\fbt|string
+     */
+    function intlList(array $items, string $conjunction = null, string $delimiter = null)
+    {
+        $intlList = new IntlList($items, $conjunction, $delimiter);
+
+        return $intlList->format();
     }
 
     /**
