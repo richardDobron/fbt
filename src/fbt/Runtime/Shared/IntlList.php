@@ -2,8 +2,6 @@
 
 namespace fbt\Runtime\Shared;
 
-use function fbt;
-use fbt\fbt;
 use function fbt\invariant;
 
 class IntlList
@@ -12,13 +10,13 @@ class IntlList
     private $conjunction;
     private $delimiter;
 
-    public const CONJUNCTIONS = [
+    const CONJUNCTIONS = [
         'AND' => 'AND',
         'NONE' => 'NONE',
         'OR' => 'OR',
     ];
 
-    public const DELIMITERS = [
+    const DELIMITERS = [
         'COMMA' => 'COMMA',
         'SEMICOLON' => 'SEMICOLON',
     ];
@@ -50,9 +48,9 @@ class IntlList
             switch ($this->delimiter) {
                 case self::DELIMITERS['SEMICOLON']:
                     $output = fbt([
-                        fbt::param('previous items', $output),
+                        \fbt\fbt::param('previous items', $output),
                         '; ',
-                        fbt::param('following items', $this->items[$i]),
+                        \fbt\fbt::param('following items', $this->items[$i]),
                     ], 'A list of items of various types, for example: ' .
                         '"Menlo Park, CA; Seattle, WA; New York City, NY". ' .
                         '{previous items} and {following items} are themselves ' .
@@ -61,9 +59,9 @@ class IntlList
                     break;
                 default:
                     $output = fbt([
-                        fbt::param('previous items', $output),
+                        \fbt\fbt::param('previous items', $output),
                         ', ',
-                        fbt::param('following items', $this->items[$i]),
+                        \fbt\fbt::param('following items', $this->items[$i]),
                     ], 'A list of items of various types. {previous items} and' .
                         ' {following items} are themselves lists that contain one or' .
                         ' more items.');
@@ -86,17 +84,17 @@ class IntlList
         switch ($conjunction) {
             case self::CONJUNCTIONS['AND']:
                 return fbt([
-                    fbt::param('list of items', $list),
+                    \fbt\fbt::param('list of items', $list),
                     ' and ',
-                    fbt::param('last item', $lastItem),
+                    \fbt\fbt::param('last item', $lastItem),
                 ], 'A list of items of various types, for example:' .
                     ' "item1, item2, item3 and item4"');
 
             case self::CONJUNCTIONS['OR']:
                 return fbt([
-                    fbt::param('list of items', $list),
+                    \fbt\fbt::param('list of items', $list),
                     ' or ',
-                    fbt::param('last item', $lastItem),
+                    \fbt\fbt::param('last item', $lastItem),
                 ], 'A list of items of various types, for example:' .
                     ' "item1, item2, item3 or item4"');
 
@@ -104,18 +102,18 @@ class IntlList
                 switch ($delimiter) {
                     case self::DELIMITERS['SEMICOLON']:
                         return fbt([
-                            fbt::param('previous items', $list),
+                            \fbt\fbt::param('previous items', $list),
                             '; ',
-                            fbt::param('last item', $lastItem),
+                            \fbt\fbt::param('last item', $lastItem),
                         ], 'A list of items of various types, for example:' .
                             ' "Menlo Park, CA; Seattle, WA; New York City, NY". ' .
                             '{previous items} itself contains one or more items.');
                     default:
                         return fbt(
                             [
-                            fbt::param('list of items', $list),
+                            \fbt\fbt::param('list of items', $list),
                             ', ',
-                            fbt::param('last item', $lastItem),
+                            \fbt\fbt::param('last item', $lastItem),
                         ],
                             'A list of items of various types, for example:' .
                             ' "item1, item2, item3, item4"'
