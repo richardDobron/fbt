@@ -15,7 +15,7 @@ module.exports = {
   baseUrl: "/fbt/",
   favicon: "img/favicon_blue.png",
   projectName: "fbt",
-  organizationName: "facebook",
+  organizationName: "richardDobron",
   scripts: ["https://buttons.github.io/buttons.js"],
   customFields: {
     users: [
@@ -65,7 +65,6 @@ module.exports = {
         {
           title: "Community",
           items: [
-            { label: "User Showcase", to: "users" },
             {
               label: "Stack Overflow",
               href: "https://stackoverflow.com/questions/tagged/fbt"

@@ -109,7 +109,7 @@ Read more about [translating](translating.md).
 - [fbt::plural(...);](plurals.md)
 - [fbt::pronoun(...);](pronouns.md)
 - [fbt::sameParam(...);](params.md)
-- [fbt::c(...);](commmon.md)
+- [fbt::c(...);](common.md)
 
 ```php
 echo fbt('You just friended ' . \fbt\fbt::name('name', 'Sarah', 2 /* gender */), 'names');
