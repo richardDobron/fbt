@@ -1,4 +1,8 @@
-# Auto-parameterization
+---
+id: autoparam
+title: Auto-parameterization
+sidebar_label: Auto-parameterization
+---
 
 `<fbt>` will automatically wrap any non-fbt children in the top-level
 `<fbt>` as though they were written with an `<fbt:param>` with a

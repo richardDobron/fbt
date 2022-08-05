@@ -1,4 +1,8 @@
-# Common FBT strings
+---
+id: common
+title: Common FBT strings
+sidebar_label: Common strings
+---
 
 The `fbt` framework provides a way to define common simple strings in one shared location.  The expected format is as a text to description map.
 

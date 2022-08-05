@@ -1,4 +1,8 @@
-# Extracting FBTs
+---
+id: collection
+title: Extracting FBTs
+sidebar_label: Extracting translatable texts
+---
 
 Unlike Facebook fbt, we collect & translate strings during script execution.
 

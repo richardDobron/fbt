@@ -1,4 +1,8 @@
-# Integrating into your app
+---
+id: getting_started
+title: Integrating into your app
+sidebar_label: Getting started
+---
 
 We recommend you read the [best practices](best_practices.md) for advice on how to best prepare your applications. We strongly encourage you to do so.
 

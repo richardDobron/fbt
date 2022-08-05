@@ -1,4 +1,8 @@
-# Plurals
+---
+id: plurals
+title: Plurals
+sidebar_label: Plurals
+---
 
 `fbt:plural` provides you with a shorthand way for plural variations.
 ```

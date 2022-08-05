@@ -1,4 +1,8 @@
-# Platform Internationalization Best Practices
+---
+id: best_practices
+title: Platform Internationalization Best Practices
+sidebar_label: Best Practices
+---
 
 Here are some rough guidelines and lessons learned by the internationalization team at Facebook. These are in no specific order of importance.
 
@@ -90,7 +94,7 @@ With appropriate CSS, the browser will word-wrap the string appropriately.
 Try not to use layouts that depend on the precise onscreen sizes of pieces of text in the original language. For any piece of text, in some languages it is likely to be shorter and in some it will be longer (sometimes significantly so in either direction.) If you have sized your user interface elements such that your text just barely fits, your application will probably not work well in a language with longer words.
 
 # Avoid Long Pieces of Text
-Large chunks of text like multiple paragraphs should be split up among multiple <fbt> tags for ease of translation. Similarly, a single long paragraph should be broken up into several smaller paragraphs. This allows translation voting to more precisely pinpoint problems.
+Large chunks of text like multiple paragraphs should be split up among multiple `<fbt>` tags for ease of translation. Similarly, a single long paragraph should be broken up into several smaller paragraphs. This allows translation voting to more precisely pinpoint problems.
 
 # Assume Word Order Will Change
 Assume that a translator will have to change the word order of every sentence. In particular, don't try to assemble sentences from smaller separately-translatable fragments, because even if you provide excellent descriptions, it's likely you will make it impossible for a translator to come up with a grammatically correct translation. Instead, expand all the possible cases out into separate translatable sentences and choose a complete sentence in your code.

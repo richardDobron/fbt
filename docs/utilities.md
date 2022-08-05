@@ -1,4 +1,8 @@
-# Runtime Utilities
+---
+id: utilities
+title: Runtime Utilities
+sidebar_label: Runtime Utilities
+---
 
 Bundled with fbt come a few useful utilities for constructing strings.
 

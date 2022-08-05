@@ -1,4 +1,8 @@
-# Implicit parameters
+---
+id: implicit_params
+title: Implicit parameters
+sidebar_label: Implicit parameters
+---
 
 ## Viewer Gender
 ### The hidden `__viewing_user__` token

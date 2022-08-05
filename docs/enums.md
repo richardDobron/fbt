@@ -1,4 +1,8 @@
-# Enumerations
+---
+id: enums
+title: Enumerations
+sidebar_label: Enumerations
+---
 
 Enumerations eliminate a lot of UI code duplication while enabling accurate translations.  `<fbt:enum>` and `fbt::enum` both provide the ability to add your ad-hoc enumerations.
 

@@ -1,5 +1,8 @@
-# The FBT API
-
+---
+id: api_intro
+title: The FBT API
+sidebar_label: Introduction
+---
 The fbt framework has two (mostly) equivalent APIs: A HTML-style `<fbt>` tag API and a "vanilla" or "functional" `fbt(...)` API that more closely resembles standard PHP.  In general, you can compose your translatable text in either format.  As the following example illustrates, the child of the `<fbt>` tag shows up as the first argument to `fbt` and any attributes show up in the optional third argument parameter.  The `desc` (text description) argument is the exception to this rule because it is a *required* parameter and attribute in `fbt(...)` and `<fbt>` respectively.
 
 Let's start with a simple example:

@@ -1,4 +1,8 @@
-# Transforms
+---
+id: transform
+title: Transforms
+sidebar_label: Transforms
+---
 
 The fbt comes with 2 transforms.
 

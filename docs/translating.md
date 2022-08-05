@@ -1,4 +1,8 @@
-# Translating
+---
+id: translating
+title: Translating
+sidebar_label: Translating FBTs
+---
 
 There are two ways to translate phrases:
 1. Manually translate generated JSON file.
@@ -12,11 +16,11 @@ php ./vendor/bin/fbt generate-translations --src=./path/to/.source_strings.json 
 ```
 
 ### Options:
-| name                    | default                  | description                                                                                           |
-|-------------------------|--------------------------|-------------------------------------------------------------------------------------------------------|
-| --src                   | ./.source_strings.json   | Path to collected source strings file                                                                 |
-| --translation-input     | ./translation_input.json | Path to translation input file                                                                        |
-| --translations=`[path]` | *none*                   | The translation files containing translations.<br>E.g. `--translations=./path/to/translations/*.json` |
+| name                    | default                  | description                                                                                             |
+|-------------------------|--------------------------|---------------------------------------------------------------------------------------------------------|
+| --src                   | ./.source_strings.json   | Path to collected source strings file                                                                   |
+| --translation-input     | ./translation_input.json | Path to translation input file                                                                          |
+| --translations=`[path]` | *none*                   | The translation files containing translations.<br />E.g. `--translations=./path/to/translations/*.json` |
 
 ## Command to convert provided translations to jenkins:
 ```shell
@@ -26,12 +30,12 @@ php ./vendor/bin/fbt translate --path=/path/to/storage --translations=/path/to/t
 ```
 
 ### Options:
-| name                             | default | description                                                                                           |
-|----------------------------------|---------|-------------------------------------------------------------------------------------------------------|
-| --path                           | *none*  | Path to export translation output (Cache storage path - must be same as in configuration)             |
-| --pretty                         | no      | Pretty print the translation output                                                                   |
-| --translations=`[path]`          | *none*  | The translation files containing translations.<br>E.g. `--translations=/path/to/translations/*.json`  |
-| --stdin < translation_input.json | *none*  | Instead of reading translation files and source file separately, read monolithic JSON file from STDIN |
+| name                             | default | description                                                                                            |
+|----------------------------------|---------|--------------------------------------------------------------------------------------------------------|
+| --path                           | *none*  | Path to export translation output (Cache storage path - must be same as in configuration)              |
+| --pretty                         | no      | Pretty print the translation output                                                                    |
+| --translations=`[path]`          | *none*  | The translation files containing translations.<br />E.g. `--translations=/path/to/translations/*.json` |
+| --stdin < translation_input.json | *none*  | Instead of reading translation files and source file separately, read monolithic JSON file from STDIN  |
 
 ## JSON schema:
 

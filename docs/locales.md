@@ -1,4 +1,8 @@
-# Supported Locales
+---
+id: locales
+title: Supported Locales
+sidebar_label: Supported Locales
+---
 
 Instead of using the ISO 639 language codes employed across the internet, Facebook has devised their own system of labeling languages. Some are the same as the ISO standard, but others are not. There also seems to be support lacking for Accept-Language: HTTP request headers.
 

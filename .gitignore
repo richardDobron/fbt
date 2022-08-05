@@ -6,3 +6,8 @@ composer.lock
 .php_cs.cache
 .phpunit.result.cache
 .php-cs-fixer.cache
+
+# documentation build artifacts
+website/build/
+website/node_modules
+website/.docusaurus
