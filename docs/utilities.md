@@ -28,9 +28,7 @@ produces the fbt
 recursively combining fbts.
 **Note that genders are not used in this `fbt:param` instances, so they default to `UNKNOWN`**
 
-
-# intlNumUtils and intlSummarizeNumber
-
+### intlNumUtils and intlSummarizeNumber
 There are a few utilities in both `intlNumUtils` and
 `intlSummarizeNumber` that are documented in the source.
 
@@ -43,7 +41,7 @@ string in the replacement.
 You can override this in `fbt::plural` [by providing the `value`
 option](plurals.md#optional-arguments).
 
-# createElement
+### createElement
 
 We use this function internally to generate HTML for FBT.
 
