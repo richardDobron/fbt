@@ -4,8 +4,8 @@
 ### The hidden `__viewing_user__` token
 
 If a token of `__viewing_user__` is provided, it is expected to have the
-corresponding [`type`](translation.md) of `IntlVariations::GENDER_*`. When
-provided, at [translation](translation.md) time, `JSFbtBuilder` will
+corresponding [`type`](translating.md) of `IntlVariations::GENDER_*`. When
+provided, at [translation](translating.md) time, `JSFbtBuilder` will
 create a special key in its table payload which signals to the runtime
 to check the gender of `IntlVariations::GENDER` in order to variate on
 gender.
