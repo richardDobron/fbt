@@ -324,7 +324,7 @@ class FbtFunctionCallProcessor
                     break;
                 case 'pronoun':
                     // Usage: fbt::pronoun(usage, gender [, options])
-                    $options = [];
+                    $options = FbtUtils::collectOptions($this->moduleName, $arg2, FbtConstants::VALID_PRONOUN_OPTIONS);
 
                     foreach (array_keys($options) as $key) {
                         $options[$key] = FbtUtils::getOptionBooleanValue($options, $key, $node->node);

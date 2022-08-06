@@ -245,7 +245,7 @@ class JSFbtBuilder
                     $gender = Gender::GENDER_CONST[$key];
 
                     if ($gender === Gender::GENDER_CONST['NOT_A_PERSON'] && ! empty($item['human'])) {
-                        return;
+                        continue;
                     }
 
                     if (! $isUsed) {
