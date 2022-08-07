@@ -296,7 +296,8 @@ FBT;
     {
         $this->expectExceptionMessage('must be one of [object, possessive, reflexive, subject]');
 
-        self::transform(<<<FBT
+        self::transform(
+            <<<FBT
 <fbt desc="Expect error exception">
     Today is
 	<fbt:pronoun type="possession" gender="2" human="false" />
