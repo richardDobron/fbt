@@ -77,6 +77,12 @@ class fbtNamespace extends FbtFunctionCallProcessor
         return new fbtNode('name', $node, $args, $value);
     }
 
+    /**
+     * @param \fbt\Util\SimpleHtmlDom\Node $node
+     * @param array $args
+     *
+     * @return \fbt\Runtime\fbtNode
+     */
     protected static function sameParam(Node $node, array $args): fbtNode
     {
         return new fbtNode('sameParam', $node, $args);

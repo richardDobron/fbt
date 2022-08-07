@@ -17,20 +17,12 @@ class IntlViewerContext implements IntlViewerContextInterface
         return self::$locale ?? FbtConfig::get('locale');
     }
 
-    /**
-     * @param string $locale
-     * @return void
-     */
-    public function setLocale(string $locale)
+    public function setLocale(string $locale): void
     {
         self::$locale = $locale;
     }
 
-    /**
-     * @param int $gender
-     * @return void
-     */
-    public static function setGender(int $gender)
+    public static function setGender(int $gender): void
     {
         self::$gender = $gender;
     }

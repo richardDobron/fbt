@@ -25,14 +25,13 @@ const features = [
       <>
         Compose translatable text inline with your source:
         <CodeBlock
-          code={`<button>
-  <?php
-      echo fbt(
-          'Hello World!',
-          'Canonical intro text'
-      );
-  ?>
-</button>`}
+          code={`<?php fbtTransform(); ?>
+<button>
+  <fbt desc="Canonical intro text">
+    Hello World!
+  </fbt>
+</button>
+<?php endFbtTransform(); ?>`}
         />
       </>
     )

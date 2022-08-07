@@ -15,7 +15,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 ## v3.0.4 - 2022-07-10
 ### Fixed
 - Empty node checking
-- 
+
 ## v4.0.4 - 2022-07-10
 ### Fixed
 - Empty node checking
