@@ -68,7 +68,7 @@ class TextPackager
     /**
      * @param array|string $texts
      *
-     * @return array|string
+     * @return string[]
      */
     private function _flattenTexts($texts): array
     {

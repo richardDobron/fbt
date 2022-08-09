@@ -280,6 +280,33 @@ FBT;
         $this->assertSame('Kate shared <strong>her</strong> photo with you.', self::transform($fbt));
     }
 
+    public function testCapitalizedPronoun()
+    {
+        $fbt = <<<FBT
+<fbt desc="Capitalized possessive pronoun">
+	<fbt:pronoun type="possessive" gender="2" capitalize="true" />
+	birthday is today.
+</fbt>
+FBT;
+
+        $this->assertSame('His birthday is today.', self::transform($fbt));
+    }
+
+    public function testUnknownUsageValue()
+    {
+        $this->expectExceptionMessage('must be one of [object, possessive, reflexive, subject]');
+
+        self::transform(
+            <<<FBT
+<fbt desc="Expect error exception">
+    Today is
+	<fbt:pronoun type="possession" gender="2" human="false" />
+	a happy birthday.
+</fbt>
+FBT
+        );
+    }
+
     public function testSimpleHtml()
     {
         $fbt = <<<FBT
