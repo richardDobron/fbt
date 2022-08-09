@@ -117,7 +117,7 @@ Here the code chooses one of two complete sentences. The translator can adjust t
 
 Along the lines of the previous item, if you have a phrase like "You have {number} photos." where you use the word "photo" when the number is 1, expand this out into separate complete sentences line, "You have one photo." and "You have {number} photos.", like this:
 ```html
-<fbt desc="...">You have <fbt:plural many="photos" showCount="ifMany"count="3">one photo</fbt:plural>.</fb:intl>
+<fbt desc="...">You have <fbt:plural many="photos" showCount="ifMany"count="3">one photo</fbt:plural>.</fbt>
 ```
 
 # Avoid Tiny Fonts
