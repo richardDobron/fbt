@@ -41,7 +41,7 @@ fbt("{name}'s photos", "")
 
 In languages where nouns change depending on whether they're used as the subject or object of a sentence, this description will allow translators to use the correct form.
 
-# Reuse Common Elements
+## Reuse Common Elements
 You should reuse common text and descriptions rather than repeating the same text over and over with different descriptions; it's less work for translators and will tend to result in higher-quality translations. This is sometimes slightly at odds with using specific descriptions; use your judgment about where to draw the line.
 
 So this:
@@ -56,7 +56,7 @@ Is usually better than this:
 fbt("Cancel", "Button label: cancel sending a message to event owner")
 ```
 
-# Avoid Translating Markup
+## Avoid Translating Markup
 If you have two sentences and a `<br />` in between, split them up into two translatable phrases. Otherwise translators will be able to mess with your markup and the results may not be what you expect.
 
 However, if you really want to use a `<br />`, we recommend doing it this way:
@@ -68,7 +68,7 @@ However, if you really want to use a `<br />`, we recommend doing it this way:
 </fbt>
 ```
 
-# Use CSS instead of Markup
+## Use CSS instead of Markup
 Use CSS rather than markup to confine text to particular parts of the page. (See also the next item.) For example, if you have the text "Next Page" and you want each word on a separate line, put it in a with a maximum width rather than putting a tag in between the two words. Don't split the text into separately translatable units since it will prevent translators from changing word order if needed.
 
 **Don't** do this:
@@ -90,13 +90,13 @@ Rather, do **this**:
 ```
 With appropriate CSS, the browser will word-wrap the string appropriately.
 
-# Avoid Layouts Relying on Precise Sizing
+## Avoid Layouts Relying on Precise Sizing
 Try not to use layouts that depend on the precise onscreen sizes of pieces of text in the original language. For any piece of text, in some languages it is likely to be shorter and in some it will be longer (sometimes significantly so in either direction.) If you have sized your user interface elements such that your text just barely fits, your application will probably not work well in a language with longer words.
 
-# Avoid Long Pieces of Text
+## Avoid Long Pieces of Text
 Large chunks of text like multiple paragraphs should be split up among multiple `<fbt>` tags for ease of translation. Similarly, a single long paragraph should be broken up into several smaller paragraphs. This allows translation voting to more precisely pinpoint problems.
 
-# Assume Word Order Will Change
+## Assume Word Order Will Change
 Assume that a translator will have to change the word order of every sentence. In particular, don't try to assemble sentences from smaller separately-translatable fragments, because even if you provide excellent descriptions, it's likely you will make it impossible for a translator to come up with a grammatically correct translation. Instead, expand all the possible cases out into separate translatable sentences and choose a complete sentence in your code.
 
 Here's a simple example to **avoid**:
@@ -120,10 +120,10 @@ Along the lines of the previous item, if you have a phrase like "You have {numbe
 <fbt desc="...">You have <fbt:plural many="photos" showCount="ifMany"count="3">one photo</fbt:plural>.</fbt>
 ```
 
-# Avoid Tiny Fonts
+## Avoid Tiny Fonts
 Font sizes under 10 pixels can be difficult to read in some languages, especially Chinese and Japanese.
 
-# Don't Hardcode Punctuation
+## Don't Hardcode Punctuation
 Different languages use different punctuation symbols; for example, Chinese has two different comma characters that are used in different contexts. In general if you allow translators to translate complete sentences (including periods and commas) this won't be as big an issue for you.
 
 So you **should** include the punctuation within the fbt tags:
@@ -149,7 +149,7 @@ And **not** do this:
 ```
 Including the colon as part of the translatable string means translators can substitute another punctuation mark if applicable, or can insert whitespace between the text and the colon (as is done in French, for example.)
 
-# Using Icons Instead of Images with Text
+## Using Icons Instead of Images with Text
 Using icons rather than images with prerendered text can sometimes save you the trouble of having to generate your graphics in different languages. But be aware that some symbols are culture-specific and may not mean the same thing to people in different countries -- for example, a hand with a raised thumb indicates "good" in some cultures but is an obscene gesture in others. An icon whose meaning is obscure is actually worse than using untranslated text, since the latter can at least be looked up in a dictionary as a last resort.
 
 Source: http://wiki.developers.facebook.com/index.php/Platform_Internationalization_Best_Practices
