@@ -17,6 +17,14 @@ use Minicli\App;
 
 $app = new App([]);
 
+$app->registerCommand('collect-fbts', function (Minicli\Command\CommandCall $app) {
+    $generateTranslationsService = new \fbt\Services\CollectFbtsService();
+    $generateTranslationsService->collectFromFiles(
+        $app->getParam('--path'),
+        $app->getParam('--src')
+    );
+});
+
 $app->registerCommand('generate-translations', function (Minicli\Command\CommandCall $app) {
     $generateTranslationsService = new \fbt\Services\TranslationsGeneratorService();
     $generateTranslationsService->generateTranslations(

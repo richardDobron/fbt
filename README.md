@@ -22,7 +22,7 @@ FBT is an internationalization framework for PHP designed to be not just **power
 ## Installing
 
 ```shell
-$ composer require richarddobron/fbt
+$ composer require richarddobron/fbt:^4
 ```
 
 ## Getting started
