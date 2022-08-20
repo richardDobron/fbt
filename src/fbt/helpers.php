@@ -139,6 +139,18 @@ namespace fbt {
         return ($a & 0xFFFFFFFF) >> ($b & 0x1F);
     }
 
+    function rsearch($folder, $pattern): \Generator
+    {
+        $dir = new \RecursiveDirectoryIterator($folder);
+        $ite = new \RecursiveIteratorIterator($dir);
+        $files = new \RegexIterator($ite, $pattern, \RegexIterator::MATCH);
+
+
+        foreach ($files as $file) {
+            yield $file->getPathName();
+        }
+    }
+
     /**
      * @throws FbtException
      * @return \fbt\fbt|string

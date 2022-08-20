@@ -8,7 +8,8 @@
         "ext-dom": "*",
         "ext-mbstring": "*",
         "ext-iconv": "*",
-        "minicli/minicli": "1.0.4"
+        "minicli/minicli": "1.0.4",
+        "nikic/php-parser": "4.x-dev"
     },
     "require-dev": {
         "phpunit/phpunit": "^6.0"

@@ -33,7 +33,7 @@ FBT
 
     public function testPlural()
     {
-        $fbt = fbt(\fbt\fbt::plural('translator', 2, ['showCount' => 'yes', 'count' => 2]), 'Plural word test');
+        $fbt = fbt(\fbt\fbt::plural('translator', 2, ['showCount' => 'yes']), 'Plural word test');
 
         $this->assertSame('2 translators', (string)$fbt);
         $this->assertSame(FbtTransform::$phrases[0]['hashToText'], [
