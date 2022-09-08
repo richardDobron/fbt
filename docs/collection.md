@@ -1,6 +1,18 @@
 # Extracting FBTs
 
-Unlike Facebook fbt, we collect & translate strings during script execution.
+We provide `collect-fbts` as a utility for collecting strings.
+
+```shell
+php ./vendor/bin/fbt collect-fbts --path=./path/to/project/storage/ --src=./path/to/project/
+```
+
+### Options:
+| name            | default | description                                                      |
+|-----------------|---------|------------------------------------------------------------------|
+| --src=`[path]`  | *none*  | Cache storage path for source strings                            |
+| --path=`[path]` | *none*  | The directory where you want to scan usages of fbt in php files. |
+
+⚠️ Unlike Facebook's version of fbt, we primarily collect `<fbt>` & translate strings during script execution.
 
 Upon successful execution, the output of the `/your/path/to/fbt/.source_strings.json` will be in the following format:
 

@@ -28,20 +28,20 @@ The following options can be defined:
 
 * **project** `string`: (Default: `website app`) Project to which the text belongs
 * **author** `string`: Text author
-* **collectFbt** `bool`: (Default: `true`) Collect fbt instances from the source and store them to a JSON file.
 * **preserveWhitespace** `bool`: (Default: `false`)
   - FBT normally consolidates whitespace down to one space (`' '`).
   - Turn this off by setting this to `true`
 * **viewerContext** `string`: (Default: `\fbt\Runtime\Shared\IntlViewerContext::class`)
 * **locale** `string`: (Default: `en_US`) User locale.
-* **hash_module** `string`: (Default: `md5`) Hash module.
-* **md5_digest** `string`: (Default: `hex`) MD5 digest.
 * **fbtCommon** `string`: (Default: `[]`) common string's, e.g. `[['text' => 'desc'], ...]`
 * **fbtCommonPath** `string`: (Default: `null`) Path to the common string's module.
 * **path** `string`: Cache storage path for generated translations & source strings.
 
 Below are the less important parameters.
 
+* **collectFbt** `bool`: (Default: `true`) Collect fbt instances from the source and store them to a JSON file.
+* **hash_module** `string`: (Default: `md5`) Hash module.
+* **md5_digest** `string`: (Default: `hex`) MD5 digest.
 * **driver** `string`: (Default: `json`) Currently, only JSON storage is supported.
 
 
@@ -89,8 +89,19 @@ $loggedUserDto = ...;
 \fbt\FbtConfig::set('viewerContext', $loggedUserDto)
 ```
 
-## 	🚀  Command
-This command creates translation payloads stored in JSON file.
+## 	🚀  Commands
+
+1. This command collects FBT strings across whole application in PHP files.
+```shell
+php ./vendor/bin/fbt collect-fbts
+```
+Read more about [FBTs extracting](collection.md).
+
+2. This command generates the missing translation hashes from collected source strings.
+```shell
+php ./vendor/bin/fbt generate-translations
+```
+3. This command creates translation payloads stored in JSON file.
 ```shell
 php ./vendor/bin/fbt translate
 ```
