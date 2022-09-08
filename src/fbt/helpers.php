@@ -73,7 +73,6 @@ namespace {
 }
 
 namespace fbt {
-
     use fbt\Exceptions\FbtException;
     use fbt\Runtime\fbtNamespace;
     use fbt\Runtime\Shared\IntlList;
