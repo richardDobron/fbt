@@ -4,6 +4,10 @@ All notable changes to `fbt` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## v4.0.7 - 2022-09-09
+### Added
+- Command to collect FBT strings
+
 ## v4.0.6 - 2022-08-09
 ### Fixed
 - Pronoun capitalization
