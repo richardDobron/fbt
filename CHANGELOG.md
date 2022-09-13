@@ -4,6 +4,10 @@ All notable changes to `fbt` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## v3.0.8 - 2022-09-13
+### Changed
+- Visibility for CollectFbtsService.php
+
 ## v3.0.7 - 2022-09-09
 ### Added
 - Command to collect FBT strings
