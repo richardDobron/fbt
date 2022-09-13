@@ -22,19 +22,19 @@ class CollectFbtsService
     /**
      * @var \PhpParser\Parser
      */
-    private $parser;
+    protected $parser;
     /**
      * @var NodeTraverser
      */
-    private $traverser;
+    protected $traverser;
     /**
      * @var NodeFinder
      */
-    private $nodeFinder;
+    protected $nodeFinder;
     /**
      * @var Standard
      */
-    private $printer;
+    protected $printer;
 
     public function __construct()
     {
@@ -71,9 +71,9 @@ class CollectFbtsService
      * @throws \Throwable
      * @throws \fbt\Exceptions\FbtParserException
      */
-    private function collectFromOneFile(string $source, string $path)
+    protected function collectFromOneFile(string $source, string $path)
     {
-        if (! preg_match('/<fbt|fbt(::c)?\s*\(/', $source)) {
+        if (! preg_match('/fbt(::c)?\s*\(/', $source)) {
             return;
         }
 
