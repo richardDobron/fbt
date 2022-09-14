@@ -18,13 +18,13 @@ class fbsBuilderTest extends \tests\TestCase
             'transform' => false,
         ]);
 
-        $this->assertSame('<fbs common="true">Post</fbs>', $html);
+        $this->assertSame('<fbs common="true">Post</fbs>', (string)$html);
 
         $html = fbt::c('Post', [
             'transform' => false,
         ]);
 
-        $this->assertSame('<fbs common="true">Post</fbs>', $html);
+        $this->assertSame('<fbs common="true">Post</fbs>', (string)$html);
     }
 
     public function testSimpleText()
@@ -38,7 +38,7 @@ class fbsBuilderTest extends \tests\TestCase
             ]
         );
 
-        $this->assertSame('<fbs desc="str_description">a string with a <fbs:param name="param name" gender="1">parameter</fbs:param></fbs>', $html);
+        $this->assertSame('<fbs desc="str_description">a string with a <fbs:param name="param name" gender="1">parameter</fbs:param></fbs>', (string)$html);
     }
 
     public function testSimpleTextWithoutDescription()
@@ -47,6 +47,6 @@ class fbsBuilderTest extends \tests\TestCase
             'transform' => false,
         ]);
 
-        $this->assertSame('<fbs>Accept</fbs>', $html);
+        $this->assertSame('<fbs>Accept</fbs>', (string)$html);
     }
 }

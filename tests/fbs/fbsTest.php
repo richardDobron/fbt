@@ -23,7 +23,7 @@ class fbsTest extends \tests\TestCase
             'common' => true,
         ]);
 
-        $this->assertSame('Accept', $html);
+        $this->assertSame('Accept', (string)$html);
     }
 
     public function testConvertASimpleString()
