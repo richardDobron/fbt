@@ -4,16 +4,16 @@ namespace fbt\Services;
 
 use fbt\Exceptions\FbtParserException;
 use fbt\FbtConfig;
-use PhpParser\Node\Identifier;
-
 use function fbt\rsearch;
 
 use fbt\Runtime\Shared\FbtHooks;
+
 use fbt\Transform\NodeVisitor;
 use PhpParser\Node;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Expr\Ternary;
+use PhpParser\Node\Identifier;
 use PhpParser\Node\Name;
 use PhpParser\NodeFinder;
 use PhpParser\NodeTraverser;
