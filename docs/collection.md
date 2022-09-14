@@ -7,10 +7,11 @@ php ./vendor/bin/fbt collect-fbts --path=./path/to/project/storage/ --src=./path
 ```
 
 ### Options:
-| name            | default | description                                                      |
-|-----------------|---------|------------------------------------------------------------------|
-| --src=`[path]`  | *none*  | Cache storage path for source strings                            |
-| --path=`[path]` | *none*  | The directory where you want to scan usages of fbt in php files. |
+| name                       | default | description                                                                             |
+|----------------------------|---------|-----------------------------------------------------------------------------------------|
+| --src=`[path]`             | *none*  | Cache storage path for source strings                                                   |
+| --path=`[path]`            | *none*  | The directory where you want to scan usages of fbt in php files.                        |
+| --fbt-common-path=`[path]` | *none*  | Optional path to the common strings module. This is a map from {[text]: [description]}. |
 
 ⚠️ Unlike Facebook's version of fbt, we primarily collect `<fbt>` & translate strings during script execution.
 
