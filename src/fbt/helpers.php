@@ -51,7 +51,7 @@ namespace {
          *
          * @return string
          */
-        function fbs($text, $description = null, array $options = []): string
+        function fbs($text, $description = null, array $options = []): fbt\fbs
         {
             return new fbt\fbs($text, $description, $options);
         }
