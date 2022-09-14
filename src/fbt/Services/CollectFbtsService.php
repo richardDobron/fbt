@@ -5,6 +5,7 @@ namespace fbt\Services;
 use fbt\Exceptions\FbtParserException;
 use fbt\FbtConfig;
 
+use PhpParser\Node\Identifier;
 use function fbt\rsearch;
 
 use fbt\Runtime\Shared\FbtHooks;
@@ -52,7 +53,7 @@ class CollectFbtsService
      * @throws \fbt\Exceptions\FbtInvalidConfigurationException
      * @throws \fbt\Exceptions\FbtParserException
      */
-    public function collectFromFiles(string $path, string $src)
+    public function collectFromFiles(string $path, string $src, string $fbtCommonPath)
     {
         $fbtDir = $path . '/';
 
@@ -61,6 +62,7 @@ class CollectFbtsService
         }
 
         FbtConfig::set('path', $path);
+        FbtConfig::set('fbtCommonPath', $fbtCommonPath);
 
         foreach (rsearch($src, '/.php$/') as $path) {
             $this->collectFromOneFile(file_get_contents($path), $path);
@@ -84,9 +86,14 @@ class CollectFbtsService
 
         /** @var StaticCall[] $translateFunctionCalls */
         $translateFunctionCalls = $this->nodeFinder->find($ast, function (Node $node) {
-            return $node instanceof FuncCall
-                && $node->name instanceof Name
-                && $node->name->toString() === 'fbt';
+            return ($node instanceof FuncCall
+                    && $node->name instanceof Name
+                    && $node->name->toString() === 'fbt')
+                || ($node instanceof StaticCall
+                    && $node->class instanceof Name
+                    && $node->name instanceof Identifier
+                    && in_array($node->class->toString(), ['fbt', 'fbt\\fbt'])
+                    && $node->name->toString() === 'c');
         });
 
         foreach ($translateFunctionCalls as $translateFunctionCall) {

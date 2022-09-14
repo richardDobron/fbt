@@ -80,6 +80,10 @@ FBT;
 FBT;
 
         $this->assertSame('Use the form below to see FBT in action.', self::transform($fbs));
+
+        $fbs = \fbt\fbt::c('Use the form below to see FBT in action.');
+
+        $this->assertSame('Use the form below to see FBT in action.', self::transform($fbs));
     }
 
     public function testNestedFbsInFbs()

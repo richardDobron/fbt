@@ -84,7 +84,7 @@ class fbt implements \JsonSerializable
         ]);
     }
 
-    public static function c(string $name, array $options = []): string
+    public static function c(string $name, array $options = [])
     {
         return new fbs($name, $options + [
             'common' => true,
