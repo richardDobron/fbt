@@ -132,7 +132,7 @@ class fbt
         } else {
             $fbtContent = FbtUtils::substituteTokens($patternString, $allSubstitutions);
             $result = $this->_wrapContent($fbtContent, $patternString, $patternHash, $reporting);
-            if (! $hasSubstitutions) {
+            if (! $hasSubstitutions && ! $reporting) {
                 self::$_cachedFbtResults[$patternString] = $result;
             }
 
