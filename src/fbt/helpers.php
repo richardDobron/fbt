@@ -49,7 +49,7 @@ namespace {
          * @param string|array|null $description
          * @param array $options
          *
-         * @return string
+         * @return fbt\fbs
          */
         function fbs($text, $description = null, array $options = []): fbt\fbs
         {

@@ -27,6 +27,6 @@ module.exports = {
     ],
     "Transforms": ["transform"],
     Collection: ["collection"],
-    Translating: ["translating", "standards", "locales"]
+    Translating: ["translating", "standards", "locales", "inline_translating"]
   }
 };
