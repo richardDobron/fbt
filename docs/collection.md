@@ -7,7 +7,7 @@ sidebar_label: Extracting translatable texts
 We provide `collect-fbts` as a utility for collecting strings.
 
 ```shell
-php ./vendor/bin/fbt collect-fbts --path=./path/to/project/storage/ --src=./path/to/project/
+php ./vendor/bin/fbt collect-fbts --path=./path/to/fbt/ --src=./path/to/project/
 ```
 
 ### Options:
