@@ -17,6 +17,8 @@ Instead of this:
 
 ```php
 fbt("Name:", "")
+// or
+fbt("Name:", "Name")
 ```
 
 In some languages, the word for *name* is different depending on whether it's the name of a person, a place, or an object. A description here allows a translator to choose the correct word for this label.

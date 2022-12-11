@@ -17,7 +17,7 @@ For installation, please follow these [instructions](https://github.com/swiftype
 
 ## How it works?
 ```php
-// to turn on inline translation
+// to turn on inline translations
 FbtHooks::inlineMode('TRANSLATE');
 
 // to turn off inline translations

@@ -93,17 +93,17 @@ $loggedUserDto = ...;
 
 1. This command collects FBT strings across whole application in PHP files.
 ```shell
-php ./vendor/bin/fbt collect-fbts
+php ./vendor/bin/fbt collect-fbts --path=./path/to/fbt/ --src=./path/to/project/
 ```
 Read more about [FBTs extracting](collection.md).
 
 2. This command generates the missing translation hashes from collected source strings.
 ```shell
-php ./vendor/bin/fbt generate-translations
+php ./vendor/bin/fbt generate-translations --source=./path/to/fbt/.source_strings.json --translations=./path/to/fbt/*.json
 ```
 3. This command creates translation payloads stored in JSON file.
 ```shell
-php ./vendor/bin/fbt translate
+php ./vendor/bin/fbt translate --path=./path/to/fbt/ --translations=./path/to/fbt/*.json
 ```
 Read more about [translating](translating.md).
 

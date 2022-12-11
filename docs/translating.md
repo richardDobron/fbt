@@ -6,9 +6,9 @@ There are two ways to translate phrases:
 
 ## Command to generate missing translation hashes from collected source strings:
 ```shell
-php ./vendor/bin/fbt generate-translations --src=./path/to/.source_strings.json --translation-input=./path/to/translation_input.json
+php ./vendor/bin/fbt generate-translations --src=./path/to/fbt/.source_strings.json --translation-input=./path/to/translation_input.json
 # or
-php ./vendor/bin/fbt generate-translations --src=./path/to/.source_strings.json --translations=./path/to/translations/*.json
+php ./vendor/bin/fbt generate-translations --src=./path/to/fbt/.source_strings.json --translations=./path/to/translations/*.json
 ```
 
 ### Options:
@@ -20,9 +20,9 @@ php ./vendor/bin/fbt generate-translations --src=./path/to/.source_strings.json 
 
 ## Command to convert provided translations to jenkins:
 ```shell
-php ./vendor/bin/fbt translate --path=/path/to/storage --stdin < translation_input.json
+php ./vendor/bin/fbt translate --path=./path/to/fbt/ --stdin < translation_input.json
 # or
-php ./vendor/bin/fbt translate --path=/path/to/storage --translations=/path/to/translations/*.json
+php ./vendor/bin/fbt translate --path=./path/to/fbt/ --translations=./path/to/translations/*.json
 ```
 
 ### Options:
