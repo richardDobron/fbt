@@ -15,6 +15,8 @@ FBT is an internationalization framework for PHP designed to be not just **power
 
 **This library is based on the JavaScript implementation of Facebook's [FBT][link-facebook-fbt].**
 
+<img src="/docs/intro.png" alt="FBT intro"/>
+
 ## Requirements
 * PHP 7.0 or higher
 * [Composer](https://getcomposer.org) is required for installation
