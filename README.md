@@ -4,8 +4,8 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/richardDobron/fbt.svg?style=flat-square)](https://packagist.org/packages/richardDobron/fbt)
 [![MIT Licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
-![Test Status](https://img.shields.io/github/workflow/status/richardDobron/fbt/run-tests/3.x?label=tests)
-![Code Style Status](https://img.shields.io/github/workflow/status/richardDobron/fbt/Check%20&%20fix%20styling?label=code%20style)
+![Test Status](https://github.com/richardDobron/fbt/actions/workflows/run-tests.yml/badge.svg?branch=3.x)
+![Code Style Status](https://github.com/richardDobron/fbt/actions/workflows/php-cs-fixer.yml/badge.svg?branch=3.x)
 [![Total Downloads](https://img.shields.io/packagist/dt/richardDobron/fbt.svg?style=flat-square)](https://packagist.org/packages/richardDobron/fbt)
 
 FBT is an internationalization framework for PHP designed to be not just **powerful** and **flexible**, but also **simple** and **intuitive**.  It helps with the following:
