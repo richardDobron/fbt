@@ -66,7 +66,7 @@ class fbtBuilderTest extends \tests\TestCase
             ]
         );
 
-        $this->assertSame('<fbt desc="object pronoun">I know<fbt:pronoun usage="object" gender="2"/>.</fbt>', (string)$html);
+        $this->assertSame('<fbt desc="object pronoun">I know<fbt:pronoun type="object" gender="2"/>.</fbt>', (string)$html);
     }
 
     public function testSameParam()
