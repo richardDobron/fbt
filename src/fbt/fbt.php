@@ -72,7 +72,7 @@ class fbt implements \JsonSerializable
     public static function pronoun(string $usage, int $gender, array $options = []): string
     {
         return createElement(static::$moduleName . ':pronoun', null, [
-            'usage' => $usage,
+            'type' => $usage,
             'gender' => $gender,
         ] + $options);
     }
