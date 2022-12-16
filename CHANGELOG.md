@@ -4,6 +4,14 @@ All notable changes to `fbt` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## v3.0.9 - 2022-12-16
+### Fixed
+- Pronoun attribute `type` when using fbt::pronoun
+- Disable cache for phrase when using reporting
+
+### Added
+- fbt::c(...) collecting
+
 ## v3.0.8 - 2022-09-13
 ### Changed
 - Visibility for CollectFbtsService.php
