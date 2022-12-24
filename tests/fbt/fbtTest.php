@@ -1,4 +1,7 @@
 <?php
+/**
+ * @fbt {"author": "me", "project": "awesome sauce"}
+ */
 
 declare(strict_types=1);
 
@@ -323,8 +326,8 @@ FBT;
                         "576c64dce7dc0eb30803b1c2feb21722" => "Go on an {=awesome vacation}",
                     ],
                     "desc" => "auto-wrap example",
-                    "project" => "website app",
-                    "author" => "richard",
+                    "project" => "awesome sauce",
+                    "author" => "me",
                     "type" => "text",
                     "jsfbt" => "Go on an {=awesome vacation}",
                 ],
@@ -335,8 +338,8 @@ FBT;
                     "desc" => "In the phrase: \"Go on an {=awesome vacation}\"",
                     "implicitFbt" => true,
                     "subject" => null,
-                    "project" => "website app",
-                    "author" => "richard",
+                    "project" => "awesome sauce",
+                    "author" => "me",
                     "type" => "text",
                     "jsfbt" => "{=awesome} vacation",
                 ],
@@ -347,8 +350,8 @@ FBT;
                     "desc" => "In the phrase: \"Go on an {=awesome} vacation\"",
                     "implicitFbt" => true,
                     "subject" => null,
-                    "project" => "website app",
-                    "author" => "richard",
+                    "project" => "awesome sauce",
+                    "author" => "me",
                     "type" => "text",
                     "jsfbt" => "awesome",
                 ],
@@ -818,5 +821,22 @@ FBT;
         $fbt = fbt('simple text', 'desc');
 
         $this->assertSame('["simple text"]', json_encode([$fbt]));
+    }
+
+    public function testDocblockOptions()
+    {
+        $fbt = fbt('A string that moved files', 'options!', [
+            'author' => 'jwatson',
+            'project' => 'Super Secret',
+        ]);
+
+        $this->assertSame('A string that moved files', (string)$fbt);
+        $this->assertSame('jwatson', FbtTransform::$phrases[0]['author']);
+        $this->assertSame('Super Secret', FbtTransform::$phrases[0]['project']);
+
+        (string)fbt('A parameterized message to: ' . \fbt\fbt::param('personName', 'Thomas'), 'desc');
+
+        $this->assertSame('me', FbtTransform::$phrases[1]['author']);
+        $this->assertSame('awesome sauce', FbtTransform::$phrases[1]['project']);
     }
 }

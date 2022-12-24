@@ -98,6 +98,7 @@ class CollectFbtsService
 
         foreach ($translateFunctionCalls as $translateFunctionCall) {
             $code = $this->printer->prettyPrintExpr($translateFunctionCall);
+            $line = $translateFunctionCall->getLine();
 
             try {
                 if ($translateFunctionCall->args[0]->value instanceof Ternary) {
@@ -108,14 +109,19 @@ class CollectFbtsService
 use fbt\\fbt;
 use function fbt\\createElement;
 
-(string)$code;
+\$fbt = $code;
+\$fbt->_trace([
+    'file' => '$path',
+    'line' => $line,
+]);
+(string)\$fbt;
 CODE
                 );
             } catch (\Throwable $e) {
                 $message = $e->getMessage();
                 $message = preg_replace('/^(.+?) on line .+$/', '$1', $message);
 
-                echo preg_replace('/(called in ).+?\(\d+\)/', '$1' . $path . '(' . $translateFunctionCall->getStartLine() . ')', $message);
+                echo preg_replace('/(called in ).+?\(\d+\)/', '$1' . $path . '(' . $line . ')', $message);
 
                 echo PHP_EOL . PHP_EOL;
             }

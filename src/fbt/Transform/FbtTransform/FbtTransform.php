@@ -37,9 +37,9 @@ class FbtTransform
      * @throws \fbt\Exceptions\FbtInvalidConfigurationException
      * @throws \fbt\Exceptions\FbtParserException
      */
-    public static function transform($html): string
+    public static function transform($html, array $trace = []): string
     {
-        self::initDefaultOptions();
+        self::initDefaultOptions($trace);
         FbtCommon::init([
             'fbtCommon' => FbtConfig::get('fbtCommon'),
             'fbtCommonPath' => FbtConfig::get('fbtCommonPath'),
@@ -92,12 +92,9 @@ class FbtTransform
      * @throws \fbt\Exceptions\FbtParserException
      * @throws \Exception
      */
-    private static function initDefaultOptions()
+    private static function initDefaultOptions(array $entrypoint)
     {
-        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-        $entrypoint = end($backtrace);
-
-        if ($entrypoint['file'] && file_exists($entrypoint['file'])) {
+        if (isset($entrypoint['file']) && file_exists($entrypoint['file'])) {
             $comments = array_filter(
                 token_get_all(file_get_contents($entrypoint['file'])),
                 function ($entry) {

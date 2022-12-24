@@ -48,7 +48,7 @@ class fbs extends fbt
 
         $fbs = createElement(self::$moduleName, implode('', $text), $attributes);
         if ($this->transform) {
-            return FbtTransform::transform($fbs);
+            return FbtTransform::transform($fbs, $this->trace);
         }
 
         return $fbs;
