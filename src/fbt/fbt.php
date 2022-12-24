@@ -17,12 +17,20 @@ class fbt implements \JsonSerializable
     protected $description;
     /* @var array */
     protected $options = [];
+    protected $trace = [];
 
     public function __construct(
         $text,
         string $description,
         array $options = []
     ) {
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        if (in_array($backtrace[1]['function'], ['fbt', 'fbs'])) {
+            $this->trace = $backtrace[1];
+        } else {
+            $this->trace = $backtrace[0];
+        }
+
         $this->options = $options;
         $this->description = $description;
         $this->text = $text;
@@ -91,6 +99,11 @@ class fbt implements \JsonSerializable
         ]);
     }
 
+    public function _trace(array $trace): void
+    {
+        $this->trace = $trace;
+    }
+
     /**
      * @throws \Exception
      * @throws Exceptions\FbtParserException|\Throwable
@@ -113,7 +126,7 @@ class fbt implements \JsonSerializable
 
         $fbt = createElement(self::$moduleName, implode('', $text), $attributes);
         if ($this->transform) {
-            return FbtTransform::transform($fbt);
+            return FbtTransform::transform($fbt, $this->trace);
         }
 
         return $fbt;
