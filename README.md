@@ -30,6 +30,17 @@ FBT is an internationalization framework for PHP designed to be not just **power
 $ composer require richarddobron/fbt:^3
 ```
 
+## Features
+- [x] Parameters and interpolation
+- [x] Implicit parameters
+- [x] Auto-parameterization
+- [x] Plurals
+- [x] Enumerations
+- [x] Pronouns
+- [x] Number formatting
+- [x] Phrase extracting
+- [x] Inline translating
+
 ## Getting started
 
 [Integrating into your app](docs/getting_started.md)

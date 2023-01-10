@@ -60,7 +60,9 @@ namespace {
     if (! function_exists('fbtTransform')) {
         function fbtTransform()
         {
-            ob_start('\fbt\Transform\FbtTransform\FbtTransform::transform');
+            ob_start(function (string $buffer) {
+                return \fbt\Transform\FbtTransform\FbtTransform::transform($buffer);
+            });
         }
     }
 
