@@ -803,6 +803,17 @@ FBT;
         // $this->assertSame('What\'s on your mind T.J.?', $fbt);
     }
 
+    public function testMultipleTagsInParameter()
+    {
+        $fbt = (string)fbt('By artist ' . \fbt\fbt::param('artist', 'Lou Reed & Metallica'), 'test');
+
+        $this->assertSame('By artist Lou Reed & Metallica', $fbt);
+
+        $fbt = (string)fbt('By artist ' . \fbt\fbt::param('artist', '<span><a>Lou Reed</a> & <a>Metallica</a></span>'), 'test');
+
+        $this->assertSame('By artist <span><a>Lou Reed</a> & <a>Metallica</a></span>', $fbt);
+    }
+
     public function testValuesThatLookLikeTokenPatterns()
     {
         $fbt = (string)fbt(
