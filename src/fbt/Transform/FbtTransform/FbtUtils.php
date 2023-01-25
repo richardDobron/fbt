@@ -466,7 +466,7 @@ class FbtUtils
         }
 
         foreach ($nodes as $node) {
-            $children = self::makeFbtElementArrayFromNode($node->children());
+            $children = self::makeFbtElementArrayFromNode($node->nodes);
             $tree[] = new fbtElement($node->tag, $node->innertext(), $node->getAllAttributes(), $children);
         }
 
