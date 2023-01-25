@@ -15,7 +15,7 @@ class FbtCommon
      * @return void
      * @throws \fbt\Exceptions\FbtException
      */
-    public static function init(array $opts = [])
+    public static function init(array $opts = []): void
     {
         if (! empty($opts['fbtCommon']) && is_array($opts['fbtCommon'])) {
             self::$textToDesc = array_merge(self::$textToDesc, $opts['fbtCommon']);

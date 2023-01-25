@@ -132,7 +132,7 @@ class HTMLFbtProcessor
      * @return void
      * @throws FbtParserException
      */
-    private function _assertNoNestedFbts()
+    private function _assertNoNestedFbts(): void
     {
         $this->nodeChecker->assertNoNestedFbts($this->node);
     }

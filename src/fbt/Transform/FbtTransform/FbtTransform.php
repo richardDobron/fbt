@@ -69,7 +69,7 @@ class FbtTransform
      * @throws \fbt\Exceptions\FbtException
      * @throws \fbt\Exceptions\FbtParserException
      */
-    public static function _fbtTraverse(Node $node)
+    public static function _fbtTraverse(Node $node): void
     {
         $root = HTMLFbtProcessor::create($node);
 

@@ -48,7 +48,7 @@ class FbtUtils
 
         // Actual namespaced version, e.g. <fbt:param>
         if ($node->isNamespacedElement()) {
-            list($namespace, $handlerName) = explode(":", $node->tag);
+            [$namespace, $handlerName] = explode(":", $node->tag);
             if ($namespace === $moduleName) {
                 $valid =
                     $handlerName === 'enum' ||
@@ -88,7 +88,7 @@ class FbtUtils
      * @return void
      * @throws FbtParserException
      */
-    public static function setUniqueToken(Node $node, string $moduleName, string $name, array &$paramSet)
+    public static function setUniqueToken(Node $node, string $moduleName, string $name, array &$paramSet): void
     {
         if (isset($paramSet[$name])) {
             throw self::errorAt(
@@ -399,6 +399,7 @@ class FbtUtils
      * Does the token substitution fbt() but without the string lookup.
      * Used for in-place substitutions in translation mode.
      *
+     * @return string|array
      * @throws \fbt\Exceptions\FbtException
      */
     public static function substituteTokens($template, $_args)

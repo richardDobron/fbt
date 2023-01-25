@@ -21,10 +21,10 @@ class IntlGenderType
     ];
 
     /**
-     * @param $lang
+     * @param string $lang
      * @return IntlDefaultGenderType|IntlMergedUnknownGenderType
      */
-    public static function forLanguage($lang)
+    public static function forLanguage(string $lang)
     {
         if (array_key_exists($lang, self::MERGED_LANGS)) {
             return new IntlMergedUnknownGenderType();
@@ -34,10 +34,10 @@ class IntlGenderType
     }
 
     /**
-     * @param $locale
+     * @param string $locale
      * @return IntlDefaultGenderType|IntlMergedUnknownGenderType
      */
-    public static function forLocale($locale)
+    public static function forLocale(string $locale)
     {
         if (array_key_exists($locale, self::MERGED_LOCALES)) {
             return new IntlMergedUnknownGenderType();

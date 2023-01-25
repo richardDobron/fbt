@@ -271,7 +271,7 @@ class TranslationBuilder
             return null;
         }
         for ($ii = 0; $ii < count($constraintKeys); ++$ii) {
-            list($token, $constraint) = $constraintKeys[$ii];
+            [$token, $constraint] = $constraintKeys[$ii];
             if ($constraint === '*') {
                 continue;
             }
@@ -431,7 +431,7 @@ class TranslationBuilder
 
         // Also include duplicate '*' entries if it is a default value
         for ($ii = $defaultingLevel; $ii < count($keys); $ii++) {
-            list($tok, $val) = $keys[$ii];
+            [$tok, $val] = $keys[$ii];
             if ($val !== '*' && $this->_config->isDefaultVariation($val)) {
                 $keys[$ii] = [$tok, '*'];
                 $this->_insertConstraint($keys, $constraintMap, $translation, $ii + 1);

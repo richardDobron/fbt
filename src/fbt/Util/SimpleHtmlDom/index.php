@@ -599,7 +599,7 @@ class Node
             $debug_object->debug_log_entry(1);
         }
 
-        list($tag, $id, $class, $attributes, $cmb) = $selector;
+        [$tag, $id, $class, $attributes, $cmb] = $selector;
         $nodes = [];
 
         if ($parent_cmd === ' ') { // Descendant Combinator

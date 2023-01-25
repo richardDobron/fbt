@@ -74,7 +74,7 @@ class FbtNodeChecker
      * @return void
      * @throws \fbt\Exceptions\FbtParserException
      */
-    public function assertNoNestedFbts(Node $node)
+    public function assertNoNestedFbts(Node $node): void
     {
         $moduleName = $this->moduleName;
 

@@ -42,7 +42,7 @@ class FbtFunctionCallProcessor
      * @return void
      * @throws \fbt\Exceptions\FbtParserException
      */
-    protected function _getOptions(array $options)
+    protected function _getOptions(array $options): void
     {
         $this->options = $options;
 
@@ -64,7 +64,7 @@ class FbtFunctionCallProcessor
      * @return void
      * @throws \fbt\Exceptions\FbtParserException
      */
-    protected function traverse(array $texts)
+    protected function traverse(array $texts): void
     {
         $moduleName = $this->moduleName;
 
@@ -196,7 +196,7 @@ class FbtFunctionCallProcessor
      * @return void
      * @throws \fbt\Exceptions\FbtParserException
      */
-    protected function _collectFbtCalls()
+    protected function _collectFbtCalls(): void
     {
         if (! empty($this->options['subject'])) {
             $this->hasTable = true;

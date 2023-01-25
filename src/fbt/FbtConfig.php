@@ -98,7 +98,7 @@ class FbtConfig
      * @return void
      * @throws FbtInvalidConfigurationException
      */
-    public static function set(string $key, $value)
+    public static function set(string $key, $value): void
     {
         if (! array_key_exists($key, self::$config)) {
             throw new FbtInvalidConfigurationException('Invalid config key ' . $key);
@@ -111,7 +111,7 @@ class FbtConfig
      * @return void
      * @throws FbtInvalidConfigurationException
      */
-    public static function setMultiple(array $config)
+    public static function setMultiple(array $config): void
     {
         foreach ($config as $key => $value) {
             self::set($key, $value);

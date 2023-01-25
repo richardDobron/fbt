@@ -51,7 +51,7 @@ class FbtAutoWrap
      * implicit description as the description.
      * @return void
      */
-    public static function createDescAttribute(Node $node)
+    public static function createDescAttribute(Node $node): void
     {
         $descString = 'In the phrase: "' . $node->getAttribute('implicitDesc') . '"';
 
@@ -113,7 +113,7 @@ class FbtAutoWrap
      * @return void
      * @throws \fbt\Exceptions\FbtParserException
      */
-    public static function createImplicitDescriptions(string $moduleName, Node $node)
+    public static function createImplicitDescriptions(string $moduleName, Node $node): void
     {
         self::createDescriptionsWithStack($moduleName, $node, []);
     }
@@ -126,7 +126,7 @@ class FbtAutoWrap
      * @return void
      * @throws \fbt\Exceptions\FbtParserException
      */
-    public static function createDescriptionsWithStack(string $moduleName, Node $node, array $stack)
+    public static function createDescriptionsWithStack(string $moduleName, Node $node, array $stack): void
     {
         $stack[] = $node;
 

@@ -86,7 +86,7 @@ namespace fbt {
      * @return void
      * @throws \fbt\Exceptions\FbtException
      */
-    function invariant($condition, $message)
+    function invariant($condition, $message): void
     {
         if (! $condition) {
             if (func_num_args() > 2) {
@@ -145,7 +145,6 @@ namespace fbt {
         $dir = new \RecursiveDirectoryIterator($folder);
         $ite = new \RecursiveIteratorIterator($dir);
         $files = new \RegexIterator($ite, $pattern, \RegexIterator::MATCH);
-
 
         foreach ($files as $file) {
             yield $file->getPathName();

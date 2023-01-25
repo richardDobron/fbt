@@ -29,7 +29,7 @@ class FbtHooks
      * @return void
      * @throws \fbt\Exceptions\FbtInvalidConfigurationException
      */
-    public static function logImpression(string $hash)
+    public static function logImpression(string $hash): void
     {
         if (! FbtConfig::get('logger')) {
             return;
@@ -42,7 +42,7 @@ class FbtHooks
      * @param string|null $locale
      * @return string
      */
-    public static function locale($locale = null): string
+    public static function locale(?string $locale = null): string
     {
         if (func_num_args() === 1) {
             self::$locale = $locale;
@@ -56,7 +56,7 @@ class FbtHooks
      * @param string|null $inlineMode
      * @return string
      */
-    public static function inlineMode($inlineMode = null): string
+    public static function inlineMode(?string $inlineMode = null): string
     {
         if (func_num_args() === 1) {
             self::$inlineMode = $inlineMode;
@@ -80,7 +80,7 @@ class FbtHooks
      * @param string $patternHash
      * @return void
      */
-    public static function onTranslationOverride(string $patternHash)
+    public static function onTranslationOverride(string $patternHash): void
     {
         if (isset(self::$actions[__FUNCTION__])) {
             self::$actions[__FUNCTION__](...func_get_args());
@@ -91,7 +91,7 @@ class FbtHooks
      * @return void
      * @throws \Throwable
      */
-    public static function onTerminating()
+    public static function onTerminating(): void
     {
         if (isset(self::$actions[__FUNCTION__])) {
             self::$actions[__FUNCTION__]();
@@ -193,7 +193,7 @@ class FbtHooks
     /**
      * @return void
      */
-    public static function storeImpressions()
+    public static function storeImpressions(): void
     {
         if (isset(self::$actions[__FUNCTION__])) {
             self::$actions[__FUNCTION__](...func_get_args());
@@ -214,7 +214,7 @@ class FbtHooks
      * @param callable $action
      * @return void
      */
-    public static function register(string $tag, callable $action)
+    public static function register(string $tag, callable $action): void
     {
         self::$actions[$tag] = $action;
     }
@@ -223,7 +223,7 @@ class FbtHooks
      * @param string $tag
      * @return void
      */
-    public static function unregister(string $tag)
+    public static function unregister(string $tag): void
     {
         if (array_key_exists($tag, self::$actions)) {
             unset(self::$actions[$tag]);

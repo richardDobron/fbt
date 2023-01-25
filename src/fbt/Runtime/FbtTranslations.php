@@ -46,7 +46,7 @@ class FbtTranslations
     /**
      * @return void
      */
-    public static function registerTranslations(array $translations)
+    public static function registerTranslations(array $translations): void
     {
         self::$translatedFbts = $translations;
     }
@@ -59,7 +59,7 @@ class FbtTranslations
     /**
      * @return void
      */
-    public static function mergeTranslations(array $newTranslations)
+    public static function mergeTranslations(array $newTranslations): void
     {
         foreach (array_keys($newTranslations) as $locale) {
             self::$translatedFbts[$locale] = array_merge(

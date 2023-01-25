@@ -68,7 +68,7 @@ class fbt
         //
         // OSS: The table is the English payload, and, by default, we lookup the
         //      translated payload via FbtTranslations
-        list($pattern, $args) = FbtTranslations::getTranslatedInput($inputTable, $inputArgs, $options) ?? [$inputTable, $inputArgs, FbtTranslations::DEFAULT_SRC_LOCALE];
+        [$pattern, $args] = FbtTranslations::getTranslatedInput($inputTable, $inputArgs, $options) ?? [$inputTable, $inputArgs, FbtTranslations::DEFAULT_SRC_LOCALE];
 
         // [fbt_impressions]
         // If this is a string literal (no tokens to substitute) then 'args' is empty
@@ -298,7 +298,7 @@ class fbt
      *
      * @return FbtResult|InlineFbtResult
      */
-    private function _wrapContent($fbtContent, string $patternString, $patternHash, bool $reporting = true)
+    private function _wrapContent($fbtContent, string $patternString, ?string $patternHash, bool $reporting = true)
     {
         $contents = is_string($fbtContent) ? [$fbtContent] : $fbtContent;
 

@@ -60,9 +60,9 @@ class FbtSiteMetaEntry
 
         if ($this->_type === null) {
             return $this->_mask;
-        } else {
-            return self::getVariationMaskFromType($this->_type);
         }
+
+        return self::getVariationMaskFromType($this->_type);
     }
 
     public function unwrap(): array
@@ -117,7 +117,7 @@ class FbtSiteMetaEntry
      * @param int|null $type
      * @return int|mixed|null
      */
-    public static function getVariationMaskFromType($type)
+    public static function getVariationMaskFromType(?int $type)
     {
         $_variationTypeToMask = [];
         $_variationTypeToMask[IntlVariations::INTL_FBT_VARIATION_TYPE['GENDER']] = IntlVariations::INTL_VARIATION_MASK['GENDER'];
