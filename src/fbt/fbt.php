@@ -92,14 +92,14 @@ class fbt implements \JsonSerializable
         ]);
     }
 
-    public static function c(string $name, array $options = [])
+    public static function c(string $name, array $options = []): fbs
     {
         return new fbs($name, $options + [
             'common' => true,
         ]);
     }
 
-    public function _trace(array $trace): void
+    public function _trace(array $trace)
     {
         $this->trace = $trace;
     }
@@ -118,6 +118,7 @@ class fbt implements \JsonSerializable
         $attributes = [
             'desc' => $this->description,
         ] + $this->options;
+
         foreach ($attributes as $attribute => $value) {
             if (array_key_exists($attribute, FbtUtils::SHORT_BOOL_CANDIDATES)) {
                 $attributes[$attribute] = $value === true ? 'true' : 'false';

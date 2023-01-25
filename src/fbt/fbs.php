@@ -40,6 +40,7 @@ class fbs extends fbt
             $attributes['desc'] = $this->description;
         }
         $attributes += $this->options;
+
         foreach ($attributes as $attribute => $value) {
             if (array_key_exists($attribute, FbtUtils::SHORT_BOOL_CANDIDATES)) {
                 $attributes[$attribute] = $value === true ? 'true' : 'false';

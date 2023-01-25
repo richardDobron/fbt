@@ -146,7 +146,6 @@ namespace fbt {
         $ite = new \RecursiveIteratorIterator($dir);
         $files = new \RegexIterator($ite, $pattern, \RegexIterator::MATCH);
 
-
         foreach ($files as $file) {
             yield $file->getPathName();
         }

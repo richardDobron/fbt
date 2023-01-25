@@ -397,6 +397,7 @@ class FbtUtils
      * Does the token substitution fbt() but without the string lookup.
      * Used for in-place substitutions in translation mode.
      *
+     * @return string|array
      * @throws \fbt\Exceptions\FbtException
      */
     public static function substituteTokens($template, $_args)

@@ -60,9 +60,9 @@ class FbtSiteMetaEntry
 
         if ($this->_type === null) {
             return $this->_mask;
-        } else {
-            return self::getVariationMaskFromType($this->_type);
         }
+
+        return self::getVariationMaskFromType($this->_type);
     }
 
     public function unwrap(): array

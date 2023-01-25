@@ -125,14 +125,12 @@ class FbtSite
             ];
         }
 
-        $fbtSite = new FbtSite(
+        return new FbtSite(
             $json['type'],
             $json['hashToText'],
             $tableData,
             $json['project']
         );
-
-        return $fbtSite;
     }
 
     public function serialize(): array

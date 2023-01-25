@@ -21,7 +21,7 @@ class TranslationConfig
     }
 
     public function getTypesFromMask(
-        $mask // IntlVariationType
+        int $mask // IntlVariationType
     ): array {
         if ($mask === IntlVariations::INTL_FBT_VARIATION_TYPE['NUMBER']) {
             $types = $this->numberType->getNumberVariations();

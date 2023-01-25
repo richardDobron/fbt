@@ -41,7 +41,7 @@ class FBLocaleToLang
         "qt_US" => "tli",
     ];
 
-    public static function get($locale): string
+    public static function get(string $locale): string
     {
         // If given an fb-locale ("xx_XX"), try to map it to a language.  Otherwise
         // return "xx".  If no '_' is found, return locale as-is.
