@@ -140,15 +140,20 @@ namespace fbt {
         return ($a & 0xFFFFFFFF) >> ($b & 0x1F);
     }
 
-    function rsearch($folder, $pattern): \Generator
+    function rsearch($folder, $pattern): array
     {
         $dir = new \RecursiveDirectoryIterator($folder);
         $ite = new \RecursiveIteratorIterator($dir);
         $files = new \RegexIterator($ite, $pattern, \RegexIterator::MATCH);
 
+        $result = [];
         foreach ($files as $file) {
-            yield $file->getPathName();
+            $result[] = $file->getPathName();
         }
+
+        sort($result);
+
+        return $result;
     }
 
     /**
