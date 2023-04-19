@@ -156,9 +156,13 @@ class FbtHooks
 
         if (file_exists($file)) {
             self::$sourceStrings = json_decode(file_get_contents($file), true);
-            $phrases = array_merge(...array_column(self::$sourceStrings['phrases'] ?? [], 'hashToText'));
-            foreach (array_keys($phrases) as $hash) {
-                self::$storedHashes[$hash] = true;
+            $phrases = self::$sourceStrings['phrases'] ?? [];
+
+            if ($phrases) {
+                $hashToText = array_merge(...array_column($phrases, 'hashToText'));
+                foreach (array_keys($hashToText) as $hash) {
+                    self::$storedHashes[$hash] = true;
+                }
             }
         }
 
