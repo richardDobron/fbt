@@ -108,7 +108,7 @@ class JSFbtBuilder
                     // We ensure we have placeholders in our metadata because enums and
                     // pronouns don't have metadata and will add "levels" to our resulting
                     // table. In the example in the docblock of buildTable(), we'd expect
-                //     array({range: ...}, array('token' => 'count', 'type' => ...))
+                    //     array({range: ...}, array('token' => 'count', 'type' => ...))
                 case 'enum':
                     // Only add an enum if it adds a level. Duplicated enum values do not
                     // add levels.
