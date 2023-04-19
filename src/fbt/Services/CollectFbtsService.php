@@ -57,9 +57,14 @@ class CollectFbtsService
     public function collectFromFiles(string $path, string $src, string $fbtCommonPath)
     {
         $fbtDir = $path . '/';
+        $file = $fbtDir . '.source_strings.json';
 
         if (! is_dir($fbtDir)) {
             mkdir($fbtDir, 0755, true);
+        }
+
+        if (file_exists($file)) {
+            unlink($file);
         }
 
         FbtConfig::set('path', $path);
