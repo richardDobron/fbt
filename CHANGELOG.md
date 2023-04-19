@@ -4,6 +4,13 @@ All notable changes to `fbt` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## v3.1.0 - 2023-04-19
+### Added
+- The `.source_strings.json` file is automatically deleted prior to executing the `collect-fbts` command.
+
+### Changed
+- The `rsearch` function now returns an `array` instead of a `Generator` (files are now sorted alphabetically).
+
 ## v3.0.11 - 2023-02-03
 ### Fixed
 - Rendering of text mixed with elements
