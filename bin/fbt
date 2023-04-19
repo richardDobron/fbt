@@ -22,7 +22,8 @@ $app->registerCommand('collect-fbts', function (Minicli\Command\CommandCall $app
     $generateTranslationsService->collectFromFiles(
         $app->getParam('--path'),
         $app->getParam('--src'),
-        $app->getParam('--fbt-common-path')
+        $app->getParam('--fbt-common-path'),
+        true
     );
 });
 
