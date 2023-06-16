@@ -44,7 +44,7 @@ class fbtHash
             is_string($payload),
             'JSFBT is not a string type. Please disable noStringify'
         );
-        $key = $payload . '|' . $desc;
+        $key = utf8_encode($payload . '|' . $desc);
 
         return self::jenkinsHash($key);
     }
