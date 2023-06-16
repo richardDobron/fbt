@@ -10,6 +10,7 @@ namespace tests\fbt;
 use fbt\Lib\IntlViewerContext;
 use fbt\Runtime\Shared\fbt;
 use fbt\Runtime\Shared\FbtHooks;
+use fbt\Transform\FbtRuntime\FbtRuntimeTransform;
 use fbt\Transform\FbtTransform\FbtTransform;
 use fbt\Transform\FbtTransform\Translate\IntlVariations;
 
@@ -599,6 +600,16 @@ FBT;
 FBT;
 
         $this->assertSame('A total amount is 10000', self::transform($fbt));
+    }
+
+    public function testUnicodeText()
+    {
+        $fbt = (string)fbt('Pick an emoji…', 'placeholder text for emoji picker');
+
+        $hashKey = FbtRuntimeTransform::transform(FbtTransform::$phrases[0])['hk'];
+
+        $this->assertSame('ZAVir', $hashKey);
+        $this->assertSame('Pick an emoji…', $fbt);
     }
 
     public function testHtmlBreak()
