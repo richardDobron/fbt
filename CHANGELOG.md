@@ -4,6 +4,10 @@ All notable changes to `fbt` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## v3.2.0 - 2023-06-16
+### Fixed
+- Jenkins hash generation when using unicode characters in text
+
 ## v3.1.0 - 2023-04-19
 ### Added
 - The `.source_strings.json` file is automatically deleted prior to executing the `collect-fbts` command.
