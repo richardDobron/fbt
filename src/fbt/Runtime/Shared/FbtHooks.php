@@ -185,7 +185,13 @@ class FbtHooks
             $parentIds[$index] = self::savePhrase($phrase, $parentIds[$parentKey] ?? null);
         }
 
-        file_put_contents($file, json_encode(self::$sourceStrings), LOCK_EX);
+        $flags = 0;
+
+        if (FbtConfig::get('prettyPrint')) {
+            $flags |= JSON_PRETTY_PRINT;
+        }
+
+        file_put_contents($file, json_encode(self::$sourceStrings, $flags), LOCK_EX);
 
         FbtTransform::$childToParent = [];
         FbtTransform::$phrases = [];

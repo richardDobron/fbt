@@ -56,6 +56,11 @@ class FbtConfig
         'path' => null,
 
         /*
+         * Pretty print source strings in a JSON file.
+         */
+        'prettyPrint' => true,
+
+        /*
          * Common string's, e.g. [['text' => 'desc'], ...].
          */
         'fbtCommon' => [],

@@ -40,6 +40,7 @@ The following options can be defined:
 Below are the less important parameters.
 
 * **collectFbt** `bool`: (Default: `true`) Collect fbt instances from the source and store them to a JSON file.
+* **prettyPrint** `bool`: (Default: `true`) Pretty print source strings in a JSON file.
 * **hash_module** `string`: (Default: `md5`) Hash module.
 * **md5_digest** `string`: (Default: `hex`) MD5 digest.
 * **driver** `string`: (Default: `json`) Currently, only JSON storage is supported.
@@ -61,7 +62,7 @@ use fbt\Runtime\Gender;
 
 class UserDTO implements IntlViewerContextInterface
 {
-    public function getLocale(): ?string
+    public function getLocale(): string
     {
         return $this->locale;
     }
