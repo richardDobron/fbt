@@ -77,37 +77,47 @@ class CollectFbtsService
         FbtHooks::storePhrases();
     }
 
+    protected function matchFbtCalls(Node $node): bool
+    {
+        return ($node instanceof FuncCall
+                && $node->name instanceof Name
+                && $node->name->toString() === 'fbt')
+            || ($node instanceof StaticCall
+                && $node->class instanceof Name
+                && $node->name instanceof Identifier
+                && in_array($node->class->toString(), ['fbt', 'fbt\\fbt'])
+                && $node->name->toString() === 'c'
+            );
+    }
+
     /**
      * @throws \Throwable
      * @throws \fbt\Exceptions\FbtParserException
      */
-    protected function collectFromOneFile(string $source, string $path)
+    protected function collectFromOneFile(string $source, string $path): bool
     {
         if (! preg_match('/fbt(::c)?\s*\(/', $source)) {
-            return;
+            echo "\033[0;37m$path \033[0m" . PHP_EOL;
+
+            return false;
         }
 
         $ast = $this->parser->parse($source);
         $ast = $this->traverser->traverse($ast);
 
-        /** @var StaticCall[] $translateFunctionCalls */
-        $translateFunctionCalls = $this->nodeFinder->find($ast, function (Node $node) {
-            return ($node instanceof FuncCall
-                    && $node->name instanceof Name
-                    && $node->name->toString() === 'fbt')
-                || ($node instanceof StaticCall
-                    && $node->class instanceof Name
-                    && $node->name instanceof Identifier
-                    && in_array($node->class->toString(), ['fbt', 'fbt\\fbt'])
-                    && $node->name->toString() === 'c');
+        /** @var StaticCall[] $fbtFunctionCalls */
+        $fbtFunctionCalls = $this->nodeFinder->find($ast, function (Node $node) {
+            return $this->matchFbtCalls($node);
         });
 
-        foreach ($translateFunctionCalls as $translateFunctionCall) {
-            $code = $this->printer->prettyPrintExpr($translateFunctionCall);
-            $line = $translateFunctionCall->getLine();
+        echo "\033[15m$path \033[0m" . PHP_EOL;
+
+        foreach ($fbtFunctionCalls as $fbtFunctionCall) {
+            $code = $this->printer->prettyPrintExpr($fbtFunctionCall);
+            $line = $fbtFunctionCall->getLine();
 
             try {
-                if ($translateFunctionCall->args[0]->value instanceof Ternary) {
+                if ($fbtFunctionCall->args[0]->value instanceof Ternary) {
                     throw new FbtParserException("Unexpected node type: Ternary. fbt()'s first argument should be a string literal, a construct like fbt::param() or an array of those called in file.php(1).");
                 }
 
@@ -132,5 +142,7 @@ CODE
                 echo PHP_EOL . PHP_EOL;
             }
         }
+
+        return true;
     }
 }
