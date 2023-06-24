@@ -82,7 +82,8 @@ class CollectFbtsService
         return ($node instanceof FuncCall
                 && $node->name instanceof Name
                 && $node->name->toString() === 'fbt')
-            || ($node instanceof StaticCall
+            || (
+                $node instanceof StaticCall
                 && $node->class instanceof Name
                 && $node->name instanceof Identifier
                 && in_array($node->class->toString(), ['fbt', 'fbt\\fbt'])
