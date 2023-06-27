@@ -11,6 +11,7 @@ use fbt\Runtime\Shared\FbtHooks;
 
 use fbt\Transform\NodeVisitor;
 use PhpParser\Node;
+use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Expr\Ternary;
@@ -77,6 +78,13 @@ class CollectFbtsService
         FbtHooks::storePhrases();
     }
 
+    protected function compileCode(Expr $fbtFunctionClassCall): string
+    {
+        $code = $this->printer->prettyPrintExpr($fbtFunctionClassCall);
+
+        return preg_replace('/\b(fbt\\\+)fbt/', 'fbt', $code);
+    }
+
     protected function matchFbtCalls(Node $node): bool
     {
         return ($node instanceof FuncCall
@@ -114,7 +122,7 @@ class CollectFbtsService
         echo "\033[15m$path \033[0m" . PHP_EOL;
 
         foreach ($fbtFunctionCalls as $fbtFunctionCall) {
-            $code = $this->printer->prettyPrintExpr($fbtFunctionCall);
+            $code = $this->compileCode($fbtFunctionCall);
             $line = $fbtFunctionCall->getLine();
 
             try {
