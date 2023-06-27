@@ -251,8 +251,8 @@ class TranslationsGeneratorService
         {
             "fb-locale": "sk_SK",
             "translations": []
-        },
-    }
+        }
+    ]
 }'
                 );
             }
