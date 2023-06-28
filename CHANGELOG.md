@@ -4,6 +4,13 @@ All notable changes to `fbt` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## v3.2.1 - 2023-06-26
+### Fixed
+- Collecting of source strings like `fbt\fbt('text', 'description')`
+
+### Added
+- Detailed information of collecting for fbt collect command
+
 ## v3.2.0 - 2023-06-16
 ### Fixed
 - Jenkins hash generation when using unicode characters in text
