@@ -40,6 +40,14 @@ class CollectFbtsService
      * @var Standard
      */
     protected $printer;
+    /**
+     * @var int
+     */
+    protected $files = 0;
+    /**
+     * @var int
+     */
+    protected $errors = 0;
 
     public function __construct()
     {
@@ -82,7 +90,7 @@ class CollectFbtsService
     {
         $code = $this->printer->prettyPrintExpr($fbtFunctionClassCall);
 
-        return preg_replace('/\b(fbt\\\+)fbt/', 'fbt', $code);
+        return preg_replace('/(\\\*|\b)(fbt\\\+)fbt/', 'fbt', $code);
     }
 
     protected function matchFbtCalls(Node $node): bool
@@ -110,6 +118,8 @@ class CollectFbtsService
 
             return false;
         }
+
+        $this->files++;
 
         $ast = $this->parser->parse($source);
         $ast = $this->traverser->traverse($ast);
@@ -145,13 +155,32 @@ CODE
             } catch (\Throwable $e) {
                 $message = $e->getMessage();
                 $message = preg_replace('/^(.+?) on line .+$/', '$1', $message);
+                $message = preg_replace('/(called in ).+?\(\d+\)/', '$1' . basename($path) . '(' . $line . ')', $message);
 
-                echo preg_replace('/(called in ).+?\(\d+\)/', '$1' . $path . '(' . $line . ')', $message);
+                if (! strstr($message, 'called in')) {
+                    $message .= ' called in ' . basename($path) . '(' . $line . ')';
+                }
 
-                echo PHP_EOL . PHP_EOL;
+                echo "\033[33m" . $message . "\033[0m" . PHP_EOL;
+
+                $this->errors++;
             }
         }
 
         return true;
+    }
+
+    public function __destruct()
+    {
+        $hashToTexts = array_merge(...array_column(FbtHooks::$sourceStrings['phrases'], 'hashToText'));
+
+        echo PHP_EOL;
+        echo "Fbt collection has been completed!" . PHP_EOL . PHP_EOL;
+
+        echo "Source strings: " . count($hashToTexts) . " in " . $this->files . " file(s)" . PHP_EOL;
+
+        if ($this->errors) {
+            echo "\033[33mErrors: " . $this->errors . "\033[0m" . PHP_EOL;
+        }
     }
 }
