@@ -136,6 +136,15 @@ const Index = () => {
                   >
                     Try it out
                   </Link>
+                  <Link
+                    className={classnames(
+                      "button button--info button--lg",
+                      styles.button
+                    )}
+                    to="docs/getting_started"
+                  >
+                    Open documentation
+                  </Link>
                 </div>
               </div>
             </div>
