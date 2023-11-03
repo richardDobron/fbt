@@ -76,4 +76,19 @@ class fbtHash
 
         return $hash;
     }
+
+    public static function oldTigerHash(string $input, int $digestBitLen = 128)
+    {
+        return substr(
+            implode(
+                array_map(
+                    function (string $h) {
+                        return str_pad(bin2hex(strrev($h)), 16, "0");
+                    },
+                    str_split(hash("tiger192,3", $input, true), 8)
+                )
+            ),
+            0, 48 - (192 - $digestBitLen) / 4
+        );
+    }
 }
