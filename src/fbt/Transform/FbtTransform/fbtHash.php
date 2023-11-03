@@ -88,7 +88,8 @@ class fbtHash
                     str_split(hash("tiger192,3", $input, true), 8)
                 )
             ),
-            0, 48 - (192 - $digestBitLen) / 4
+            0,
+            48 - (192 - $digestBitLen) / 4
         );
     }
 }

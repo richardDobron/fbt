@@ -267,6 +267,7 @@ class FbtUtils
                     "$moduleName.param's number option should be an expression or 'true'"
                 );
             }
+
             // For number="true" we don't pass additional value.
             return null;
         }
@@ -426,6 +427,7 @@ class FbtUtils
             if (is_object($argument)) {
                 $objectPieces[] = $argument;
                 $argNames[] = $parameter;
+
                 // End of Transmission Block sentinel marker
                 return "\x17" . $punctuation;
             } elseif ($argument === null) {
