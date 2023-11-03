@@ -65,19 +65,7 @@ class FbtHash
         return array_map(function ($phrase) {
             return array_map(
                 function ($text) use ($phrase) {
-                    return hash('tiger128,3', $text . ':::' . $phrase['desc'] . ':');
-                },
-                $phrase['texts']
-            );
-        }, $phrases);
-    }
-
-    public static function tiger_fb($phrases): array
-    {
-        return array_map(function ($phrase) {
-            return array_map(
-                function ($text) use ($phrase) {
-                    return hash('tiger128,3-fb', $text . ':::' . $phrase['desc'] . ':');
+                    return FbtTransform\fbtHash::oldTigerHash($text . ':::' . $phrase['desc'] . ':');
                 },
                 $phrase['texts']
             );
