@@ -113,6 +113,7 @@ class FbtConfig
     }
 
     /**
+     * @param array $config
      * @return void
      * @throws FbtInvalidConfigurationException
      */
