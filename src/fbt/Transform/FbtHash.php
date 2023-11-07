@@ -19,9 +19,9 @@ class FbtHash
      *
      * [["hash1", "hash2", ...]]
      */
-    public static function md5($phrases): array
+    public static function md5(array $phrases): array
     {
-        return array_map(function ($phrase) {
+        return array_map(function (array $phrase) {
             return array_map(
                 function ($text) use ($phrase) {
                     $md5 = md5($text . $phrase['desc']);
@@ -60,9 +60,9 @@ class FbtHash
      *   ["hash1", "hash2", ...], // hashes for strings of phrase N
      * ]
      */
-    public static function tiger($phrases): array
+    public static function tiger(array $phrases): array
     {
-        return array_map(function ($phrase) {
+        return array_map(function (array $phrase) {
             return array_map(
                 function ($text) use ($phrase) {
                     return FbtTransform\fbtHash::oldTigerHash($text . ':::' . $phrase['desc'] . ':');

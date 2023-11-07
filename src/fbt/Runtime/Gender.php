@@ -191,7 +191,7 @@ class Gender
         ],
     ];
 
-    public static function getData($gender, $usage)
+    public static function getData(string $gender, string $usage)
     {
         $data = self::DATA;
 

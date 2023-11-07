@@ -44,7 +44,7 @@ can produce the translated payloads `fbt::_()` expects.
 
 When it comes to moving from source text to translations, what is most
 pertinent is the `hashToText` payload containing all relevant texts
-with their identifying hash.  You can choose `md5` or `tiger` hash module.  It defaults to md5.
+with their identifying hash.  You can choose `md5` or `tiger` hash module.  It defaults to `md5`.
 
 ### A note on hashes
 

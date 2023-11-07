@@ -135,7 +135,7 @@ class TranslationsGeneratorService
     /**
      * @throws \fbt\Exceptions\FbtException
      */
-    private function processGroups($phrases, $translatedGroups): array
+    private function processGroups(array $phrases, array $translatedGroups): array
     {
         $localeToHashToFbt = [];
 
@@ -156,12 +156,12 @@ class TranslationsGeneratorService
      * Generate missing translation hashes from collected source strings
      *
      * @param string $source
-     * @param $translationsPath
-     * @param $inputPath
+     * @param string|null $translationsPath
+     * @param string $inputPath
      *
      * @throws \Exception
      */
-    public function generateTranslations(string $source, $translationsPath, $inputPath)
+    public function generateTranslations(string $source, ?string $translationsPath, string $inputPath)
     {
         if (! file_exists($source)) {
             throw new \Exception('Source strings file does not exist: ' . $source);
