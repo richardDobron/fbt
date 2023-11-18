@@ -94,7 +94,11 @@ class FbtTransform
      */
     private static function initDefaultOptions(array $entrypoint)
     {
-        if (isset($entrypoint['file']) && file_exists($entrypoint['file'])) {
+        static $cache = [];
+
+        if (isset($entrypoint['file']) && file_exists($entrypoint['file']) && ! in_array($entrypoint['file'], $cache)) {
+            $cache[] = $entrypoint['file'];
+
             $comments = array_filter(
                 token_get_all(file_get_contents($entrypoint['file'])),
                 function ($entry) {
