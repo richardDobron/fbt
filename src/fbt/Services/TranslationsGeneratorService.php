@@ -161,7 +161,7 @@ class TranslationsGeneratorService
      *
      * @throws \Exception
      */
-    public function generateTranslations(string $source, ?string $translationsPath, string $inputPath)
+    public function generateTranslations(string $source, $translationsPath, string $inputPath)
     {
         if (! file_exists($source)) {
             throw new \Exception('Source strings file does not exist: ' . $source);
