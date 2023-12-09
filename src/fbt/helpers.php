@@ -39,6 +39,10 @@ namespace {
          */
         function fbt($text, string $description, array $options = []): fbt\fbt
         {
+            if (class_exists(\fbt\LaravelPackage\fbt::class)) {
+                return new \fbt\LaravelPackage\fbt($text, $description, $options);
+            }
+
             return new fbt\fbt($text, $description, $options);
         }
     }
@@ -53,6 +57,10 @@ namespace {
          */
         function fbs($text, $description = null, array $options = []): fbt\fbs
         {
+            if (class_exists(\fbt\LaravelPackage\fbs::class)) {
+                return new \fbt\LaravelPackage\fbs($text, $description, $options);
+            }
+
             return new fbt\fbs($text, $description, $options);
         }
     }
