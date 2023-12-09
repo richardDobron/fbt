@@ -4,9 +4,13 @@ All notable changes to `fbt` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
-## v4.2.2 - 2023-06-26
+## v4.2.3 - 2023-12-09
+### Changed
+- Allow to call customized `\fbt\fbt` implementation for methods `fbt` and `fbs` when Laravel package is used
+
 ### Fixed
-- Collecting of source strings like `fbt\fbt('text', 'description')`
+- Redundant file scanning for docblock with the `@fbt` pragma
+- `tiger128,3` now generates the same hash as the original implementation
 
 ### Added
 - Detailed information of collecting for fbt collect command
