@@ -2,6 +2,7 @@
 
 namespace fbt\Services;
 
+use fbt\Exceptions\FbtInvalidConfigurationException;
 use fbt\Exceptions\FbtParserException;
 use fbt\FbtConfig;
 use function fbt\rsearch;
@@ -58,11 +59,16 @@ class CollectFbtsService
     }
 
     /**
+     * @param string $path
+     * @param string $src
+     * @param null|string $fbtCommonPath
+     * @param bool $cleanCache
+     * @return void
      * @throws \Throwable
      * @throws \fbt\Exceptions\FbtInvalidConfigurationException
      * @throws \fbt\Exceptions\FbtParserException
      */
-    public function collectFromFiles(string $path, string $src, ?string $fbtCommonPath, bool $cleanCache)
+    public function collectFromFiles(string $path, string $src, $fbtCommonPath, bool $cleanCache)
     {
         $fbtDir = $path . '/';
         $file = $fbtDir . '.source_strings.json';
