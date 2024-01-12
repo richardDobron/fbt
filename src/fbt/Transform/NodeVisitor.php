@@ -2,6 +2,7 @@
 
 namespace fbt\Transform;
 
+use fbt\Services\CollectFbtsService;
 use PhpParser\Node;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Name;
@@ -18,7 +19,8 @@ class NodeVisitor extends NodeVisitorAbstract
             && in_array($node->class->toString(), ['fbt', 'fbt\fbt'])) {
             switch ($node->name->toString()) {
                 case "param":
-                    if (! ($node->args[1]->value instanceof String_)) {
+                    if (! CollectFbtsService::matchFbtCalls($node->args[1]->value)
+                        && ! ($node->args[1]->value instanceof String_)) {
                         $node->args[1] = new String_('value');
                     }
 

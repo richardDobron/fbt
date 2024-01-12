@@ -16,7 +16,9 @@ class FbtHooks
     /* @var array */
     private static $actions = [];
     /* @var array */
-    public static $sourceStrings = [];
+    public static $sourceStrings = [
+        'phrases' => [],
+    ];
     /* @var array */
     public static $sourceHashes = [];
     /* @var array */

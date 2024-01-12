@@ -63,7 +63,7 @@ class CollectFbtsService
      * @throws \fbt\Exceptions\FbtInvalidConfigurationException
      * @throws \fbt\Exceptions\FbtParserException
      */
-    public function collectFromFiles(string $path, string $src, string $fbtCommonPath, bool $cleanCache)
+    public function collectFromFiles(string $path, string $src, ?string $fbtCommonPath, bool $cleanCache)
     {
         $fbtDir = $path . '/';
         $file = $fbtDir . '.source_strings.json';
@@ -93,7 +93,7 @@ class CollectFbtsService
         return preg_replace('/(\\\*|\b)(fbt\\\+)fbt/', 'fbt', $code);
     }
 
-    protected function matchFbtCalls(Node $node): bool
+    public static function matchFbtCalls(Node $node): bool
     {
         return ($node instanceof FuncCall
                 && $node->name instanceof Name
@@ -126,7 +126,7 @@ class CollectFbtsService
 
         /** @var StaticCall[] $fbtFunctionCalls */
         $fbtFunctionCalls = $this->nodeFinder->find($ast, function (Node $node) {
-            return $this->matchFbtCalls($node);
+            return self::matchFbtCalls($node);
         });
 
         echo "\033[15m$path \033[0m" . PHP_EOL;
