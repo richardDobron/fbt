@@ -2,7 +2,6 @@
 
 namespace fbt\Services;
 
-use fbt\Exceptions\FbtInvalidConfigurationException;
 use fbt\Exceptions\FbtParserException;
 use fbt\FbtConfig;
 use function fbt\rsearch;
