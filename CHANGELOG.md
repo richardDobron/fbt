@@ -4,6 +4,10 @@ All notable changes to `fbt` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## v3.2.4 - 2024-01-12
+### Fixed
+- Collecting of fbt::param values
+
 ## v3.2.3 - 2023-12-09
 ### Changed
 - Allow to call customized `\fbt\fbt` implementation for methods `fbt` and `fbs` when Laravel package is used
