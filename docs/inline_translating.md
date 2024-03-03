@@ -13,7 +13,7 @@ If you right-click on the underlined string, the translation dialog appears and 
 
 ## Installing
 
-For installation, please follow these [instructions](https://github.com/swiftyper-sk/fbt-inline-translations#-installing).
+For installation, please follow these [instructions](https://github.com/swiftyper-sk/fbt-inline-translations#non-react-usage).
 
 ## How it works?
 ```php

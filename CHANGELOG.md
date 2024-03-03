@@ -8,10 +8,6 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 ### Fixed
 - Collecting of fbt::param values
 
-### Fixed
-- Redundant file scanning for docblock with the `@fbt` pragma
-- `tiger128,3` now generates the same hash as the original implementation
-
 ## v4.2.3 - 2023-12-09
 ### Changed
 - Allow to call customized `\fbt\fbt` implementation for methods `fbt` and `fbs` when Laravel package is used
