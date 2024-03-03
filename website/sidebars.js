@@ -12,6 +12,7 @@ module.exports = {
   docs: {
     "Getting started": [
       "getting_started",
+      "locale_detection",
       "best_practices"
     ],
     API: [
