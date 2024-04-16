@@ -3,7 +3,9 @@
 namespace fbt\Transform;
 
 use fbt\Services\CollectFbtsService;
+use fbt\Transform\FbtTransform\Translate\IntlVariations;
 use PhpParser\Node;
+use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Name;
 use PhpParser\Node\Scalar\LNumber;
@@ -14,6 +16,19 @@ class NodeVisitor extends NodeVisitorAbstract
 {
     public function enterNode(Node $node)
     {
+        if ($node instanceof FuncCall
+            && $node->name instanceof Name
+            && $node->name->toString() === 'fbt') {
+            if (isset($node->args[2]) && $node->args[2]->value instanceof Node\Expr\Array_) {
+                foreach ($node->args[2]->value->items as $attribute) {
+                    if ($attribute->key->value === 'subject') {
+                        if (! ($attribute->value instanceof String_)) {
+                            $attribute->value = new LNumber(IntlVariations::GENDER_MALE);
+                        }
+                    }
+                }
+            }
+        }
         if ($node instanceof StaticCall
             && $node->class instanceof Name
             && in_array($node->class->toString(), ['fbt', 'fbt\fbt'])) {
