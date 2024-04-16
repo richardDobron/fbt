@@ -278,6 +278,7 @@ class FbtFunctionCallProcessor
 
             switch ($node->name) {
                 case 'param':
+                case 'sameParam':
                     $texts[] = $variations[$arg0] ?? '{' . $arg0 . '}';
 
                     break;

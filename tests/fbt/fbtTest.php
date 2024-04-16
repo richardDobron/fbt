@@ -838,6 +838,15 @@ FBT;
         $this->assertSame('with tokens {tokenB} and B', $fbt);
     }
 
+    public function testSubject()
+    {
+        $fbt = fbt('You<fbt:param name="lineBreak"><br></fbt:param>see<fbt:same-param name="lineBreak"/>the world', 'expose subject', [
+            'subject' => IntlVariations::GENDER_MALE,
+        ]);
+
+        $this->assertSame('You<br/>see<br/>the world', (string)$fbt);
+    }
+
     public function testJsonSerialization()
     {
         $fbt = fbt('simple text', 'desc');
