@@ -143,6 +143,7 @@ class fbt implements \JsonSerializable
             if (! isset(self::$cachedFbt[$hash])) {
                 self::$cachedFbt[$hash] = FbtTransform::transform($fbt, $this->trace);
             }
+
             return self::$cachedFbt[$hash];
         }
 
