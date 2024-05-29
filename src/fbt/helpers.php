@@ -183,7 +183,7 @@ namespace fbt {
      */
     function createElement(string $tag, $content = null, array $attributes = []): string
     {
-        static $dom;
+        static $dom, $cachedValues = [];
 
         if (empty($dom)) {
             $dom = new DOM();
@@ -200,9 +200,13 @@ namespace fbt {
                     continue;
                 }
 
-                $value = htmlentities($value, ENT_QUOTES, 'UTF-8', false);
+                $hash = md5($value);
 
-                $attributeStrings[] = "$attribute=\"$value\"";
+                if (! isset($cachedValues[$hash])) {
+                    $cachedValues[$hash] = htmlentities($value, ENT_QUOTES, 'UTF-8', false);
+                }
+
+                $attributeStrings[] = "$attribute=\"$cachedValues[$hash]\"";
             }
 
             $element .= ' ' . implode(' ', $attributeStrings);
