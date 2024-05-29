@@ -30,6 +30,8 @@ class fbs extends fbt
 
     public function __toString(): string
     {
+        static $cache;
+
         $text = $this->text;
         if (is_string($text)) {
             $text = [$this->text];
@@ -49,7 +51,11 @@ class fbs extends fbt
 
         $fbs = createElement(self::$moduleName, implode('', $text), $attributes);
         if ($this->transform) {
-            return FbtTransform::transform($fbs, $this->trace);
+            $hash = md5($fbs);
+            if (! isset($cache[$hash])) {
+                $cache[$hash] = FbtTransform::transform($fbs, $this->trace);
+            }
+            return $cache[$hash];
         }
 
         return $fbs;

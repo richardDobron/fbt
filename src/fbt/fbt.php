@@ -9,6 +9,7 @@ class fbt implements \JsonSerializable
 {
     /* @var string */
     protected static $moduleName = 'fbt';
+    protected static $cachedFbt = [];
     /* @var bool */
     protected $transform;
     /* @var string|array */
@@ -99,9 +100,20 @@ class fbt implements \JsonSerializable
         ]);
     }
 
+    /**
+     * @internal
+     */
     public function _trace(array $trace): void
     {
         $this->trace = $trace;
+    }
+
+    /**
+     * @internal
+     */
+    public static function _purgeCache(): void
+    {
+        self::$cachedFbt = [];
     }
 
     /**
@@ -127,7 +139,11 @@ class fbt implements \JsonSerializable
 
         $fbt = createElement(self::$moduleName, implode('', $text), $attributes);
         if ($this->transform) {
-            return FbtTransform::transform($fbt, $this->trace);
+            $hash = md5($fbt);
+            if (! isset(self::$cachedFbt[$hash])) {
+                self::$cachedFbt[$hash] = FbtTransform::transform($fbt, $this->trace);
+            }
+            return self::$cachedFbt[$hash];
         }
 
         return $fbt;

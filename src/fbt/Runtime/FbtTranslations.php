@@ -2,6 +2,7 @@
 
 namespace fbt\Runtime;
 
+use fbt\fbt;
 use fbt\FbtConfig;
 use fbt\Runtime\Shared\FbtHooks;
 
@@ -48,6 +49,7 @@ class FbtTranslations
      */
     public static function registerTranslations(array $translations): void
     {
+        fbt::_purgeCache();
         self::$translatedFbts = $translations;
     }
 
@@ -61,6 +63,7 @@ class FbtTranslations
      */
     public static function mergeTranslations(array $newTranslations): void
     {
+        fbt::_purgeCache();
         foreach (array_keys($newTranslations) as $locale) {
             self::$translatedFbts[$locale] = array_merge(
                 self::$translatedFbts[$locale] ?? [],
