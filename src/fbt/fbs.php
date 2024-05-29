@@ -55,6 +55,7 @@ class fbs extends fbt
             if (! isset($cache[$hash])) {
                 $cache[$hash] = FbtTransform::transform($fbs, $this->trace);
             }
+
             return $cache[$hash];
         }
 
