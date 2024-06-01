@@ -4,6 +4,14 @@ All notable changes to `fbt` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## v3.2.6 - 2024-06-01
+### Added
+- Cache to improve performance of the `fbt` and `fbs` methods
+
+## v3.2.5 - 2024-04-16
+### Fixed
+- Fix fbt::sameParam for subject
+
 ## v3.2.4 - 2024-01-12
 ### Fixed
 - Collecting of fbt::param values
