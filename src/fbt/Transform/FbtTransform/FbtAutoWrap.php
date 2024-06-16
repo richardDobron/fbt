@@ -130,7 +130,7 @@ class FbtAutoWrap
     {
         $stack[] = $node;
 
-        if ($node->children()) {
+        if ($node->nodes) {
             $filteredChildren = FbtUtils::filterEmptyNodes($node->nodes);
             foreach ($filteredChildren as $child) {
                 if ($child->isElement() && FbtUtils::validateNamespacedFbtElement($moduleName, $node) === 'implicitParamMarker') {
