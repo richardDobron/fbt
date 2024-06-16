@@ -58,9 +58,7 @@ class GetNamespacedArgs
         $node = NodeParser::parse('<html>' . $node->innertext() . '</html>', false, true, DEFAULT_TARGET_CHARSET, false)
             ->find('html', 0);
 
-        $value = FbtUtils::makeFbtElementArrayFromNode($node->children() ?: $node->nodes)[0] ?? '';
-
-        $value = (string)$value;
+        $value = implode('', FbtUtils::makeFbtElementArrayFromNode($node->nodes));
 
         $paramArgs = [$nameAttr, $value];
 

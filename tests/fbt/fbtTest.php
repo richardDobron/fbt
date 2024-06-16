@@ -632,6 +632,14 @@ FBT;
 FBT;
 
         $this->assertSame('Bar<br/> Bar<br/> Bar', self::transform($fbt));
+
+        $fbt = <<<FBT
+<fbt desc="Bar">
+    Foo<br/><fbt:param name="lineBreakk">Bar<br>Baz</fbt:param>
+</fbt>
+FBT;
+
+        $this->assertSame('Foo<br/>Bar<br/>Baz', self::transform($fbt));
     }
 
     public function testCheckAlreadyStoredHashes()
