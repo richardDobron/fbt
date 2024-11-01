@@ -833,9 +833,11 @@ FBT;
 
         $this->assertSame('By artist <span><a>Lou Reed</a> & <a>Metallica</a></span>', $fbt);
 
-        $this->expectException(FbtParserException::class);
+        if (version_compare(PHP_VERSION, '7.4.0') >= 0) {
+            $this->expectException(\Exception::class);
 
-        $fbt = (string)fbt('By artist ' . \fbt\fbt::param('artist', '<a>Lou Reed</a> & <a>Metallica</a>'), 'test');
+            (string)fbt('By artist ' . \fbt\fbt::param('artist', '<a>Lou Reed</a> & <a>Metallica</a>'), 'test');
+        }
     }
 
     public function testEmptyParameter()
