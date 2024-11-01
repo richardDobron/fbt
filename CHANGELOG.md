@@ -4,6 +4,12 @@ All notable changes to `fbt` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## v3.2.8 - 2024-11-01
+### Changed
+- fbt:param now accepts also empty string as a value
+### Added
+- fallback configuration for translations (available for 'translate' command)
+
 ## v3.2.7 - 2024-06-16
 ### Fixed
 - Fix mixed text children with `<br />` in fbt:param
