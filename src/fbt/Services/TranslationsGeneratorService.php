@@ -2,6 +2,7 @@
 
 namespace fbt\Services;
 
+use fbt\FbtConfig;
 use fbt\Runtime\Shared\FbtHooks;
 use fbt\Transform\FbtTransform\fbtHash;
 use fbt\Transform\FbtTransform\FbtUtils;
@@ -115,15 +116,20 @@ class TranslationsGeneratorService
     /**
      * @throws \fbt\Exceptions\FbtException
      */
-    private function processTranslations(array $fbtSites, array $group): array
+    private function processTranslations(array $fbtSites, array $group, array $fbtTranslations = []): array
     {
         $config = TranslationConfig::fromFBLocale($group['fb-locale']);
+        $fallback = FbtHooks::getFallback($group['fb-locale']);
         $translations = FbtUtils::objMap($group['translations'], function ($translation) {
             return TranslationData::fromJSON($translation);
         });
-        $translatedPhrases = array_map(function ($fbtSite) use ($translations, $config) {
+        // fbt diff: Adding fallback translations to the TranslationBuilder.
+        $fallbackTranslations = FbtUtils::objMap($fbtTranslations[$fallback]['translations'] ?? [], function ($translation) {
+            return TranslationData::fromJSON($translation);
+        });
+        $translatedPhrases = array_map(function ($fbtSite) use ($translations, $fallbackTranslations, $config) {
             // fbt diff: We are including a hash for reporting and logging.
-            return (new TranslationBuilder($translations, $config, $fbtSite, true))->build();
+            return (new TranslationBuilder($translations, $config, $fbtSite, true, $fallbackTranslations))->build();
         }, $fbtSites);
 
         return [
@@ -284,7 +290,7 @@ class TranslationsGeneratorService
         $phrases = $sourceStrings['phrases'];
         $fbtSites = array_map('\fbt\Transform\FbtTransform\Translate\FbtSite::fromScan', $phrases);
         $translatedGroups = array_map(function ($group) use ($fbtSites) {
-            return self::processTranslations($fbtSites, $group);
+            return self::processTranslations($fbtSites, $group, $this->translations);
         }, $this->translations);
 
         $flags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;

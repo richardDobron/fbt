@@ -40,6 +40,7 @@ The following options can be defined:
 * **fbtCommon** `string`: (Default: `[]`) common string's, e.g. `[['text' => 'desc'], ...]`
 * **fbtCommonPath** `string`: (Default: `null`) Path to the common string's module.
 * **path** `string`: Cache storage path for generated translations & source strings.
+* **fallback** `array`: (Default: `[]`) Fallback translations, e.g. `['de_AT' => 'de_DE']` 
 
 Below are the less important parameters.
 
