@@ -7,7 +7,6 @@ declare(strict_types=1);
 
 namespace tests\fbt;
 
-use fbt\Exceptions\FbtParserException;
 use fbt\Lib\IntlViewerContext;
 use fbt\Runtime\Shared\fbt;
 use fbt\Runtime\Shared\FbtHooks;
