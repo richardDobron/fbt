@@ -8,7 +8,6 @@ use fbt\FbtConfig;
 use function fbt\rsearch;
 
 use fbt\Runtime\Shared\FbtHooks;
-
 use fbt\Transform\NodeVisitor;
 use PhpParser\Node;
 use PhpParser\Node\Expr;
