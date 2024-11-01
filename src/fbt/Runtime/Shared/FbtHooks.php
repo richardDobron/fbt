@@ -166,6 +166,8 @@ class FbtHooks
                     self::$storedHashes[$hash] = true;
                 }
             }
+        } else if (! is_dir($fbtDir)) {
+            mkdir($fbtDir, 0777, true);
         }
 
         if (isset(self::$actions[__FUNCTION__])) {
