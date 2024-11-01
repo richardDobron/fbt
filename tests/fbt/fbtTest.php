@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace tests\fbt;
 
+use fbt\Exceptions\FbtParserException;
 use fbt\Lib\IntlViewerContext;
 use fbt\Runtime\Shared\fbt;
 use fbt\Runtime\Shared\FbtHooks;
@@ -635,7 +636,7 @@ FBT;
 
         $fbt = <<<FBT
 <fbt desc="Bar">
-    Foo<br/><fbt:param name="lineBreakk">Bar<br>Baz</fbt:param>
+    Foo<br/><fbt:param name="lineBreakk">Bar<br/>Baz</fbt:param>
 </fbt>
 FBT;
 
@@ -831,6 +832,17 @@ FBT;
         $fbt = (string)fbt('By artist ' . \fbt\fbt::param('artist', '<span><a>Lou Reed</a> & <a>Metallica</a></span>'), 'test');
 
         $this->assertSame('By artist <span><a>Lou Reed</a> & <a>Metallica</a></span>', $fbt);
+
+        $this->expectException(FbtParserException::class);
+
+        $fbt = (string)fbt('By artist ' . \fbt\fbt::param('artist', '<a>Lou Reed</a> & <a>Metallica</a>'), 'test');
+    }
+
+    public function testEmptyParameter()
+    {
+        $fbt = (string)fbt('Search results for \'' . \fbt\fbt::param('query', '') . '\'', 'page title');
+
+        $this->assertSame('Search results for \'\'', $fbt);
     }
 
     public function testValuesThatLookLikeTokenPatterns()

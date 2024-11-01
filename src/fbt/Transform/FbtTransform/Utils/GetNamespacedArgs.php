@@ -50,7 +50,7 @@ class GetNamespacedArgs
             $paramChildren = [$node->nodes[0]->innertext()];
         }
 
-        if (count($paramChildren) !== 1) {
+        if (count($paramChildren) > 1) {
             throw FbtUtils::errorAt($node, "$this->moduleName:param expects an string or HTML element, and only one");
         }
 
