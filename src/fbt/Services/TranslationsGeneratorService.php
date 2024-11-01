@@ -2,7 +2,6 @@
 
 namespace fbt\Services;
 
-use fbt\FbtConfig;
 use fbt\Runtime\Shared\FbtHooks;
 use fbt\Transform\FbtTransform\fbtHash;
 use fbt\Transform\FbtTransform\FbtUtils;
