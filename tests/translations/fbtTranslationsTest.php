@@ -225,6 +225,10 @@ FBT;
 
     public function testStdinTranslations()
     {
+        FbtConfig::set('fallback', [
+            'cs_CZ' => 'sk_SK',
+        ]);
+
         $translateFbt = function ($subject) {
             return <<<FBT
 <fbt desc="User(s) have poked the viewer" subject="$subject">
@@ -232,6 +236,14 @@ FBT;
 </fbt>
 FBT;
         };
+
+        $this->registerTranslations();
+
+        FbtHooks::locale('cs_CZ');
+
+        $this->assertEquals('John <span>vás štuchol</span>.', self::transform($translateFbt(1)));
+        $this->assertEquals('John <span>vás štuchla</span>.', self::transform($translateFbt(2)));
+        $this->assertEquals('John <span>vás štuchol/a</span>.', self::transform($translateFbt(3)));
 
         $this->registerStdinTranslations();
 

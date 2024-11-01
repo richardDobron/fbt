@@ -14,6 +14,8 @@ class TranslationBuilder
 {
     /** @var TranslationData[] */
     private $_translations;
+    /** @var TranslationData[] */
+    private $_fallbackTranslations;
     /** @var TranslationConfig */
     private $_config;
     /** @var FbtSite */
@@ -38,9 +40,11 @@ class TranslationBuilder
         array $translations, // hash/id => translation (TranslationData | string)
         TranslationConfig $config, // Configuration for variation defaults (number/gender)
         FbtSite $fbtSite, // fbtSite to translate
-        bool $inclHash // include hash/identifer in leaf of payloads
+        bool $inclHash, // include hash/identifer in leaf of payloads
+        array $fallbackTranslations = [] // hash/id => translation (TranslationData | string)
     ) {
         $this->_translations = $translations;
+        $this->_fallbackTranslations = $fallbackTranslations;
         $this->_config = $config;
         $this->_fbtSite = $fbtSite;
         $this->_tokenMasks = []; // token => mask
@@ -91,7 +95,7 @@ class TranslationBuilder
     private function _translationsExist(): bool
     {
         foreach ($this->_fbtSite->getHashToText() as $hash) {
-            $transData = $this->_translations[$hash] ?? null;
+            $transData = $this->_translations[$hash] ?? $this->_fallbackTranslations[$hash] ?? null;
             if (
                 ! ($transData instanceof TranslationData) ||
                 $transData->hasTranslation()
@@ -110,7 +114,7 @@ class TranslationBuilder
     private function _findVCGenderVariation(): bool
     {
         foreach (array_keys($this->_fbtSite->getHashToText()) as $hash) {
-            $transData = $this->_translations[$hash] ?? null;
+            $transData = $this->_translations[$hash] ?? $this->_fallbackTranslations[$hash] ?? null;
             if (! ($transData instanceof TranslationData)) {
                 continue;
             }
@@ -218,7 +222,7 @@ class TranslationBuilder
         string $hash, // string
         array $tokenConstraints // {string: string}: token => constraint
     ) {
-        $transData = $this->_translations[$hash] ?? null;
+        $transData = $this->_translations[$hash] ?? $this->_fallbackTranslations[$hash] ?? null;
         if (is_string($transData)) {
             // Fake translations are just simple strings.  There's no such thing as
             // variation support for these locales.  So if token constraints were
@@ -356,7 +360,7 @@ class TranslationBuilder
         }
 
         $constraintMap = [];
-        $transData = $this->_translations[$hash] ?? null;
+        $transData = $this->_translations[$hash] ?? $this->_fallbackTranslations[$hash] ?? null;
         if (! $transData) {
             // No translation? No constraints.
             return (self::$_mem[$hash] = $constraintMap);

@@ -39,6 +39,11 @@ class FbtConfig
         'locale' => 'en_US',
 
         /*
+         * Locale fallback.
+         */
+        'fallback' => [],
+
+        /*
          * Hash module.
          * md5 / tiger
          */

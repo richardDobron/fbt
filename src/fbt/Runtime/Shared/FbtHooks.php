@@ -78,6 +78,13 @@ class FbtHooks
         return $viewerContext ?? new IntlViewerContext();
     }
 
+    public static function getFallback(string $locale): ?string
+    {
+        $fallback = FbtConfig::get('fallback');
+
+        return $fallback[$locale] ?? null;
+    }
+
     /**
      * @param string $patternHash
      * @return void
