@@ -52,7 +52,7 @@ class IntlPunctuation
         "\u{FF09}" . // Fullwidth right parenthesis
         "\u{FF3D}" . // Fullwidth right square bracket
         "\\s" .
-        "]*$/";
+        "]*$/u";
 
     /**
      * Checks whether a string ends in sentence-final punctuation. This logic is

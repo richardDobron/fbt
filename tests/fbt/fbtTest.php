@@ -846,6 +846,13 @@ FBT;
         $this->assertSame('Search results for \'\'', $fbt);
     }
 
+    public function testUnicodeParameter()
+    {
+        $fbt = (string)fbt('Search results for “' . \fbt\fbt::param('query', 'ß') . '”', 'page title');
+
+        $this->assertSame('Search results for “ß”', $fbt);
+    }
+
     public function testValuesThatLookLikeTokenPatterns()
     {
         $fbt = (string)fbt(

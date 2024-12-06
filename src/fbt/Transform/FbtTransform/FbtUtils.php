@@ -418,7 +418,7 @@ class FbtUtils
         // Splice in the arguments while keeping rich object ones separate.
         $objectPieces = [];
         $argNames = [];
-        $stringPieces = explode("\x17", preg_replace_callback("/{([^}]+)}(" . IntlPunctuation::PUNCT_CHAR_CLASS . "*)/", function ($matches) use ($args, &$argNames, &$objectPieces) {
+        $stringPieces = explode("\x17", preg_replace_callback("/{([^}]+)}(" . IntlPunctuation::PUNCT_CHAR_CLASS . "*)/u", function ($matches) use ($args, &$argNames, &$objectPieces) {
             $parameter = $matches[1];
             $punctuation = $matches[2] ?? '';
 
