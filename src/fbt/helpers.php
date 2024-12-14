@@ -1,5 +1,19 @@
 <?php
 
+namespace Latte\Runtime {
+    if (! class_exists(\Latte\Engine::class)) {
+        interface HtmlStringable
+        {
+            /** in HTML format */
+            public function __toString(): string;
+        }
+    } elseif (! interface_exists(\Latte\Runtime\HtmlStringable::class)) {
+        interface HtmlStringable extends \Latte\Runtime\IHtmlString
+        {
+        }
+    }
+}
+
 namespace {
     if (! function_exists('mb_str_split')) {
         function mb_str_split(string $str, int $length = 1): array

@@ -82,7 +82,24 @@ class CollectFbtsService
             $this->collectFromOneFile(file_get_contents($path), $path);
         }
 
+        if (class_exists(\Latte\Engine::class)) {
+            foreach (rsearch($src, "/.latte$/") as $path) {
+                $this->collectFromOneFile($this->compileLatte($path), $path);
+            }
+        }
+
         FbtHooks::storePhrases();
+    }
+
+    protected function compileLatte(string $path): string
+    {
+        try {
+            $latte = new \Latte\Engine();
+
+            return $latte->compile($path);
+        } catch (\Exception $e) {
+            return '';
+        }
     }
 
     protected function compileCode(Expr $fbtFunctionClassCall): string
