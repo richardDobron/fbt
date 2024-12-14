@@ -4,10 +4,13 @@ namespace tests;
 
 use fbt\FbtConfig;
 use fbt\Runtime\Shared\FbtHooks;
+use Spatie\Snapshots\MatchesSnapshots;
 
 abstract class TestCase extends \PHPUnit\Framework\TestCase
 {
-    public function setUp()
+    use MatchesSnapshots;
+
+    public function setUp(): void
     {
         FbtConfig::set('author', 'richard');
         FbtConfig::set('locale', 'sk_SK');
@@ -18,7 +21,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         });
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         parent::tearDown();
 

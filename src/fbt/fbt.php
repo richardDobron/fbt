@@ -4,8 +4,9 @@ namespace fbt;
 
 use fbt\Transform\FbtTransform\FbtTransform;
 use fbt\Transform\FbtTransform\FbtUtils;
+use Latte\Runtime\HtmlStringable;
 
-class fbt implements \JsonSerializable
+class fbt implements \JsonSerializable, HtmlStringable
 {
     /* @var string */
     protected static $moduleName = 'fbt';
