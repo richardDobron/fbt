@@ -331,8 +331,6 @@ class intlNumUtils
             $truncatedValue /= pow(10, -$power + $numSigFigs);
             // Determine number of decimals based on sig figs
             if ($decimals === null) {
-                var_dump(-$power, $numSigFigs);
-
                 return self::formatNumberWithThousandDelimiters($truncatedValue, $numSigFigs - $power - 1);
             }
         }
