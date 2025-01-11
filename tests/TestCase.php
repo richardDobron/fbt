@@ -4,6 +4,7 @@ namespace tests;
 
 use fbt\FbtConfig;
 use fbt\Runtime\Shared\FbtHooks;
+use fbt\Runtime\Shared\intlNumUtils;
 use Spatie\Snapshots\MatchesSnapshots;
 
 abstract class TestCase extends \PHPUnit\Framework\TestCase
@@ -26,5 +27,6 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         parent::tearDown();
 
         FbtHooks::storePhrases();
+        IntlNumUtils::config([]);
     }
 }
