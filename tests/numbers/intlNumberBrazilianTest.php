@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace numbers;
+namespace tests\numbers;
 
 use fbt\Runtime\Shared\intlNumUtils;
 
