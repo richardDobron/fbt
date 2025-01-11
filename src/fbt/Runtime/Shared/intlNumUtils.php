@@ -43,7 +43,7 @@ function _buildRegex($pattern)
     static $_regexCache;
 
     if (! isset($_regexCache[$pattern])) {
-        $_regexCache[$pattern] = '/' . $pattern . '/i';
+        $_regexCache[$pattern] = '/' . $pattern . '/iu';
     }
 
     return $_regexCache[$pattern];
@@ -53,53 +53,48 @@ function _buildRegex($pattern)
  * Escapes regex special characters from a string, so it can be
  * used as a raw search term inside an actual regex.
  */
-function escapeRegex($str)
+function escapeRegex($str): string
 {
-    // From http://stackoverflow.com/questions/14076210/
-    return preg_replace("/([.?*+\^$\[\]\\(){}|\-])/", '\\\\\1', $str);
+    return preg_quote($str, '/');
 }
 
 function matchCurrenciesWithDots()
 {
     return _buildRegex(array_reduce(CURRENCIES_WITH_DOTS, function ($regex, $representation) {
-        return $regex . ($regex ? '|' : '') . '(' . escapeRegex($representation) . ')';
+        return $regex . ($regex ? '|' : '') . '(' . $representation . ')';
     }, ''));
 }
 
-function _replaceWithNativeDigits($number, $digits)
+function _replaceWithNativeDigits(string $number, string $digits): string
 {
     $result = '';
-    $number = strVal($number);
+    $digitsArray = mb_str_split($digits);
 
-    for ($ii = 0, $iiMax = mb_strlen($number); $ii < $iiMax; $ii++) {
-        $d = $digits[ord(mb_substr($number, $ii, 1)) - 48]; /* 48 === '0' */
-        $result += $d ?? $number[$ii];
+    for ($i = 0; $i < mb_strlen($number); $i++) {
+        $char = mb_substr($number, $i, 1);
+        $charCode = ord($char);
+        if ($charCode >= 48 && $charCode <= 57) {
+            $nativeDigit = $digitsArray[$charCode - 48] ?? null;
+            $result .= $nativeDigit !== null ? $nativeDigit : $char;
+        } else {
+            $result .= $char;
+        }
     }
 
     return $result;
 }
-
-function truncateLongNumber($number, $decimals = null)
-{
-    $pos = strpos($number, '.');
-    $dividend = $pos ? substr($number, 0, $pos) : $number;
-    $remainder = $pos ? substr($number, $pos + 1) : '';
-
-    return $decimals != null
-        ? $dividend .
-        '.' .
-        addZeros(substr($remainder, 0, $decimals), $decimals - mb_strlen($remainder))
-        : $dividend;
-}
-
 
 /**
  * Calculate how many powers of 10 there are in a given number
  * I.e. 1.23 has 0, 100 and 999 have 2, and 1000 has 3.
  * Used in the inflation and rounding calculations below.
  */
-function _getNumberOfPowersOfTen($value)
+function _getNumberOfPowersOfTen(int $value): float
 {
+    if ($value === 0) {
+        return 0;
+    }
+
     return floor(log10(abs($value)));
 }
 
@@ -124,11 +119,11 @@ function _roundNumber($valueParam, $decimalsParam = null): string
 
     $pos = strpos($value, '.');
 
-    if (! $pos) {
+    if ($pos === false) {
         $value .= '.';
         $zeros = $decimals;
     } else {
-        $zeros = $decimals - (mb_strlen($value) - $pos - 1);
+        $zeros = $decimals - (strlen($value) - $pos - 1);
     }
     for ($i = 0, $l = $zeros; $i < $l; $i++) {
         $value .= '0';
@@ -137,10 +132,12 @@ function _roundNumber($valueParam, $decimalsParam = null): string
     return $value;
 }
 
-function addZeros($x, $count)
+function addZeros($x, $count): string
 {
     $result = $x;
-    $result .= str_repeat('0', $count);
+    if ($count > 0) {
+        $result .= str_repeat('0', $count);
+    }
 
     return $result;
 }
@@ -162,16 +159,16 @@ function _parseCodifiedNumber($text): ?float
 
 function _getNativeDigitsMap(): ?array
 {
-    $NumberFormatConfig = NumberFormatConsts::get(FbtHooks::locale());
+    $numberFormatConfig = intlNumUtils::config();
     $nativeDigitMap = [];
-    $digits = $NumberFormatConfig['numberingSystemData']['digits'] ?? $NumberFormatConfig['numberingSystemData'];
+    $digits = $numberFormatConfig['numberingSystemData']['digits'] ?? $numberFormatConfig['numberingSystemData'];
 
     if ($digits == null) {
         return null;
     }
 
-    for ($i = 0, $iMax = mb_strlen(strval($digits)); $i < $iMax; $i++) {
-        $nativeDigitMap[ord(mb_substr($digits, $i, 1))] = strval($i);
+    foreach (mb_str_split($digits) as $i => $char) {
+        $nativeDigitMap[$char] = (string)$i;
     }
 
     return $nativeDigitMap;
@@ -179,6 +176,19 @@ function _getNativeDigitsMap(): ?array
 
 class intlNumUtils
 {
+    protected static $config = [];
+
+    public static function config(?array $config = null): ?array
+    {
+        $locale = FbtHooks::locale();
+
+        if ($config !== null) {
+            self::$config[$locale] = array_merge(NumberFormatConsts::get($locale), $config);
+        }
+
+        return self::$config[$locale] ?? NumberFormatConsts::get($locale);
+    }
+
     /**
      * Format a number for string output.
      *
@@ -190,11 +200,11 @@ class intlNumUtils
      * be displayed. For instance, pass `0` to round to the nearest
      * integer, `2` to round to nearest cent when displaying currency, etc.
      */
-    public static function formatNumber($value, $decimals = null)
+    public static function formatNumber(float $value, ?int $decimals = null): string
     {
-        $NumberFormatConfig = NumberFormatConsts::get(FbtHooks::locale());
+        $numberFormatConfig = self::config();
 
-        return self::formatNumberRaw($value, $decimals, '', $NumberFormatConfig['decimalSeparator'], $NumberFormatConfig['minDigitsForThousandsSeparator'], $NumberFormatConfig['standardDecimalPatternInfo'], $NumberFormatConfig['numberingSystemData']);
+        return self::formatNumberRaw($value, $decimals, '', $numberFormatConfig['decimalSeparator'], $numberFormatConfig['minDigitsForThousandsSeparator'], $numberFormatConfig['standardDecimalPatternInfo'], $numberFormatConfig['numberingSystemData']);
     }
 
     /**
@@ -204,11 +214,18 @@ class intlNumUtils
      * exactly what you're doing. Consider using `formatNumber` or
      * `formatNumberWithThousandDelimiters` below.
      */
-    public static function formatNumberRaw($value, $decimals = null, $thousandDelimiter = '', $decimalDelimiter = '.', $minDigitsForThousandDelimiter = 0, $standardPatternInfo = [
-        'primaryGroupSize' => DEFAULT_GROUPING_SIZE,
-        'secondaryGroupSize' => DEFAULT_GROUPING_SIZE,
-    ], $numberingSystemData = null)
-    {
+    public static function formatNumberRaw(
+        $value,
+        ?int $decimals = null,
+        string $thousandDelimiter = '',
+        string $decimalDelimiter = '.',
+        int $minDigitsForThousandDelimiter = 0,
+        array $standardPatternInfo = [
+            'primaryGroupSize' => DEFAULT_GROUPING_SIZE,
+            'secondaryGroupSize' => DEFAULT_GROUPING_SIZE,
+        ],
+        ?array $numberingSystemData = null
+    ): string {
         $primaryGroupingSize = $standardPatternInfo['primaryGroupSize'] ?? DEFAULT_GROUPING_SIZE;
         $secondaryGroupingSize = $standardPatternInfo['secondaryGroupSize'] ?? $primaryGroupingSize;
 
@@ -216,10 +233,10 @@ class intlNumUtils
 
         if (is_float($value) && is_nan($value)) {
             $v = 0;
-        } elseif ($decimals == null) {
+        } elseif ($decimals === null) {
             $v = (string)$value;
         } elseif (is_string($value)) {
-            $v = truncateLongNumber($value, $decimals);
+            $v = self::truncateLongNumber($value, $decimals);
         } else {
             $v = _roundNumber($value, $decimals);
         }
@@ -243,7 +260,9 @@ class intlNumUtils
         }
         if ($digits !== null) {
             $wholeNumber = _replaceWithNativeDigits($wholeNumber, $digits);
-            $decimal = $decimal && _replaceWithNativeDigits($decimal, $digits);
+            if ($decimal) {
+                $decimal = _replaceWithNativeDigits($decimal, $digits);
+            }
         }
 
         $result = $wholeNumber;
@@ -265,11 +284,19 @@ class intlNumUtils
      * be displayed. For instance, pass `0` to round to the nearest
      * integer, `2` to round to nearest cent when displaying currency, etc.
      */
-    public static function formatNumberWithThousandDelimiters($value, $decimals = null)
+    public static function formatNumberWithThousandDelimiters(float $value, ?int $decimals = null): string
     {
-        $NumberFormatConfig = NumberFormatConsts::get(FbtHooks::locale());
+        $numberFormatConfig = self::config();
 
-        return self::formatNumberRaw($value, $decimals, $NumberFormatConfig["numberDelimiter"], $NumberFormatConfig["decimalSeparator"], $NumberFormatConfig["minDigitsForThousandsSeparator"], $NumberFormatConfig["standardDecimalPatternInfo"], $NumberFormatConfig["numberingSystemData"]);
+        return self::formatNumberRaw(
+            $value,
+            $decimals,
+            $numberFormatConfig["numberDelimiter"],
+            $numberFormatConfig["decimalSeparator"],
+            $numberFormatConfig["minDigitsForThousandsSeparator"],
+            $numberFormatConfig["standardDecimalPatternInfo"],
+            $numberFormatConfig["numberingSystemData"]
+        );
     }
 
     /**
@@ -288,7 +315,7 @@ class intlNumUtils
      * > formatNumberWithLimitedSigFig(1.23456789, 2, 2)
      * "1.20"
      */
-    public static function formatNumberWithLimitedSigFig($value, $decimals, $numSigFigs)
+    public static function formatNumberWithLimitedSigFig(float $value, ?int $decimals, int $numSigFigs): string
     {
         // First make the number sufficiently integer-like.
         $power = _getNumberOfPowersOfTen($value);
@@ -303,7 +330,9 @@ class intlNumUtils
         if ($power < $numSigFigs) {
             $truncatedValue /= pow(10, -$power + $numSigFigs);
             // Determine number of decimals based on sig figs
-            if ($decimals == null) {
+            if ($decimals === null) {
+                var_dump(-$power, $numSigFigs);
+
                 return self::formatNumberWithThousandDelimiters($truncatedValue, $numSigFigs - $power - 1);
             }
         }
@@ -314,9 +343,9 @@ class intlNumUtils
 
     public static function parseNumber($text): ?float
     {
-        $NumberFormatConfig = NumberFormatConsts::get(FbtHooks::locale());
+        $numberFormatConfig = self::config();
 
-        return self::parseNumberRaw($text, $NumberFormatConfig['decimalSeparator '] ?? '.', $NumberFormatConfig['numberDelimiter']);
+        return self::parseNumberRaw($text, $numberFormatConfig['decimalSeparator'] ?? '.', $numberFormatConfig['numberDelimiter']);
     }
 
     /**
@@ -330,7 +359,7 @@ class intlNumUtils
      * Calling this function directly is discouraged, unless you know
      * exactly what you're doing. Consider using `parseNumber` below.
      */
-    public static function parseNumberRaw($text, $decimalDelimiter, $numberDelimiter = ''): ?float
+    public static function parseNumberRaw(string $text, string $decimalDelimiter, string $numberDelimiter = ''): ?float
     {
         // Replace numerals based on current locale data
         $digitsMap = _getNativeDigitsMap();
@@ -338,7 +367,7 @@ class intlNumUtils
         if ($digitsMap) {
             $_text = trim(implode('', array_map(function ($character) use ($digitsMap) {
                 return $digitsMap[$character] ?? $character;
-            }, str_split($text))));
+            }, mb_str_split($text))));
         }
 
         $_text = preg_replace("/^[^\d]*\-/", "\u{0002}", $_text); // preserve negative sign
@@ -368,13 +397,13 @@ class intlNumUtils
         return _parseCodifiedNumber($_text);
     }
 
-    public static function truncateLongNumber($number, $decimals = null)
+    public static function truncateLongNumber(string $number, int $decimals = null): string
     {
-        $pos = strpos($number, '.');
-        $dividend = $pos ? $number : substr($number, 0, $pos);
-        $remainder = $pos ? '' : substr($number, $pos + 1);
+        $pos = mb_strpos($number, '.');
+        $dividend = $pos === false ? $number : mb_substr($number, 0, $pos);
+        $remainder = $pos === false ? '' : mb_substr($number, $pos + 1);
 
-        return $decimals !== null ? $dividend . '.' . addZeros(substr($remainder, 0, $decimals), $decimals - mb_strlen($remainder)) : $dividend;
+        return $decimals !== null ? $dividend . '.' . addZeros(mb_substr($remainder, 0, $decimals), $decimals - mb_strlen($remainder)) : $dividend;
     }
 
     /**
@@ -385,7 +414,7 @@ class intlNumUtils
      * gets edge cases for Norwegian and Spanish right.
      *
      */
-    public static function getFloatString($num, $thousandDelimiter, $decimalDelimiter)
+    public static function getFloatString($num, $thousandDelimiter, $decimalDelimiter): string
     {
         $str = (string)$num;
         $pieces = explode('.', $str);
@@ -406,7 +435,7 @@ class intlNumUtils
      * edge cases for Norwegian and Spanish right.
      *
      */
-    public static function getIntegerString($num, $thousandDelimiter)
+    public static function getIntegerString(int $num, string $thousandDelimiter): string
     {
         $delim = $thousandDelimiter;
         if ($delim === '') {
