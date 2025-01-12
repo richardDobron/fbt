@@ -11,7 +11,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
 {
     use MatchesSnapshots;
 
-    public function setUp(): void
+    public function setUp()
     {
         FbtConfig::set('author', 'richard');
         FbtConfig::set('locale', 'sk_SK');
@@ -22,7 +22,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         });
     }
 
-    protected function tearDown(): void
+    protected function tearDown()
     {
         parent::tearDown();
 

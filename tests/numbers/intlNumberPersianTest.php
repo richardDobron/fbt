@@ -10,7 +10,7 @@ class intlNumberPersianTest extends \tests\TestCase
 {
     private $util;
 
-    public function setUp(): void
+    public function setUp()
     {
         parent::setUp();
 
