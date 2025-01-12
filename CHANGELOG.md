@@ -4,6 +4,10 @@ All notable changes to `fbt` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## v3.3.1 - 2025-01-12
+### Fixed
+- Fix intlNumUtils class parser and formatter
+
 ## v3.3.0 - 2024-12-14
 ### Added
 - Latte support
