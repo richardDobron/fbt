@@ -40,8 +40,18 @@ class fbt implements \JsonSerializable, HtmlStringable
         unset($this->options['transform']);
     }
 
-    public static function param(string $name, string $value, array $options = []): string
+    /**
+     * @param string $name
+     * @param int|float|string $value
+     * @param array $options
+     * @return string
+     */
+    public static function param(string $name, $value, array $options = []): string
     {
+        if (isset($options['number']) && is_bool($options['number'])) {
+            $options['number'] = $options['number'] ? 'true' : 'false';
+        }
+
         return createElement(static::$moduleName . ':param', $value, [
             'name' => $name,
         ] + $options);
