@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace tests\translations;
 
+use fbt\fbt;
 use fbt\FbtConfig;
 use fbt\Lib\IntlViewerContext;
 use fbt\Runtime\FbtTranslations;
@@ -125,7 +126,7 @@ FBT;
 
     public function testSubjectWithNumber()
     {
-        $translateFbt = function ($subject, $number) {
+        $translateFbt = function (int $subject, int $number) {
             return <<<FBT
 <fbt desc="Text indicating the number of followers of a user" subject="$subject">
     Followed by <strong><fbt:param name="number of followers" number="true">$number</fbt:param> person</strong>
@@ -174,6 +175,41 @@ FBT;
         $this->assertEquals('Sledovaný <strong>1 osobou</strong>', self::transform($translateFbt(1, 1)));
         $this->assertEquals('Sledovaná <strong>2 ľuďmi</strong>', self::transform($translateFbt(2, 2)));
         $this->assertEquals('Sledovaný/á <strong>5 ľuďmi</strong>', self::transform($translateFbt(3, 5)));
+    }
+
+    public function testNumberParam()
+    {
+        $translateFbt = function (int $number) {
+            return fbt('+' . fbt::param('count', $number, ['number' => true]) . ' more', 'text in product gallery');
+        };
+
+        FbtHooks::locale('en_US');
+
+        $this->assertEquals('+1 more', $translateFbt(1));
+
+        $this->assertEquals([
+            [
+                't' =>
+                    [
+                        '*' => '+{count} more',
+                    ],
+                'm' =>
+                    [
+                        [
+                            'token' => 'count',
+                            'type' => 2,
+                        ],
+                    ],
+            ],
+        ], array_column(FbtTransform::$phrases, 'jsfbt'));
+
+        $this->registerTranslations();
+
+        FbtHooks::locale(null);
+
+        $this->assertEquals('+1 ďalšia', $translateFbt(1));
+        $this->assertEquals('+2 ďalšie', $translateFbt(2));
+        $this->assertEquals('+5 ďalších', $translateFbt(5));
     }
 
     public function testSubject()

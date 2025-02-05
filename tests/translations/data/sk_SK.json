@@ -2,6 +2,34 @@
     "sk_SK": {
         "fb-locale": "sk_SK",
         "translations": {
+            "35dff4c3b4983537013cf63fb03c9fea": {
+                "translations": [
+                    {
+                        "translation": "+{count} ďalšia",
+                        "variations": [
+                            4
+                        ]
+                    },
+                    {
+                        "translation": "+{count} ďalšie",
+                        "variations": [
+                            20
+                        ]
+                    },
+                    {
+                        "translation": "+{count} ďalších",
+                        "variations": [
+                            24
+                        ]
+                    }
+                ],
+                "tokens": [
+                    "count"
+                ],
+                "types": [
+                    28
+                ]
+            },
             "4a709aa92b186ddab2026e89affdb34b": {
                 "translations": [
                     {
