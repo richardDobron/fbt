@@ -7,6 +7,8 @@ use fbt\Exceptions\FbtInvalidConfigurationException;
 class FbtConfig
 {
     /** @var array */
+    protected static $actions = [];
+    /** @var array */
     protected static $config = [
         /*
          * Project to which the text belongs.
@@ -114,6 +116,12 @@ class FbtConfig
             throw new FbtInvalidConfigurationException('Invalid config key ' . $key);
         }
 
+        if (! isset(static::$config[$key]) || static::$config[$key] !== $value) {
+            foreach (self::$actions[$key] ?? [] as $action) {
+                $action($value, static::$config[$key]);
+            }
+        }
+
         static::$config[$key] = $value;
     }
 
@@ -127,5 +135,18 @@ class FbtConfig
         foreach ($config as $key => $value) {
             self::set($key, $value);
         }
+    }
+
+    public static function listen(string $key, \closure $action)
+    {
+        if (! array_key_exists($key, self::$config)) {
+            throw new FbtInvalidConfigurationException('Invalid config key ' . $key);
+        }
+
+        if (! isset(self::$actions[$key])) {
+            self::$actions[$key] = [];
+        }
+
+        self::$actions[$key][] = $action;
     }
 }
