@@ -4,6 +4,12 @@ All notable changes to `fbt` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## v3.3.2 - 2025-02-16
+### Fixed
+- Fix `fbt::param` boolean conversion in `number` option
+### Added
+- Listener for `FbtConfig`
+
 ## v3.3.1 - 2025-01-12
 ### Fixed
 - Fix intlNumUtils class parser and formatter
