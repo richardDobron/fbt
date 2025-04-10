@@ -36,7 +36,7 @@ class NodeVisitor extends NodeVisitorAbstract
                 case "param":
                     if (! CollectFbtsService::matchFbtCalls($node->args[1]->value)
                         && ! ($node->args[1]->value instanceof String_)) {
-                        $node->args[1] = new String_('value');
+                        $node->args[1] = new String_('123');
                     }
 
                     break;
