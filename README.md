@@ -2,6 +2,8 @@
   <img src="icon.png" height="150" width="150" alt="FBT"/>
 </h1>
 
+# FBT for PHP
+
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/richardDobron/fbt.svg?style=flat-square)](https://packagist.org/packages/richardDobron/fbt)
 [![MIT Licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 ![Test Status](https://github.com/richardDobron/fbt/actions/workflows/run-tests.yml/badge.svg?branch=3.x)
@@ -20,17 +22,17 @@ FBT is an internationalization framework for PHP designed to be not just **power
 <img src="docs/enum.png" alt="FBT enum"/>
 <img src="docs/pronouns.png" alt="FBT pronouns"/>
 
-## Requirements
+## 📖 Requirements
 * PHP 7.0 or higher
 * [Composer](https://getcomposer.org) is required for installation
 
-## Installing
+## 📦 Installing
 
 ```shell
 $ composer require richarddobron/fbt:^3
 ```
 
-## Features
+## ✨ Features
 - [x] Parameters and interpolation
 - [x] Implicit parameters
 - [x] Auto-parameterization
@@ -41,40 +43,44 @@ $ composer require richarddobron/fbt:^3
 - [x] Phrase extracting
 - [x] Inline translating
 
-## Getting started
+## 🚀 Getting started
 
-[Integrating into your app](docs/getting_started.md)
+See the [Getting Started](docs/getting_started.md) guide for more.
 
-## Version Guidance
+## 📑 Version Guidance
 
 | Version | Released   | Status | Repo             | PHP Version |
 |---------|------------|--------|------------------|-------------|
 | 3.x     | 2022-02-18 | Latest | [v3][fbt-3-repo] | >= 7.0      |
 
-## Official integrations
+## 🔌 Official integrations
 
 The following integrations are fully supported and maintained:
 
 - [Laravel](https://github.com/richardDobron/laravel-fbt)
 
-## How FBT works
+## ⚙️ How FBT works
 FBT works by transforming your `<fbt>` and `fbt(...)` constructs via
-[Simple HTML DOM Parser][simplehtmldom].  This library serve to extract strings from source and
-lookup translated payloads generated while execution.  FBT creates tables
-of all possible variations for the given fbt phrase and accesses this
+[Simple HTML DOM Parser][simplehtmldom].  It serves to extract strings from source and
+lookup translated payloads generated during execution.  FBT creates tables
+of all possible variations for each fbt phrase and accesses them
 at runtime.
 
-## Full documentation
-https://github.com/richardDobron/fbt/tree/main/docs
+## 📕 Full documentation
 
+- [API Reference](https://richarddobron.github.io/fbt/)
 
-## TODO
+## ✅ TODO
 
 - [ ] Add driver-agnostic support for multiple database systems.
 - [ ] Add integrations for Symfony, CakePHP, Zend Framework, ...
 - ...
 
-## License
+## 🤝 Contributing
+
+We welcome contributions! If you'd like to help improve this project, feel free to open an issue or submit a pull request.
+
+## 📜 License
 FBT is MIT licensed, as found in the [LICENSE](LICENSE) file.
 
 [fbt-3-repo]: https://github.com/richarddobron/fbt
