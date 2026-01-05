@@ -211,6 +211,40 @@ FBT;
         $this->assertSame('First <strong>second</strong>, <span>third</span>, <div>fourth</div>.', self::transform($fbt));
     }
 
+    public function testBuffer()
+    {
+        $this->expectOutputString('A simple string');
+
+        fbtTransform();
+
+        echo <<<HTML
+<fbt desc="It's simple">A simple string</fbt>
+HTML;
+
+        endFbtTransform();
+    }
+
+    public function testBrokenHtmlTransform()
+    {
+        $fbt = <<<FBT
+<div>
+    <fbt desc="It's simple">A simple string</fbt>
+
+    </p><p>
+    <span>
+</div>
+</span>
+FBT;
+
+        $this->assertSame('<div>
+    A simple string
+
+    </p><p>
+    <span>
+</div>
+</span>', self::transform($fbt));
+    }
+
     public function testMixedHtmlTagsWithParams()
     {
         $fbt = <<<FBT
