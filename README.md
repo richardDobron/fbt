@@ -78,10 +78,11 @@ at runtime.
 
 ## 🤝 Contributing
 
-We welcome contributions! If you'd like to help improve this project, feel free to open an issue or submit a pull request.
+Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## 📜 License
-FBT is MIT licensed, as found in the [LICENSE](LICENSE) file.
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 [fbt-3-repo]: https://github.com/richarddobron/fbt
 [link-facebook-fbt]: https://github.com/facebook/fbt
