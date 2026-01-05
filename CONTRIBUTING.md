@@ -1,41 +1,32 @@
 # Contributing
 
-Please read and understand the contribution guide before creating an issue or pull request.
+Contributions are **welcome** and will be fully **credited**.
 
-## Etiquette
+We accept contributions via Pull Requests on [Github](https://github.com/richardDobron/fbt).
 
-This project is an open source project, and as such, the maintainers use their free time to build and maintain it.
-The code is freely available and can be used, forked and modified.
 
-Please be considerate towards maintainers when raising issues or presenting pull requests.
+## Pull Requests
 
-It's the duty of the maintainer to ensure that all submissions to the project are of sufficient
-quality to benefit the project. Many developers have different skill sets, strengths, and weaknesses. Respect the maintainer's decision, and do not be upset or abusive if your submission is not used.
+- **[PSR-12 Coding Standard](https://www.php-fig.org/psr/psr-12/)** - Check the code style with ``$ composer check-style`` and fix it with ``$ composer fix-style``.
 
-## Viability
+- **Add tests!** - Your patch won't be accepted if it doesn't have tests.
 
-When requesting or submitting new features, first consider whether it might be useful to others. Open
-source projects are used by many developers, who may have entirely different needs to your own. Think about
-whether or not your feature is likely to be used by other users of the project.
+- **Document any change in behaviour** - Make sure the `README.md` and any other relevant documentation are kept up-to-date.
 
-## How to submit changes?
+- **Consider our release cycle** - We try to follow [SemVer v2.0.0](http://semver.org/). Randomly breaking public APIs is not an option.
 
-- Check the codebase to ensure that your feature doesn't already exist.
-- Check the pull requests to ensure that another person hasn't already submitted the feature or fix.
-- Use the [pull request template](PULL_REQUEST_TEMPLATE.md)
+- **Create feature branches** - Don't ask us to pull from your master branch.
 
-## How to report a bug?
+- **One pull request per feature** - If you want to do more than one thing, send multiple pull requests.
 
-- Attempt to replicate the problem, to ensure that it wasn't a coincidental incident.
-- Check to make sure your feature suggestion isn't already present within the project.
-- Check the pull requests tab to ensure that the bug doesn't have a fix in progress.
-- Check the pull requests tab to ensure that the feature isn't already in progress.
-- Use the [issue template](ISSUE_TEMPLATE.md)
+- **Send coherent history** - Make sure each individual commit in your pull request is meaningful. If you had to make multiple intermediate commits while developing, please [squash them](http://www.git-scm.com/book/en/v2/Git-Tools-Rewriting-History#Changing-Multiple-Commit-Messages) before submitting.
 
-## Requirements
 
-- **[PSR-2 Coding Standard](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide.md)**. - Style will get automatically fixed.
-- **Add tests backing up your change!** - You can run the test by running `vendor/bin/phpunit`
-- **Document any change in behaviour** - Documentation is located in the `/docs/` folder
-- **One feature per Pull Request**
-- **Add meaningful commit messages**
+## Running Tests
+
+``` bash
+$ composer test
+```
+
+
+**Happy coding**!
