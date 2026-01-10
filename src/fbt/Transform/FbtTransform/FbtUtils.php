@@ -152,7 +152,7 @@ class FbtUtils
     public static function collectOptions($moduleName, $options, $validOptions): array
     {
         $key2value = [];
-        if ($options == null) {
+        if ($options === null) {
             return $key2value;
         }
 
@@ -383,7 +383,7 @@ class FbtUtils
                 return $node->innertext();
             }
 
-            if ($node->isElement() && ! $node->isNamespacedElement() && $node->innertext() == '') {
+            if ($node->isElement() && ! $node->isNamespacedElement() && $node->innertext() === '') {
                 // todo: this should catch in _createFbtFunctionCallNode
                 invariant(false, 'text cannot be null');
             }

@@ -119,7 +119,7 @@ class HTMLFbtProcessor
 
         $args = [$text, $desc];
 
-        if ($options != null) {
+        if ($options !== null) {
             $args[] = $options;
         }
 
@@ -164,7 +164,7 @@ class HTMLFbtProcessor
         }
 
         foreach ($children as $child) {
-            if ($child->implicitDesc != null && $child->implicitDesc !== '') {
+            if ($child->implicitDesc !== null && $child->implicitDesc !== '') {
                 $child->parentIndex = $phraseIndex;
                 $child->setAttribute('parentIndex', $phraseIndex);
             }

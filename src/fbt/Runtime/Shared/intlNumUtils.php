@@ -111,11 +111,11 @@ class intlNumUtils
             $replaceWith = '$1' . $thousandDelimiter . '$2$3';
             $primaryPattern = '(\\d)(\\d{' . ($primaryGroupingSize - 0) . '})($|\\D)';
             $replaced = preg_replace(self::_buildRegex($primaryPattern), $replaceWith, $wholeNumber);
-            if ($replaced != $wholeNumber) {
+            if ($replaced !== $wholeNumber) {
                 $wholeNumber = $replaced;
                 $secondaryPatternString = '(\\d)(\\d{' . ($secondaryGroupingSize - 0) . '})(' . self::escapeRegex($thousandDelimiter) . ')';
                 $secondaryPattern = self::_buildRegex($secondaryPatternString);
-                while (($replaced = preg_replace($secondaryPattern, $replaceWith, $wholeNumber)) != $wholeNumber) {
+                while (($replaced = preg_replace($secondaryPattern, $replaceWith, $wholeNumber)) !== $wholeNumber) {
                     $wholeNumber = $replaced;
                 }
             }
@@ -378,7 +378,7 @@ class intlNumUtils
         $nativeDigitMap = [];
         $digits = $numberFormatConfig['numberingSystemData']['digits'] ?? $numberFormatConfig['numberingSystemData'];
 
-        if ($digits == null) {
+        if ($digits === null) {
             return null;
         }
 

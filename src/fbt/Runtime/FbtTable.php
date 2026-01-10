@@ -74,7 +74,7 @@ class FbtTable
         // in the table, in which case we return null
         if ($argsIndex >= count($args)) {
             return $table;
-        } elseif ($table == null) {
+        } elseif ($table === null) {
             return null;
         }
 
