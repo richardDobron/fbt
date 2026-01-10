@@ -33,7 +33,7 @@ class IntlVariationResolverImpl
             gettype($numType)
         );
 
-        return $number == 1 ? [self::EXACTLY_ONE, $numType, "*"] : [$numType, "*"];
+        return $number === 1 ? [self::EXACTLY_ONE, $numType, "*"] : [$numType, "*"];
     }
 
     /**

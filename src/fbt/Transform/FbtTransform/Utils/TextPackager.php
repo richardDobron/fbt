@@ -48,7 +48,7 @@ class TextPackager
             $hashToText = [];
             foreach ($flatText['texts'] as $textIdx => $text) {
                 $hash = $hashes[$phraseIdx][$textIdx];
-                if ($hash == null) {
+                if ($hash === null) {
                     throw new FbtException('Missing hash for text: ' . $text);
                 }
                 $hashToText[$hash] = $text;

@@ -12,7 +12,7 @@ We recommend you read the [best practices](best_practices.md) for advice on how 
 $ composer require richarddobron/fbt
 ```
 
-Add this lines to your code:
+Add these lines to your code:
 
 - _We recommend setting the **author**, **project** and **path** options._
 ```php
@@ -37,8 +37,8 @@ The following options can be defined:
   - Turn this off by setting this to `true`
 * **viewerContext** `string`: (Default: `\fbt\Runtime\Shared\IntlViewerContext::class`)
 * **locale** `string`: (Default: `en_US`) User locale.
-* **fbtCommon** `string`: (Default: `[]`) common string's, e.g. `[['text' => 'desc'], ...]`
-* **fbtCommonPath** `string`: (Default: `null`) Path to the common string's module.
+* **fbtCommon** `string`: (Default: `[]`) common strings, e.g. `[['text' => 'desc'], ...]`
+* **fbtCommonPath** `string`: (Default: `null`) Path to the common strings module.
 * **path** `string`: Cache storage path for generated translations & source strings.
 * **fallback** `array`: (Default: `[]`) Fallback translations, e.g. `['de_AT' => 'de_DE']` 
 

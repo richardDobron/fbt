@@ -227,7 +227,7 @@ class fbt
                 return FbtTableAccessor::getNumberResult($variation, $substitution, $number);
             } elseif ($variations[0] === FbtRuntimeTypes::PARAM_VARIATION_TYPE['gender']) {
                 $gender = $variations[1];
-                invariant($gender != null, 'expected gender value');
+                invariant($gender !== null, 'expected gender value');
 
                 return FbtTableAccessor::getGenderResult(
                     IntlVariationResolverImpl::getGenderVariations($gender),

@@ -34,7 +34,7 @@ class FbtTranslations
             }
         }
 
-        if ($hashKey == null || empty($table[$hashKey])) {
+        if ($hashKey === null || empty($table[$hashKey])) {
             return null;
         }
 
