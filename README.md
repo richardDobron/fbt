@@ -61,7 +61,7 @@ The following integrations are fully supported and maintained:
 
 ## ⚙️ How FBT works
 FBT works by transforming your `<fbt>` and `fbt(...)` constructs via
-[Simple HTML DOM Parser][simplehtmldom].  It serves to extract strings from source and
+[DOM Forge][dom-forge].  It serves to extract strings from source and
 lookup translated payloads generated during execution.  FBT creates tables
 of all possible variations for each fbt phrase and accesses them
 at runtime.
@@ -86,4 +86,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 [fbt-3-repo]: https://github.com/richarddobron/fbt
 [link-facebook-fbt]: https://github.com/facebook/fbt
-[simplehtmldom]: https://sourceforge.net/projects/simplehtmldom/files/simplehtmldom/1.9.1/
+[dom-forge]: https://github.com/richardDobron/dom-forge
