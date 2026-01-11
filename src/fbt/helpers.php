@@ -97,12 +97,20 @@ namespace {
 }
 
 namespace fbt {
+
+    use dobron\DomForge\DomForge;
+    use dobron\DomForge\Node;
     use fbt\Exceptions\FbtException;
     use fbt\Runtime\fbtNamespace;
     use fbt\Runtime\Shared\IntlList;
     use fbt\Transform\FbtTransform\FbtConstants;
-    use fbt\Util\SimpleHtmlDom\DOM;
-    use fbt\Util\SimpleHtmlDom\Node;
+
+    DomForge::registerSelfClosingTags([
+        'fbt:enum',
+        'fbt:pronoun',
+        'fbt:sameparam',
+        'fbt:same-param',
+    ]);
 
     /**
      * @return void
@@ -197,11 +205,7 @@ namespace fbt {
      */
     function createElement(string $tag, $content = null, array $attributes = []): string
     {
-        static $dom, $cachedValues = [];
-
-        if (empty($dom)) {
-            $dom = new DOM();
-        }
+        static $cachedValues = [];
 
         $element = '<' . $tag;
 
@@ -226,7 +230,7 @@ namespace fbt {
             $element .= ' ' . implode(' ', $attributeStrings);
         }
 
-        if ($dom->isSelfClosingTag($tag)) {
+        if (DomForge::isSelfClosingTag($tag)) {
             $element .= '/>';
         } else {
             if (! is_array($content)) {

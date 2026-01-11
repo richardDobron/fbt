@@ -2,6 +2,8 @@
 
 namespace fbt\Transform\FbtTransform\Processors;
 
+use dobron\DomForge\DomForge;
+use dobron\DomForge\Node;
 use fbt\Exceptions\FbtParserException;
 use function fbt\fbt;
 use function fbt\invariant;
@@ -13,7 +15,6 @@ use fbt\Transform\FbtTransform\FbtConstants;
 use fbt\Transform\FbtTransform\FbtNodeChecker;
 use fbt\Transform\FbtTransform\FbtUtils;
 use fbt\Transform\FbtTransform\Utils\GetNamespacedArgs;
-use fbt\Util\SimpleHtmlDom\Node;
 
 class HTMLFbtProcessor
 {
@@ -93,7 +94,7 @@ class HTMLFbtProcessor
 
         $this->_assertHasMandatoryAttributes();
 
-        return $this->node->getAllAttributes() // js~php diff
+        return $this->node->getAttributes() // js~php diff
             ? FbtUtils::getOptionsFromAttributes($this->node, FbtConstants::VALID_FBT_OPTIONS, FbtConstants::FBT_REQUIRED_ATTRIBUTES)
             : null;
     }
@@ -103,7 +104,7 @@ class HTMLFbtProcessor
      */
     private function _assertHasMandatoryAttributes()
     {
-        if (! count(array_intersect(array_keys($this->node->getAllAttributes()), FbtConstants::FBT_CALL_MUST_HAVE_AT_LEAST_ONE_OF_THESE_ATTRIBUTES))) {
+        if (! count(array_intersect(array_keys($this->node->getAttributes()), FbtConstants::FBT_CALL_MUST_HAVE_AT_LEAST_ONE_OF_THESE_ATTRIBUTES))) {
             throw FbtUtils::errorAt($this->node, "<$this->moduleName> must have at least one of these attributes: " . implode(', ', FbtConstants::FBT_CALL_MUST_HAVE_AT_LEAST_ONE_OF_THESE_ATTRIBUTES));
         }
     }
@@ -191,10 +192,10 @@ class HTMLFbtProcessor
     private function _transformNamespacedFbtElement(Node $node)
     {
         switch ($node->nodetype) {
-            case HDOM_TYPE_ELEMENT:
+            case DomForge::TYPE_ELEMENT:
                 return $this->_toFbtNamespacedCall($node);
-            case HDOM_TYPE_TEXT:
-                return FbtUtils::normalizeSpaces($node->innertext());
+            case DomForge::TYPE_TEXT:
+                return FbtUtils::normalizeSpaces($node->innerHtml);
             default:
                 throw FbtUtils::errorAt($node, "Unknown namespace fbt type $node->nodetype ($node->tag)");
         }
@@ -224,7 +225,7 @@ class HTMLFbtProcessor
                 'subject' => $this->node->getAttribute('subject') ?: null,
                 'project' => $this->node->getAttribute('project'),
                 'author' => $this->node->getAttribute('author'),
-            ]), $node->getAllAttributes());
+            ]), $node->getAttributes());
             $args[1][1] = $content;
             $args[2] = $content;
         }

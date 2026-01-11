@@ -2,8 +2,9 @@
 
 namespace fbt\Transform\FbtTransform;
 
+use dobron\DomForge\Node;
+
 use function fbt\checkParentTags;
-use fbt\Util\SimpleHtmlDom\Node;
 
 class FbtAutoWrap
 {
@@ -68,7 +69,7 @@ class FbtAutoWrap
             // js~php diff:
             && ! in_array($node->tag, $excludedTags)
             && ! checkParentTags($node, $excludedTags)
-            ? FbtUtils::normalizeSpaces($node->innertext()) : '';
+            ? FbtUtils::normalizeSpaces($node->innerHtml()) : '';
     }
 
     /**
