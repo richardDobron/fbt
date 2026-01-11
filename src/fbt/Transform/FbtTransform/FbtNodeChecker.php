@@ -2,7 +2,7 @@
 
 namespace fbt\Transform\FbtTransform;
 
-use fbt\Util\SimpleHtmlDom\Node;
+use dobron\DomForge\Node;
 
 class FbtNodeChecker
 {

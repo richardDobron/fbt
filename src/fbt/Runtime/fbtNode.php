@@ -2,7 +2,7 @@
 
 namespace fbt\Runtime;
 
-use fbt\Util\SimpleHtmlDom\Node;
+use dobron\DomForge\Node;
 
 class fbtNode
 {

@@ -2,13 +2,13 @@
 
 namespace fbt\Transform\FbtTransform;
 
+use dobron\DomForge\Node;
 use fbt\Exceptions\FbtParserException;
 
 use function fbt\invariant;
 
 use fbt\Runtime\fbtElement;
 use fbt\Runtime\Shared\IntlPunctuation;
-use fbt\Util\SimpleHtmlDom\Node;
 
 class FbtUtils
 {
@@ -180,7 +180,7 @@ class FbtUtils
     {
         $options = [];
 
-        foreach ($attributesNode->getAllAttributes() as $name => $value) {
+        foreach ($attributesNode->getAttributes() as $name => $value) {
             // Required attributes are passed as a separate argument in the fbt(...)
             // call, because they're required. They're not passed as options.
             // Ignored attributes are simply stripped from the function call entirely
@@ -206,9 +206,9 @@ class FbtUtils
     public static function errorAt(Node $node, string $msg): FbtParserException
     {
         $_node = clone $node;
-        $_node->getDOM()->remove_callback();
+        $_node->dom()->removeCallback();
 
-        $errorMsg = "$msg\n---\n" . $_node->outertext() . "\n---";
+        $errorMsg = "$msg\n---\n" . $_node->outerHtml() . "\n---";
 
         return new FbtParserException($errorMsg);
     }
@@ -375,17 +375,17 @@ class FbtUtils
         $firstKey = array_keys($nodes)[0] ?? null;
         $lastKey = array_keys($nodes)[count($nodes) - 1] ?? null;
         $filteredNodes = array_filter($nodes, function (Node $node, $key) use ($firstKey, $lastKey) {
-            if ($node->isText() && preg_match("/^\s+$/", $node->innertext())) {
-                $node->innertext = (
+            if ($node->isText() && preg_match("/^\s+$/", $node->innerHtml())) {
+                $node->innerHtml = (
                     $key === $firstKey || $key === $lastKey
                     ? ''
                     : ' '
                 );
 
-                return $node->innertext();
+                return $node->innerHtml();
             }
 
-            if ($node->isElement() && ! $node->isNamespacedElement() && $node->innertext() === '') {
+            if ($node->isElement() && ! $node->isNamespacedElement() && $node->innerHtml() === '') {
                 // todo: this should catch in _createFbtFunctionCallNode
                 invariant(false, 'text cannot be null');
             }
@@ -472,7 +472,7 @@ class FbtUtils
 
         foreach ($nodes as $node) {
             $children = self::makeFbtElementArrayFromNode($node->nodes);
-            $tree[] = new fbtElement($node->tag, $node->innertext(), $node->getAllAttributes(), $children);
+            $tree[] = new fbtElement($node->tag, $node->innerHtml(), $node->getAttributes(), $children);
         }
 
         return $tree;

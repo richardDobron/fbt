@@ -2,11 +2,11 @@
 
 namespace fbt\Transform\FbtTransform\Utils;
 
+use dobron\DomForge\Node;
 use fbt\Transform\FbtTransform\FbtAutoWrap;
 use fbt\Transform\FbtTransform\FbtConstants;
 use fbt\Transform\FbtTransform\FbtUtils;
 use fbt\Util\NodeParser;
-use fbt\Util\SimpleHtmlDom\Node;
 
 class GetNamespacedArgs
 {
@@ -27,7 +27,7 @@ class GetNamespacedArgs
     {
         $newNode = FbtAutoWrap::wrapImplicitFBTParam($this->moduleName, $node);
 
-        return ['=' . $newNode->getAttribute('paramName'), $newNode->outertext()];
+        return ['=' . $newNode->getAttribute('paramName'), $newNode->outerHtml()];
     }
 
     /**
@@ -47,7 +47,7 @@ class GetNamespacedArgs
         }));
 
         if (count($paramChildren) === 0 && count($node->nodes) === 1 && $node->nodes[0]->isText()) {
-            $paramChildren = [$node->nodes[0]->innertext()];
+            $paramChildren = [$node->nodes[0]->innerHtml()];
         }
 
         if (count($paramChildren) > 1) {
@@ -55,7 +55,7 @@ class GetNamespacedArgs
         }
 
         // restore nodes noise (Simple HTML DOM issue)
-        $node = NodeParser::parse('<html>' . $node->innertext() . '</html>', false, true, DEFAULT_TARGET_CHARSET, false)
+        $node = NodeParser::parse('<html>' . $node->innerHtml() . '</html>')
             ->find('html', 0);
 
         $value = implode('', FbtUtils::makeFbtElementArrayFromNode($node->nodes));
@@ -85,7 +85,7 @@ class GetNamespacedArgs
         }
 
         $singularNode = $pluralChildren[0];
-        $singularText = $singularNode->innertext();
+        $singularText = $singularNode->innerHtml();
         $singularArg = trim(FbtUtils::normalizeSpaces($singularText)); // fbt diff rtrim()
 
         return [$singularArg, $countAttr, $options];
@@ -138,7 +138,7 @@ class GetNamespacedArgs
         $singularArg = $nameChildren[0];
 
         if ($singularArg->isText()) {
-            $singularArg = FbtUtils::normalizeSpaces($singularArg->innertext());
+            $singularArg = FbtUtils::normalizeSpaces($singularArg->innerHtml());
         }
 
         return [$nameAttribute, $singularArg, $genderAttribute];

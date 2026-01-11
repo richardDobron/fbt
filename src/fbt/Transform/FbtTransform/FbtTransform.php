@@ -2,13 +2,13 @@
 
 namespace fbt\Transform\FbtTransform;
 
+use dobron\DomForge\Node;
 use fbt\fbt;
 use fbt\FbtConfig;
 use fbt\Runtime\FbtTranslations;
 use fbt\Runtime\Shared\FbtHooks;
 use fbt\Transform\FbtTransform\Processors\HTMLFbtProcessor;
 use fbt\Util\NodeParser;
-use fbt\Util\SimpleHtmlDom\Node;
 
 class FbtTransform
 {
@@ -56,8 +56,8 @@ class FbtTransform
             self::$init = true;
         }
 
-        $dom = NodeParser::parse($html, false, true, DEFAULT_TARGET_CHARSET, false);
-        $dom->set_callback([self::class, '_fbtTraverse']);
+        $dom = NodeParser::parse($html);
+        $dom->setCallback([self::class, '_fbtTraverse']);
 
         return $dom->save();
     }
@@ -85,7 +85,7 @@ class FbtTransform
             $node->setAttribute('author', self::$defaultOptions['author']);
         }
 
-        $node->outertext = (string)$root->convertToFbtFunctionCallNode();
+        $node->outerHtml = (string)$root->convertToFbtFunctionCallNode();
     }
 
     /**

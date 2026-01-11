@@ -4,17 +4,26 @@ declare(strict_types=1);
 
 namespace fbt\Util;
 
-use fbt\Util\SimpleHtmlDom\DOM;
+use dobron\DomForge\Configuration;
+use dobron\DomForge\DomForge;
 
 class NodeParser
 {
-    public static function file_get_html()
+    public static function parse(string $str)
     {
-        return call_user_func_array('\fbt\Util\SimpleHtmlDom\file_get_html', func_get_args());
-    }
+        if (empty($str)) {
+            return false;
+        }
 
-    public static function parse(): DOM
-    {
-        return call_user_func_array('\fbt\Util\SimpleHtmlDom\str_get_html', func_get_args());
+        // fbt self-closing tags are registered globally in helpers.php
+        $configuration = (new Configuration())
+            ->setLowercase(false)
+            ->setForceTagsClosed(true)
+            ->setTargetCharset('UTF-8')
+            ->setRemoveLineBreaks(false)
+            ->setDefaultBrText("\n")
+            ->setDefaultSpanText(' ');
+
+        return DomForge::fromHtml($str, $configuration);
     }
 }

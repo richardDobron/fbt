@@ -2,13 +2,13 @@
 
 namespace fbt\Runtime;
 
+use dobron\DomForge\Node;
 use fbt\FbtConfig;
 use fbt\Transform\FbtRuntime\FbtRuntimeTransform;
 use fbt\Transform\FbtTransform\FbtConstants;
 use fbt\Transform\FbtTransform\FbtTransform;
 use fbt\Transform\FbtTransform\Processors\FbtFunctionCallProcessor;
 use fbt\Transform\FbtTransform\Utils\TextPackager;
-use fbt\Util\SimpleHtmlDom\Node;
 
 class fbtNamespace extends FbtFunctionCallProcessor
 {
@@ -78,7 +78,7 @@ class fbtNamespace extends FbtFunctionCallProcessor
     }
 
     /**
-     * @param \fbt\Util\SimpleHtmlDom\Node $node
+     * @param \dobron\DomForge\Node $node
      * @param array $args
      *
      * @return \fbt\Runtime\fbtNode
