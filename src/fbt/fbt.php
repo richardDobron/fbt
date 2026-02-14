@@ -134,7 +134,7 @@ class fbt implements \JsonSerializable, HtmlStringable
     public function __toString(): string
     {
         $text = $this->text;
-        if (is_string($text)) {
+        if (! is_array($text)) {
             $text = [$this->text];
         }
 

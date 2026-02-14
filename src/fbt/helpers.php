@@ -165,12 +165,12 @@ namespace fbt {
         return false;
     }
 
-    function unsignedRightShift($a, $b): int
+    function unsignedRightShift(int $a, int $b): int
     {
         return ($a & 0xFFFFFFFF) >> ($b & 0x1F);
     }
 
-    function rsearch($folder, $pattern): array
+    function rsearch(string $folder, string $pattern): array
     {
         $dir = new \RecursiveDirectoryIterator($folder);
         $ite = new \RecursiveIteratorIterator($dir);
