@@ -256,7 +256,6 @@ class HTMLFbtProcessor
             throw FbtUtils::errorAt($node, "<$this->moduleName> requires a \"desc\" attribute");
         }
 
-
         return $descAttr;
     }
 
