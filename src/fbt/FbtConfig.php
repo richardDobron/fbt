@@ -149,4 +149,14 @@ class FbtConfig
 
         self::$actions[$key][] = $action;
     }
+
+    public static function clearListeners(?string $key = null): void
+    {
+        if ($key === null) {
+            self::$actions = [];
+            return;
+        }
+
+        unset(self::$actions[$key]);
+    }
 }
