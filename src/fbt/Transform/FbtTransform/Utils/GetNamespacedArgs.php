@@ -6,7 +6,6 @@ use dobron\DomForge\Node;
 use fbt\Transform\FbtTransform\FbtAutoWrap;
 use fbt\Transform\FbtTransform\FbtConstants;
 use fbt\Transform\FbtTransform\FbtUtils;
-use fbt\Util\NodeParser;
 
 class GetNamespacedArgs
 {
