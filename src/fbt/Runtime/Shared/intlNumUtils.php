@@ -257,7 +257,7 @@ class intlNumUtils
         return self::_parseCodifiedNumber($_text);
     }
 
-    public static function truncateLongNumber(string $number, int $decimals = null): string
+    public static function truncateLongNumber(?string $number, ?int $decimals = null): string
     {
         $pos = strpos($number, '.');
         $dividend = $pos === false ? $number : substr($number, 0, $pos);

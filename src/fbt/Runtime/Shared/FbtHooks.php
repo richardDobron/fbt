@@ -128,7 +128,7 @@ class FbtHooks
      * @param int|null $parentId
      * @return null|int
      */
-    public static function savePhrase(array $phrase, int $parentId = null): ?int
+    public static function savePhrase(array $phrase, ?int $parentId = null): ?int
     {
         if (isset(self::$actions[__FUNCTION__])) {
             return self::$actions[__FUNCTION__](...func_get_args());

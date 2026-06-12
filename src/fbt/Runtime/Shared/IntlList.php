@@ -25,7 +25,7 @@ class IntlList
         'SEMICOLON' => 'SEMICOLON',
     ];
 
-    public function __construct(array $items, string $conjunction = null, string $delimiter = null)
+    public function __construct(array $items, ?string $conjunction = null, ?string $delimiter = null)
     {
         $this->items = $items;
         $this->conjunction = $conjunction;

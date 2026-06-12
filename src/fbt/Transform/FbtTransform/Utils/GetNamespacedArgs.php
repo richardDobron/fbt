@@ -54,9 +54,8 @@ class GetNamespacedArgs
             throw FbtUtils::errorAt($node, "$this->moduleName:param expects an string or HTML element, and only one");
         }
 
-        // restore nodes noise (Simple HTML DOM issue)
-        $node = NodeParser::parse('<html>' . $node->innerHtml() . '</html>')
-            ->find('html', 0);
+        // Trigger rebuild by setting innerHtml to itself
+        $node->innerHtml = $node->innerHtml;
 
         $value = implode('', FbtUtils::makeFbtElementArrayFromNode($node->nodes));
 

@@ -255,7 +255,7 @@ class fbt
      * @return array
      * @throws FbtException
      */
-    public static function _plural(float $count, string $label = null, $value = null): array
+    public static function _plural(float $count, ?string $label = null, $value = null): array
     {
         $variation = IntlVariationResolverImpl::getNumberVariations($count);
         $substitution = [];

@@ -245,14 +245,14 @@ class IntlNumberType
         "tob" => \fbt\Transform\FbtTransform\Translate\CLDR\IntlCLDRNumberType47::class,
     ];
 
-    public static function getNumberModuleForLang(string $lang = null): IntlNumberConsistency
+    public static function getNumberModuleForLang(?string $lang = null): IntlNumberConsistency
     {
         $cldr = self::LANG_TO_NUMBER_TYPE[$lang] ?? \fbt\Transform\FbtTransform\Translate\CLDR\IntlCLDRNumberType01::class;
 
         return new $cldr();
     }
 
-    public static function getNumberModuleForLocale(string $locale = null): IntlNumberConsistency
+    public static function getNumberModuleForLocale(?string $locale = null): IntlNumberConsistency
     {
         if (array_key_exists($locale, self::LOCALE_TO_NUMBER_TYPE)) {
             $cldr = self::LOCALE_TO_NUMBER_TYPE[$locale];
@@ -263,17 +263,17 @@ class IntlNumberType
         return self::getNumberModuleForLang(FBLocaleToLang::get($locale));
     }
 
-    public static function getLanguage(string $language = null): IntlNumberConsistency
+    public static function getLanguage(?string $language = null): IntlNumberConsistency
     {
         return self::getNumberModuleForLang($language);
     }
 
-    public static function getLocale(string $locale = null): IntlNumberConsistency
+    public static function getLocale(?string $locale = null): IntlNumberConsistency
     {
         return self::getNumberModuleForLocale($locale);
     }
 
-    public static function get(string $locale = null): IntlNumberConsistency
+    public static function get(?string $locale = null): IntlNumberConsistency
     {
         return self::getLocale($locale);
     }
