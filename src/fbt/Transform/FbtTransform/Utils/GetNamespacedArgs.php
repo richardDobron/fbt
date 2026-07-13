@@ -6,7 +6,6 @@ use dobron\DomForge\Node;
 use fbt\Transform\FbtTransform\FbtAutoWrap;
 use fbt\Transform\FbtTransform\FbtConstants;
 use fbt\Transform\FbtTransform\FbtUtils;
-use fbt\Util\NodeParser;
 
 class GetNamespacedArgs
 {
@@ -54,9 +53,7 @@ class GetNamespacedArgs
             throw FbtUtils::errorAt($node, "$this->moduleName:param expects an string or HTML element, and only one");
         }
 
-        // restore nodes noise (Simple HTML DOM issue)
-        $node = NodeParser::parse('<html>' . $node->innerHtml() . '</html>')
-            ->find('html', 0);
+        $node->innerHtml = $node->innerHtml;
 
         $value = implode('', FbtUtils::makeFbtElementArrayFromNode($node->nodes));
 
