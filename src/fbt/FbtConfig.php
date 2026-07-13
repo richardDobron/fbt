@@ -154,6 +154,7 @@ class FbtConfig
     {
         if ($key === null) {
             self::$actions = [];
+
             return;
         }
 
