@@ -7,15 +7,12 @@ use fbt\Exceptions\FbtParserException;
 
 use function fbt\invariant;
 
-use fbt\Runtime\fbtElement;
 use fbt\Runtime\Shared\IntlPunctuation;
 
 class FbtUtils
 {
     public const FBT_CORE_ATTRIBUTES = [ // js~php diff
-        'implicitDesc' => true,
         'implicitFbt' => true,
-        'paramName' => true,
         'desc' => true,
     ];
 
@@ -454,27 +451,5 @@ class FbtUtils
         }
 
         return $pieces;
-    }
-
-    // js~php diff:
-
-    /**
-     * @param array|Node $nodes
-     * @return array
-     */
-    public static function makeFbtElementArrayFromNode($nodes): array
-    {
-        $tree = [];
-
-        if ($nodes instanceof Node) {
-            $nodes = [$nodes];
-        }
-
-        foreach ($nodes as $node) {
-            $children = self::makeFbtElementArrayFromNode($node->nodes);
-            $tree[] = new fbtElement($node->tag, $node->innerHtml(), $node->getAttributes(), $children);
-        }
-
-        return $tree;
     }
 }

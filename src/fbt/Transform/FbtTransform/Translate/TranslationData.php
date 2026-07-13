@@ -7,7 +7,7 @@ class TranslationData
     public $tokens;
     public $types;
     public $translations;
-    private $_defaultTranslation;
+    private $_defaultTranslation = false;
 
     public function __construct(
         $tokens,
@@ -37,7 +37,7 @@ class TranslationData
     // Makes a best effort attempt at finding the default translation.
     public function getDefaultTranslation($config)
     {
-        if (empty($this->_defaultTranslation)) {
+        if ($this->_defaultTranslation === false) {
             for ($i = 0; $i < count($this->translations); ++$i) {
                 $trans = $this->translations[$i];
                 $isDefault = true;

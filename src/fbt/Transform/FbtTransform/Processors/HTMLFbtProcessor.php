@@ -165,9 +165,8 @@ class HTMLFbtProcessor
         }
 
         foreach ($children as $child) {
-            if ($child->implicitDesc !== null && $child->implicitDesc !== '') {
-                $child->parentIndex = $phraseIndex;
-                $child->setAttribute('parentIndex', $phraseIndex);
+            if (! empty($child->context->implicitDesc)) {
+                $child->context->parentIndex = $phraseIndex;
             }
         }
 
@@ -211,6 +210,7 @@ class HTMLFbtProcessor
         $moduleName = $this->moduleName;
         $name = FbtUtils::validateNamespacedFbtElement($moduleName, $node);
         $getNamespacedArgs = new GetNamespacedArgs($moduleName);
+
         $args = [
             $node,
             $getNamespacedArgs->{$name}($node),
@@ -281,7 +281,7 @@ class HTMLFbtProcessor
     /**
      * @throws \fbt\Exceptions\FbtParserException|\fbt\Exceptions\FbtException
      */
-    public function convertToFbtFunctionCallNode(): fbtNamespace
+    public function convertToFbtFunctionCallNode($phraseIndex): fbtNamespace
     {
         $this->_assertNoNestedFbts();
 
@@ -289,9 +289,7 @@ class HTMLFbtProcessor
             $this->_addImplicitDescriptionsToChildrenRecursively();
         }
 
-        // js~php diff:
-
-        // $this->_setPhraseIndexOnImplicitChildren($phraseIndex);
+        $this->_setPhraseIndexOnImplicitChildren($phraseIndex);
 
         $children = $this->_transformChildrenToFbtCalls($this->node->nodes);
 

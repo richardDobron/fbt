@@ -26,9 +26,8 @@ class FbtAutoWrap
     public static function wrapImplicitFBTParam(string $moduleName, Node $node): Node
     {
         // js~php diff:
-        $node->setAttribute('implicitDesc', $node->getAttribute('implicitDesc'));
         $node->setAttribute('implicitFbt', 'true');
-        $node->setAttribute('paramName', trim(FbtUtils::normalizeSpaces(self::collectRawString($moduleName, $node))));
+        $node->context->paramName = trim(FbtUtils::normalizeSpaces(self::collectRawString($moduleName, $node)));
         self::createDescAttribute($node);
 
         return $node;
@@ -53,7 +52,7 @@ class FbtAutoWrap
      */
     public static function createDescAttribute(Node $node): void
     {
-        $descString = 'In the phrase: "' . $node->getAttribute('implicitDesc') . '"';
+        $descString = 'In the phrase: "' . $node->context->implicitDesc . '"';
 
         $node->setAttribute('desc', $descString);
     }
@@ -133,8 +132,8 @@ class FbtAutoWrap
         if ($node->nodes) {
             $filteredChildren = FbtUtils::filterEmptyNodes($node->nodes);
             foreach ($filteredChildren as $child) {
-                if ($child->isElement() && FbtUtils::validateNamespacedFbtElement($moduleName, $node) === 'implicitParamMarker') {
-                    $child->setAttribute('implicitDesc', self::collectTokenStringFromStack($moduleName, $stack, 0));
+                if ($child->isElement() && FbtUtils::validateNamespacedFbtElement($moduleName, $child) === 'implicitParamMarker') {
+                    $child->context->implicitDesc = self::collectTokenStringFromStack($moduleName, $stack, 0);
                 }
 
                 self::createDescriptionsWithStack($moduleName, $child, $stack);

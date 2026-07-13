@@ -24,7 +24,7 @@ class IntlVariationResolverImpl
     {
         $locale = FbtHooks::locale();
 
-        $numType = IntlNumberType::getLocale($locale)->getVariation($number);
+        $numType = IntlNumberType::forLocale($locale)->getVariation($number);
 
         invariant(
             $numType & IntlVariations::INTL_VARIATION_MASK['NUMBER'],

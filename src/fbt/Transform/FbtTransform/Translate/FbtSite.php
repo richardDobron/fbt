@@ -115,7 +115,7 @@ class FbtSite
             $textToHash = [];
             foreach ($json['hashToText'] as $k => $text) {
                 invariant(
-                    empty($textToHash[$text]), // undefined
+                    !isset($textToHash[$text]), // undefined
                     "Duplicate texts pointing to different hashes shouldn't be possible"
                 );
                 $textToHash[$text] = $k;

@@ -10,7 +10,7 @@
         "ext-iconv": "*",
         "minicli/minicli": "1.0.4",
         "nikic/php-parser": "^4.1",
-        "richarddobron/dom-forge": "dev-main"
+        "richarddobron/dom-forge": "^2.0.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^8.5.5 || ^9.3.5",

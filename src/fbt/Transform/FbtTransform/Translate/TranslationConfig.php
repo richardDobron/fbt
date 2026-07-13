@@ -49,7 +49,7 @@ class TranslationConfig
     public static function fromFBLocale($locale): TranslationConfig
     {
         return new TranslationConfig(
-            IntlNumberType::getLocale($locale),
+            IntlNumberType::forLocale($locale),
             IntlGenderType::forLocale($locale)
         );
     }

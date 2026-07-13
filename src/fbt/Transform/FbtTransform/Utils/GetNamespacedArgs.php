@@ -26,7 +26,7 @@ class GetNamespacedArgs
     {
         $newNode = FbtAutoWrap::wrapImplicitFBTParam($this->moduleName, $node);
 
-        return ['=' . $newNode->getAttribute('paramName'), $newNode->outerHtml()];
+        return ['=' . $newNode->context->paramName, $newNode->outerHtml()];
     }
 
     /**
@@ -53,12 +53,7 @@ class GetNamespacedArgs
             throw FbtUtils::errorAt($node, "$this->moduleName:param expects an string or HTML element, and only one");
         }
 
-        // Trigger rebuild by setting innerHtml to itself
-        $node->innerHtml = $node->innerHtml;
-
-        $value = implode('', FbtUtils::makeFbtElementArrayFromNode($node->nodes));
-
-        $paramArgs = [$nameAttr, $value];
+        $paramArgs = [$nameAttr, $node->innerHtml];
 
         if (count($options) > 0) {
             $paramArgs[] = $options;
@@ -84,7 +79,7 @@ class GetNamespacedArgs
 
         $singularNode = $pluralChildren[0];
         $singularText = $singularNode->innerHtml();
-        $singularArg = trim(FbtUtils::normalizeSpaces($singularText)); // fbt diff rtrim()
+        $singularArg = rtrim(FbtUtils::normalizeSpaces($singularText));
 
         return [$singularArg, $countAttr, $options];
     }

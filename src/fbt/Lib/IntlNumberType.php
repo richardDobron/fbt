@@ -268,13 +268,13 @@ class IntlNumberType
         return self::getNumberModuleForLang($language);
     }
 
-    public static function getLocale(?string $locale = null): IntlNumberConsistency
+    public static function forLocale(?string $locale = null): IntlNumberConsistency
     {
         return self::getNumberModuleForLocale($locale);
     }
 
     public static function get(?string $locale = null): IntlNumberConsistency
     {
-        return self::getLocale($locale);
+        return self::forLocale($locale);
     }
 }

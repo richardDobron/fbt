@@ -384,7 +384,7 @@ class TranslationBuilder
                 ) {
                     // Only add default tokens we haven't specified.
                     if (! $this->_config->isDefaultVariation($variation)) {
-                        return;
+                        continue 2;
                     }
                 }
                 $constraints[$token] = $variation;

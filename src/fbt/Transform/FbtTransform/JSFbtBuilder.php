@@ -238,13 +238,13 @@ class JSFbtBuilder
 
             case 'pronoun':
                 $genderSrc = $item['gender'];
-                $isUsed = in_array($genderSrc, $this->usedPronouns);
+                $isUsed = array_key_exists($genderSrc, $this->usedPronouns);
                 $genders = $isUsed ? $this->usedPronouns[$genderSrc] : Gender::GENDER_CONST;
                 $resTable = [];
                 foreach (array_keys($genders) as $key) {
                     $gender = Gender::GENDER_CONST[$key];
 
-                    if ($gender === Gender::GENDER_CONST['NOT_A_PERSON'] && ! empty($item['human'])) {
+                    if ($gender === Gender::GENDER_CONST['NOT_A_PERSON'] && empty($item['human'])) {
                         continue;
                     }
 
@@ -262,7 +262,7 @@ class JSFbtBuilder
                 }
 
                 if (! $isUsed) {
-                    unset($this->usedPronouns['genderSrc']);
+                    unset($this->usedPronouns[$genderSrc]);
                 }
 
                 // js~php diff
