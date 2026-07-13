@@ -4,6 +4,10 @@ All notable changes to `fbt` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## v3.3.4 - 2026-07-13
+### Changed
+- Replace `SimpleHtmlDom` with `DOMForge`
+
 ## v3.3.3 - 2025-04-15
 ### Changed
 - Default value for `fbt::param` is now `123` instead of `value` while running `collect-fbts` command
