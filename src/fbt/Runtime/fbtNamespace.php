@@ -109,9 +109,11 @@ class fbtNamespace extends FbtFunctionCallProcessor
         $phrase = $textPackager->pack([$this->_getPhrase($texts, $desc, $isTable)])[0];
 
         if (FbtConfig::get('collectFbt') && empty($phrase['doNotExtract'])) {
+            $context = $phrase['context'];
+            unset($phrase['context']);
             FbtTransform::$phrases[] = $phrase;
 
-            if (! empty($phrase['implicitFbt'])) {
+            if (! empty($context['implicitFbt'])) {
                 FbtTransform::addEnclosingString(count(FbtTransform::$phrases) - 1, count(FbtTransform::$phrases));
             }
         }

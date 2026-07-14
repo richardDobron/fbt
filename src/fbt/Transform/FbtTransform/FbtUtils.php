@@ -4,19 +4,13 @@ namespace fbt\Transform\FbtTransform;
 
 use dobron\DomForge\Node;
 use fbt\Exceptions\FbtParserException;
+
 use function fbt\invariant;
-use fbt\Runtime\fbtElement;
+
 use fbt\Runtime\Shared\IntlPunctuation;
 
 class FbtUtils
 {
-    const FBT_CORE_ATTRIBUTES = [ // js~php diff
-        'implicitDesc' => true,
-        'implicitFbt' => true,
-        'paramName' => true,
-        'desc' => true,
-    ];
-
     public static function normalizeSpaces(string $value, array $options = []): string
     {
         if (! empty($options['preserveWhitespace'])) {
@@ -29,9 +23,9 @@ class FbtUtils
     /**
      * Validates allowed children inside <fbt>.
      * Currently allowed:
-     *   <fbt:param>, <FbtParam>
-     *   <fbt:enum>,  <FbtEnum>
-     *   <fbt:name>,  <FbtName>
+     *   <fbt:param>
+     *   <fbt:enum>
+     *   <fbt:name>
      * And returns a name of a corresponding handler.
      * If a child is not valid, it is flagged as an Implicit Parameter and is
      * automatically wrapped with <fbt:param>
@@ -113,14 +107,7 @@ class FbtUtils
         array $validOptions,
         $value
     ): string {
-        $validOptions = array_merge($validOptions, self::FBT_CORE_ATTRIBUTES);
         $validValues = $validOptions[$option] ?? null;
-
-        if ($value === true) { // js~php diff
-            $value = 'true';
-        } elseif ($value === false) {
-            $value = 'false';
-        }
 
         if (! array_key_exists($option, $validOptions) || empty($validValues)) {
             throw new FbtParserException(
@@ -128,7 +115,11 @@ class FbtUtils
                 "Only allowed: " . implode(', ', array_keys($validOptions)) . " "
             );
         } elseif ($validValues !== true) {
-            $valueStr = $value;
+            if (is_bool($value)) { // js~php diff
+                $valueStr = $value ? 'true' : 'false';
+            } else {
+                $valueStr = $value;
+            }
             if (! isset($validValues[$valueStr])) {
                 throw new FbtParserException(
                     "Invalid value, \"$valueStr\" for \"$option\". " .
@@ -370,26 +361,13 @@ class FbtUtils
     {
         // js~php diff
 
-        $firstKey = array_keys($nodes)[0] ?? null;
-        $lastKey = array_keys($nodes)[count($nodes) - 1] ?? null;
-        $filteredNodes = array_filter($nodes, function (Node $node, $key) use ($firstKey, $lastKey) {
-            if ($node->isText() && preg_match("/^\s+$/", $node->innerHtml())) {
-                $node->innerHtml = (
-                    $key === $firstKey || $key === $lastKey
-                    ? ''
-                    : ' '
-                );
-
-                return $node->innerHtml();
-            }
-
-            if ($node->isElement() && ! $node->isNamespacedElement() && $node->innerHtml() === '') {
-                // todo: this should catch in _createFbtFunctionCallNode
-                invariant(false, 'text cannot be null');
+        $filteredNodes = array_filter($nodes, function (Node $node) {
+            if ($node->isText() && preg_match("/^\s+$/", $node->innerHtml)) {
+                return $node->innerHtml;
             }
 
             return ! $node->isComment();
-        }, ARRAY_FILTER_USE_BOTH);
+        });
 
         return array_values($filteredNodes);
     }
@@ -401,10 +379,8 @@ class FbtUtils
      * @return string|array
      * @throws \fbt\Exceptions\FbtException
      */
-    public static function substituteTokens($template, $_args)
+    public static function substituteTokens($template, $args)
     {
-        $args = $_args;
-
         if (! $args) {
             return $template;
         }
@@ -418,7 +394,7 @@ class FbtUtils
         // Splice in the arguments while keeping rich object ones separate.
         $objectPieces = [];
         $argNames = [];
-        $stringPieces = explode("\x17", preg_replace_callback("/{([^}]+)}(" . IntlPunctuation::PUNCT_CHAR_CLASS . "*)/u", function ($matches) use ($args, &$argNames, &$objectPieces) {
+        $stringPieces = explode("\x17", preg_replace_callback("/{([^}]+)}(" . IntlPunctuation::PUNCT_CHAR_CLASS . "*)/u", function (array $matches) use ($args, &$argNames, &$objectPieces) {
             $parameter = $matches[1];
             $punctuation = $matches[2] ?? '';
 
@@ -452,27 +428,5 @@ class FbtUtils
         }
 
         return $pieces;
-    }
-
-    // js~php diff:
-
-    /**
-     * @param array|Node $nodes
-     * @return array
-     */
-    public static function makeFbtElementArrayFromNode($nodes): array
-    {
-        $tree = [];
-
-        if ($nodes instanceof Node) {
-            $nodes = [$nodes];
-        }
-
-        foreach ($nodes as $node) {
-            $children = self::makeFbtElementArrayFromNode($node->nodes);
-            $tree[] = new fbtElement($node->tag, $node->innerHtml(), $node->getAttributes(), $children);
-        }
-
-        return $tree;
     }
 }

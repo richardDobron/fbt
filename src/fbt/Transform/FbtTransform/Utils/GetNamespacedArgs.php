@@ -26,18 +26,18 @@ class GetNamespacedArgs
     {
         $newNode = FbtAutoWrap::wrapImplicitFBTParam($this->moduleName, $node);
 
-        return ['=' . $newNode->getAttribute('paramName'), $newNode->outerHtml()];
+        return ['=' . $newNode->context->paramName, $newNode->outerHtml()];
     }
 
     /**
-     * <fbt:param> or <FbtParam>
+     * <fbt:param>
      *
      * @throws \fbt\Exceptions\FbtParserException
      */
     public function param(Node $node): array
     {
         $nameAttr = FbtUtils::normalizeSpaces(FbtUtils::getAttributeByNameOrThrow($node, 'name'));
-        $options = FbtUtils::getOptionsFromAttributes($node, FbtConstants::validParamOptions(), FbtConstants::REQUIRED_PARAM_OPTIONS + FbtUtils::FBT_CORE_ATTRIBUTES);
+        $options = FbtUtils::getOptionsFromAttributes($node, FbtConstants::validParamOptions(), FbtConstants::REQUIRED_PARAM_OPTIONS);
 
         // js~php diff:
 
@@ -46,18 +46,14 @@ class GetNamespacedArgs
         }));
 
         if (count($paramChildren) === 0 && count($node->nodes) === 1 && $node->nodes[0]->isText()) {
-            $paramChildren = [$node->nodes[0]->innerHtml()];
+            $paramChildren = [$node->nodes[0]->innerHtml];
         }
 
         if (count($paramChildren) > 1) {
             throw FbtUtils::errorAt($node, "$this->moduleName:param expects an string or HTML element, and only one");
         }
 
-        $node->innerHtml = $node->innerHtml;
-
-        $value = implode('', FbtUtils::makeFbtElementArrayFromNode($node->nodes));
-
-        $paramArgs = [$nameAttr, $value];
+        $paramArgs = [$nameAttr, $node->innerHtml];
 
         if (count($options) > 0) {
             $paramArgs[] = $options;
@@ -67,7 +63,7 @@ class GetNamespacedArgs
     }
 
     /**
-     * <fbt:plural> or <FbtPlural>
+     * <fbt:plural>
      *
      * @throws \fbt\Exceptions\FbtParserException
      */
@@ -82,14 +78,14 @@ class GetNamespacedArgs
         }
 
         $singularNode = $pluralChildren[0];
-        $singularText = $singularNode->innerHtml();
-        $singularArg = trim(FbtUtils::normalizeSpaces($singularText)); // fbt diff rtrim()
+        $singularText = $singularNode->innerHtml;
+        $singularArg = rtrim(FbtUtils::normalizeSpaces($singularText));
 
         return [$singularArg, $countAttr, $options];
     }
 
     /**
-     * <fbt:pronoun> or <FbtPronoun>
+     * <fbt:pronoun>
      *
      * @throws \fbt\Exceptions\FbtParserException
      */
@@ -118,7 +114,7 @@ class GetNamespacedArgs
     }
 
     /**
-     * <fbt:name> or <FbtName>
+     * <fbt:name>
      *
      * @throws \fbt\Exceptions\FbtParserException
      */
@@ -135,14 +131,14 @@ class GetNamespacedArgs
         $singularArg = $nameChildren[0];
 
         if ($singularArg->isText()) {
-            $singularArg = FbtUtils::normalizeSpaces($singularArg->innerHtml());
+            $singularArg = FbtUtils::normalizeSpaces($singularArg->innerHtml);
         }
 
         return [$nameAttribute, $singularArg, $genderAttribute];
     }
 
     /**
-     * <fbt:same-param> or <FbtSameParam>
+     * <fbt:same-param>
      *
      * @throws \fbt\Exceptions\FbtParserException
      */
@@ -158,7 +154,7 @@ class GetNamespacedArgs
     }
 
     /**
-     * <fbt:enum> or <FbtEnum>
+     * <fbt:enum>
      *
      * @throws \fbt\Exceptions\FbtParserException
      */

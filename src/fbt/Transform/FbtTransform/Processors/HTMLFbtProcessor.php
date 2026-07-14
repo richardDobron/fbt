@@ -5,9 +5,10 @@ namespace fbt\Transform\FbtTransform\Processors;
 use dobron\DomForge\DomForge;
 use dobron\DomForge\Node;
 use fbt\Exceptions\FbtParserException;
+
 use function fbt\fbt;
 use function fbt\invariant;
-use fbt\Runtime\fbtElement;
+
 use fbt\Runtime\fbtNamespace;
 use fbt\Transform\FbtTransform\FbtAutoWrap;
 use fbt\Transform\FbtTransform\FbtCommon;
@@ -51,7 +52,7 @@ class HTMLFbtProcessor
     {
         return count($childNodes) > 1
             ? $this->_createConcatFromExpressions($childNodes)
-            : $childNodes[0];
+            : ($childNodes[0] ?? null);
     }
 
     /**
@@ -94,9 +95,16 @@ class HTMLFbtProcessor
 
         $this->_assertHasMandatoryAttributes();
 
-        return $this->node->getAttributes() // js~php diff
-            ? FbtUtils::getOptionsFromAttributes($this->node, FbtConstants::VALID_FBT_OPTIONS, FbtConstants::FBT_REQUIRED_ATTRIBUTES)
-            : null;
+        if (count($this->node->getAttributes()) > 1) {
+            $options = FbtUtils::getOptionsFromAttributes($this->node, FbtConstants::VALID_FBT_OPTIONS, FbtConstants::FBT_REQUIRED_ATTRIBUTES);
+            if ($this->node->context) {
+                $options['context'] = (array)$this->node->context;
+            }
+
+            return $options;
+        }
+
+        return null;
     }
 
     /**
@@ -113,7 +121,7 @@ class HTMLFbtProcessor
      * @throws \fbt\Exceptions\FbtException
      * @throws \fbt\Exceptions\FbtParserException
      */
-    private function _createFbtFunctionCallNode($text, $desc, $options): fbtNamespace
+    private function _createFbtFunctionCallNode($text, $desc, array $options): fbtNamespace
     {
         invariant($text, 'text cannot be null');
         invariant($desc, 'desc cannot be null');
@@ -138,7 +146,7 @@ class HTMLFbtProcessor
 
     private function _isImplicitFbt(): bool
     {
-        return $this->node->getAttribute('implicitFbt') === 'true';
+        return $this->node->context->implicitFbt ?? false;
     }
 
     /**
@@ -147,8 +155,6 @@ class HTMLFbtProcessor
     private function _addImplicitDescriptionsToChildrenRecursively(): self
     {
         FbtAutoWrap::createImplicitDescriptions($this->moduleName, $this->node);
-
-        return $this;
     }
 
     /**
@@ -156,7 +162,7 @@ class HTMLFbtProcessor
      * node that are implicit are given their parent's location. This can then
      * be used to link the inner strings with their enclosing string.
      */
-    private function _setPhraseIndexOnImplicitChildren($phraseIndex): self
+    private function _setPhraseIndexOnImplicitChildren(int $phraseIndex): self
     {
         $children = $this->node->children();
 
@@ -165,9 +171,8 @@ class HTMLFbtProcessor
         }
 
         foreach ($children as $child) {
-            if ($child->implicitDesc !== null && $child->implicitDesc !== '') {
-                $child->parentIndex = $phraseIndex;
-                $child->setAttribute('parentIndex', $phraseIndex);
+            if (! empty($child->context->implicitDesc)) {
+                $child->context->parentIndex = $phraseIndex;
             }
         }
 
@@ -186,7 +191,7 @@ class HTMLFbtProcessor
 
     /**
      * Transform a namespaced fbt JSXElement into a
-     * method call. E.g. `<fbt:param>` or <FbtParam> to `fbt::param()`
+     * method call. E.g. `<fbt:param>` to `fbt::param()`
      * @throws \fbt\Exceptions\FbtParserException
      */
     private function _transformNamespacedFbtElement(Node $node)
@@ -211,6 +216,7 @@ class HTMLFbtProcessor
         $moduleName = $this->moduleName;
         $name = FbtUtils::validateNamespacedFbtElement($moduleName, $node);
         $getNamespacedArgs = new GetNamespacedArgs($moduleName);
+
         $args = [
             $node,
             $getNamespacedArgs->{$name}($node),
@@ -218,27 +224,18 @@ class HTMLFbtProcessor
 
         if ($name === 'implicitParamMarker') {
             $name = 'param';
-
-            // js~php diff:
-            $content = (string)new fbtElement($node->tag, fbt($this->_transformChildrenToFbtCalls($node->nodes), $node->getAttribute('desc'), [
-                'implicitFbt' => true,
-                'subject' => $this->node->getAttribute('subject') ?: null,
-                'project' => $this->node->getAttribute('project'),
-                'author' => $this->node->getAttribute('author'),
-            ]), $node->getAttributes());
-            $args[1][1] = $content;
-            $args[2] = $content;
         }
 
         return call_user_func_array([fbtNamespace::class, $name], $args);
     }
 
     /**
+     * Given an array of nodes, recursively construct a concatenation of all these nodes.
      * @throws \fbt\Exceptions\FbtException
      */
     private function _createConcatFromExpressions(array $nodes): array
     {
-        invariant($nodes, 'Cannot create an expression without nodes.');
+        invariant(count($nodes) > 1, 'Cannot create an expression without nodes.');
 
         // js~php diff
         return $nodes;
@@ -281,7 +278,7 @@ class HTMLFbtProcessor
     /**
      * @throws \fbt\Exceptions\FbtParserException|\fbt\Exceptions\FbtException
      */
-    public function convertToFbtFunctionCallNode(): fbtNamespace
+    public function convertToFbtFunctionCallNode(int $phraseIndex): fbtNamespace
     {
         $this->_assertNoNestedFbts();
 
@@ -289,9 +286,7 @@ class HTMLFbtProcessor
             $this->_addImplicitDescriptionsToChildrenRecursively();
         }
 
-        // js~php diff:
-
-        // $this->_setPhraseIndexOnImplicitChildren($phraseIndex);
+        $this->_setPhraseIndexOnImplicitChildren($phraseIndex);
 
         $children = $this->_transformChildrenToFbtCalls($this->node->nodes);
 

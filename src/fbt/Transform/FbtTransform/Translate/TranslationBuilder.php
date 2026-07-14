@@ -202,7 +202,6 @@ class TranslationBuilder
                 unset($tokenConstraints[$token]);
             }
 
-            // js~php diff
             // @see https://stackoverflow.com/questions/5525795/does-javascript-guarantee-object-property-order
             uksort($table, function ($a, $b) {
                 return is_int($b) - is_int($a) ?: strnatcmp($a, $b);
