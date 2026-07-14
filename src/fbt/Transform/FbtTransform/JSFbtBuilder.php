@@ -265,7 +265,6 @@ class JSFbtBuilder
                     unset($this->usedPronouns[$genderSrc]);
                 }
 
-                // js~php diff
                 // @see https://stackoverflow.com/questions/5525795/does-javascript-guarantee-object-property-order
                 uksort($resTable, function ($a, $b) {
                     return is_int($b) - is_int($a) ?: strnatcmp($a, $b);

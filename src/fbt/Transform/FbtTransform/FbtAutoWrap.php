@@ -5,6 +5,7 @@ namespace fbt\Transform\FbtTransform;
 use dobron\DomForge\Node;
 
 use function fbt\checkParentTags;
+use function fbt\invariant;
 
 class FbtAutoWrap
 {
@@ -25,24 +26,41 @@ class FbtAutoWrap
      */
     public static function wrapImplicitFBTParam(string $moduleName, Node $node): Node
     {
-        // js~php diff:
-        $node->setAttribute('implicitFbt', 'true');
-        $node->context->paramName = trim(FbtUtils::normalizeSpaces(self::collectRawString($moduleName, $node)));
-        self::createDescAttribute($node);
+        invariant(! isset($node->context->paramName), 'You can only wrap an implicit fbt param once');
+
+        $parent = $node;
+        while ($parent = $parent->parent) {
+            if ($parent->tag === $moduleName) {
+                break;
+            }
+        }
+
+        $node->context->paramName = trim(
+            FbtUtils::normalizeSpaces(
+                self::collectRawString($moduleName, $node)
+            )
+        );
+
+        $fbtNode = $node->dom()->createElement(
+            $moduleName,
+            $node->innerHtml,
+            $parent->getAttributes()
+        );
+
+        $fbtNode->context->implicitFbt = true;
+        $fbtNode->context->implicitDesc = $node->context->implicitDesc;
+        $fbtNode->context->parentIndex = $node->context->parentIndex;
+
+        foreach ($node->nodes as $child) {
+            $fbtNode->appendChild($child);
+        }
+        self::createDescAttribute($fbtNode);
+
+        $fbtNode->parent = $node;
+        $node->children = [$fbtNode];
+        $node->nodes = [$fbtNode];
 
         return $node;
-        /*
-         * $fbtNode = clone $node;
-         * $fbtNode->attr = [
-         *     'implicitDesc' => $node->getAttribute('implicitDesc'),
-         *     'implicitFbt' => 'true',
-         *     'paramName' => trim(FbtUtils::normalizeSpaces(self::collectRawString($moduleName, $node))),
-         * ];
-         * self::createDescAttribute($fbtNode);
-         * $fbtNode->tag = $moduleName;
-         * $fbtNode->children = [$node];
-         * return $fbtNode;
-         */
     }
 
     /**
@@ -68,7 +86,7 @@ class FbtAutoWrap
             // js~php diff:
             && ! in_array($node->tag, $excludedTags)
             && ! checkParentTags($node, $excludedTags)
-            ? FbtUtils::normalizeSpaces($node->innerHtml()) : '';
+            ? FbtUtils::normalizeSpaces($node->innerHtml) : '';
     }
 
     /**
@@ -89,7 +107,7 @@ class FbtAutoWrap
             return '[' . self::getExplicitParamName($node) . ']';
         } else {
             $filteredChildren = FbtUtils::filterEmptyNodes($node->nodes);
-            $string = implode('', array_map(function ($_child) use ($moduleName) {
+            $string = implode('', array_map(function (Node $_child) use ($moduleName) {
                 return self::collectRawString($moduleName, $_child, true);
             }, $filteredChildren));
 
@@ -210,7 +228,6 @@ class FbtAutoWrap
             case 'implicitParamMarker':
                 return self::FBT_PARAM_TYPE['IMPLICIT'];
             case 'param':
-            case 'FbtParam':
                 return self::FBT_PARAM_TYPE['EXPLICIT'];
             default:
                 return self::FBT_PARAM_TYPE['NULL'];

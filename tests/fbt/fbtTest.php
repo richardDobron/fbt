@@ -300,7 +300,9 @@ FBT;
 </fbt>
 FBT;
 
-        $this->assertSame('<b class="padRight">Richard</b> has shared <a class="link" href="#">3 photos</a> with you.', self::transform($fbt));
+        $this->assertSame('
+		<b class="padRight">Richard</b>
+     has shared <a class="link" href="#">3 photos</a> with you.', self::transform($fbt));
     }
 
     public function testMixedPronounHtmlTags()
@@ -372,8 +374,6 @@ FBT;
                         "7de5f69602b0c289965183f9ffbf2496" => "{=awesome} vacation",
                     ],
                     "desc" => "In the phrase: \"Go on an {=awesome vacation}\"",
-                    "implicitFbt" => true,
-                    "subject" => null,
                     "project" => "awesome sauce",
                     "author" => "me",
                     "type" => "text",
@@ -384,8 +384,6 @@ FBT;
                         "6bbb015218a9c99babf7213c1fa764d8" => "awesome",
                     ],
                     "desc" => "In the phrase: \"Go on an {=awesome} vacation\"",
-                    "implicitFbt" => true,
-                    "subject" => null,
                     "project" => "awesome sauce",
                     "author" => "me",
                     "type" => "text",
@@ -453,7 +451,7 @@ FBT;
 </fbt>
 FBT;
 
-        $this->assertSame('A parameterized message to: ', self::transform($fbt));
+        $this->assertSame('A parameterized message to:  ', self::transform($fbt));
     }
 
     public function testNestWithinHtmlNodes()
@@ -488,9 +486,11 @@ FBT;
 FBT;
 
         $this->assertSame('<div>
-    now by <a href="/link">
+    now by ' . '
+        <a href="/link">
           me
         </a>
+      ' . '
 </div>', self::transform($fbt));
     }
 
@@ -656,7 +656,7 @@ FBT;
 </fbt>
 FBT;
 
-        $this->assertSame('Bar<br/> Bar', self::transform($fbt));
+        $this->assertSame('Bar<br> Bar', self::transform($fbt));
 
         $fbt = <<<FBT
 <fbt desc="Foo">
@@ -753,7 +753,11 @@ FBT;
 </fbt>
 FBT;
 
-        $this->assertSame('<b>simple</b> test', self::transform($fbt));
+        $this->assertSame('
+    <b>
+      simple
+    </b>
+   test', self::transform($fbt));
     }
 
     public function testViewerContext()

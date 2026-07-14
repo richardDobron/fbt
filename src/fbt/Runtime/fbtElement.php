@@ -4,8 +4,6 @@ namespace fbt\Runtime;
 
 use function fbt\createElement;
 
-use fbt\Transform\FbtTransform\FbtUtils;
-
 class fbtElement
 {
     public $attributes = [];
@@ -28,15 +26,12 @@ class fbtElement
 
     public function __toString()
     {
-        $attributes = array_diff_key($this->attributes, FbtUtils::FBT_CORE_ATTRIBUTES);
-        $content = implode('', array_map(function (self $child) {
-            return (string)$child;
-        }, $this->children)) ?: $this->content;
+        $content = implode('', array_map('strval', $this->children)) ?: $this->content;
 
         if ($this->tag === 'text') {
             return $content;
         }
 
-        return createElement($this->tag, $content, $attributes);
+        return createElement($this->tag, $content, $this->attributes);
     }
 }
