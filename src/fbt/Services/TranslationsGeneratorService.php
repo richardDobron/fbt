@@ -5,6 +5,7 @@ namespace fbt\Services;
 use fbt\Runtime\Shared\FbtHooks;
 use fbt\Transform\FbtTransform\fbtHash;
 use fbt\Transform\FbtTransform\FbtUtils;
+use fbt\Transform\FbtTransform\Translate\FbtSite;
 use fbt\Transform\FbtTransform\Translate\TranslationBuilder;
 use fbt\Transform\FbtTransform\Translate\TranslationConfig;
 use fbt\Transform\FbtTransform\Translate\TranslationData;
@@ -119,14 +120,14 @@ class TranslationsGeneratorService
     {
         $config = TranslationConfig::fromFBLocale($group['fb-locale']);
         $fallback = FbtHooks::getFallback($group['fb-locale']);
-        $translations = FbtUtils::objMap($group['translations'], function ($translation) {
+        $translations = FbtUtils::objMap($group['translations'], function (array $translation) {
             return TranslationData::fromJSON($translation);
         });
         // fbt diff: Adding fallback translations to the TranslationBuilder.
-        $fallbackTranslations = FbtUtils::objMap($fbtTranslations[$fallback]['translations'] ?? [], function ($translation) {
+        $fallbackTranslations = FbtUtils::objMap($fbtTranslations[$fallback]['translations'] ?? [], function (array $translation) {
             return TranslationData::fromJSON($translation);
         });
-        $translatedPhrases = array_map(function ($fbtSite) use ($translations, $fallbackTranslations, $config) {
+        $translatedPhrases = array_map(function (FbtSite $fbtSite) use ($translations, $fallbackTranslations, $config) {
             // fbt diff: We are including a hash for reporting and logging.
             return (new TranslationBuilder($translations, $config, $fbtSite, true, $fallbackTranslations))->build();
         }, $fbtSites);
@@ -288,7 +289,7 @@ class TranslationsGeneratorService
 
         $phrases = $sourceStrings['phrases'];
         $fbtSites = array_map('\fbt\Transform\FbtTransform\Translate\FbtSite::fromScan', $phrases);
-        $translatedGroups = array_map(function ($group) use ($fbtSites) {
+        $translatedGroups = array_map(function (array $group) use ($fbtSites) {
             return self::processTranslations($fbtSites, $group, $this->translations);
         }, $this->translations);
 

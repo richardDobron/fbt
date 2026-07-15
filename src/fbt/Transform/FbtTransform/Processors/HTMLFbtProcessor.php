@@ -48,7 +48,7 @@ class HTMLFbtProcessor
     /**
      * @throws \fbt\Exceptions\FbtException
      */
-    private function _getText($childNodes)
+    private function _getText(array $childNodes)
     {
         return count($childNodes) > 1
             ? $this->_createConcatFromExpressions($childNodes)
@@ -121,7 +121,7 @@ class HTMLFbtProcessor
      * @throws \fbt\Exceptions\FbtException
      * @throws \fbt\Exceptions\FbtParserException
      */
-    private function _createFbtFunctionCallNode($text, $desc, array $options): fbtNamespace
+    private function _createFbtFunctionCallNode($text, $desc, ?array $options): fbtNamespace
     {
         invariant($text, 'text cannot be null');
         invariant($desc, 'desc cannot be null');
@@ -184,7 +184,7 @@ class HTMLFbtProcessor
      */
     private function _transformChildrenToFbtCalls(array $nodes): array
     {
-        return array_map(function ($node) {
+        return array_map(function (Node $node) {
             return $this->_transformNamespacedFbtElement($node);
         }, FbtUtils::filterEmptyNodes($nodes));
     }

@@ -30,19 +30,6 @@ namespace {
         }
     }
 
-    if (! function_exists("mb_ord")) {
-        function mb_ord($charUTF8): int
-        {
-            $charUCS4 = mb_convert_encoding($charUTF8, 'UCS-4BE', 'UTF-8');
-            $byte1 = ord(substr($charUCS4, 0, 1));
-            $byte2 = ord(substr($charUCS4, 1, 1));
-            $byte3 = ord(substr($charUCS4, 2, 1));
-            $byte4 = ord(substr($charUCS4, 3, 1));
-
-            return ($byte1 << 32) + ($byte2 << 16) + ($byte3 << 8) + $byte4;
-        }
-    }
-
     if (! function_exists('fbt')) {
         /**
          * @param string|array $text

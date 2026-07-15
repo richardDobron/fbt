@@ -39,15 +39,9 @@ class GetNamespacedArgs
         $nameAttr = FbtUtils::normalizeSpaces(FbtUtils::getAttributeByNameOrThrow($node, 'name'));
         $options = FbtUtils::getOptionsFromAttributes($node, FbtConstants::validParamOptions(), FbtConstants::REQUIRED_PARAM_OPTIONS);
 
-        // js~php diff:
-
-        $paramChildren = array_values(array_filter(FbtUtils::filterEmptyNodes($node->nodes), function (Node $node) {
+        $paramChildren = array_filter(FbtUtils::filterEmptyNodes($node->nodes), function (Node $node) {
             return $node->isElement();
-        }));
-
-        if (count($paramChildren) === 0 && count($node->nodes) === 1 && $node->nodes[0]->isText()) {
-            $paramChildren = [$node->nodes[0]->innerHtml];
-        }
+        });
 
         if (count($paramChildren) > 1) {
             throw FbtUtils::errorAt($node, "$this->moduleName:param expects an string or HTML element, and only one");

@@ -239,8 +239,7 @@ class TranslationBuilder
                 $defTranslation ?? $source;
         }
 
-        // fbt: disable null translation for variation
-        if (! $translation) {
+        if ($translation === null) {
             return null;
         }
 
@@ -352,7 +351,7 @@ class TranslationBuilder
     /** @var array */
     private static $_mem;
 
-    private function _getConstraintMap($hash)
+    private function _getConstraintMap(string $hash)
     {
         if (array_key_exists($hash, self::$_mem)) {
             return self::$_mem[$hash];
@@ -413,7 +412,7 @@ class TranslationBuilder
      */
     private function _insertConstraint(
         array $keys, // [[token, constraint]]
-        &$constraintMap, // {key: translation}
+        array &$constraintMap, // {key: translation}
         string $translation, // string
         int $defaultingLevel // int
     ) {
@@ -462,7 +461,7 @@ function buildConstraintKey(
 /**
  * @throws \fbt\Exceptions\FbtException
  */
-function getTypesFromMask($mask): array
+function getTypesFromMask(int $mask): array
 {
     $type = IntlVariations::getType($mask);
     if ($type === IntlVariations::INTL_VARIATION_MASK['NUMBER']) {

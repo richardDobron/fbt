@@ -33,7 +33,7 @@ class FbtUtils
      * @param $node - The node that contains the name of any parent node. For
      * example, for a JSXElement, the containing name is the openingElement's name.
      */
-    public static function validateNamespacedFbtElement($moduleName, Node $node): string
+    public static function validateNamespacedFbtElement(string $moduleName, Node $node): string
     {
         $valid = false;
         $handlerName = null;
@@ -71,7 +71,7 @@ class FbtUtils
         'reporting' => 'reporting', // fbt diff
     ];
 
-    private static function canBeShortBoolAttr($name): bool
+    private static function canBeShortBoolAttr(string $name): bool
     {
         return in_array($name, self::SHORT_BOOL_CANDIDATES);
     }
@@ -86,7 +86,7 @@ class FbtUtils
             throw self::errorAt(
                 $node,
                 "There's already a token called \"$name\" in this $moduleName call. " .
-                "Use $moduleName.sameParam if you want to reuse the same token name or " .
+                "Use $moduleName::sameParam if you want to reuse the same token name or " .
                 "give this token a different name"
             );
         }
@@ -140,7 +140,7 @@ class FbtUtils
         return $options;
     }
 
-    public static function collectOptions($moduleName, $options, $validOptions): array
+    public static function collectOptions(string $moduleName, $options, array $validOptions): array
     {
         $key2value = [];
         if ($options === null) {
@@ -245,7 +245,7 @@ class FbtUtils
      * @return int|null
      * @throws FbtParserException
      */
-    public static function getVariationValue($moduleName, $variationName, $variationInfo, Node $node)
+    public static function getVariationValue(string $moduleName, string $variationName, $variationInfo, Node $node)
     {
         // Numbers allow only `true` or expression.
         if (
@@ -255,7 +255,7 @@ class FbtUtils
             if ($variationInfo !== true) {
                 throw self::errorAt(
                     $node,
-                    "$moduleName.param's number option should be an expression or 'true'"
+                    "$moduleName::param's number option should be an expression or 'true'"
                 );
             }
 
@@ -345,7 +345,7 @@ class FbtUtils
      * The micro-optimized equivalent of `count(array_keys($o)) > 0` but
      * without the throw-away array
      */
-    public static function hasKeys($o): bool
+    public static function hasKeys(array $o): bool
     {
         foreach ($o as $k => $v) {
             return true;

@@ -225,7 +225,7 @@ class intlNumUtils
         $digitsMap = self::_getNativeDigitsMap();
         $_text = $text;
         if ($digitsMap) {
-            $_text = trim(implode('', array_map(function ($character) use ($digitsMap) {
+            $_text = trim(implode('', array_map(function (string $character) use ($digitsMap) {
                 return $digitsMap[$character] ?? $character;
             }, mb_str_split($text))));
         }

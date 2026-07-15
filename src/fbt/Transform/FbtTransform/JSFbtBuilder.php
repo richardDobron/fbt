@@ -3,7 +3,9 @@
 namespace fbt\Transform\FbtTransform;
 
 use fbt\Exceptions\FbtException;
+
 use function fbt\invariant;
+
 use fbt\Runtime\Gender;
 use fbt\Transform\FbtTransform\Translate\IntlVariations;
 
@@ -39,7 +41,7 @@ class JSFbtBuilder
      *
      * @throws FbtException
      */
-    public static function build($type, $texts, bool $reactNativeMode = false)
+    public static function build(string $type, array $texts, bool $reactNativeMode = false)
     {
         $builder = new JSFbtBuilder($reactNativeMode);
         if ($type === FbtConstants::FBT_TYPE['TEXT']) {
@@ -59,7 +61,7 @@ class JSFbtBuilder
         }
     }
 
-    public function buildMetadata($texts): array
+    public function buildMetadata(array $texts): array
     {
         $metadata = [];
         $enums = [];
@@ -184,7 +186,7 @@ class JSFbtBuilder
     /**
      * @throws \fbt\Exceptions\FbtException
      */
-    private function _buildTable($prefix, $texts, $idx)
+    private function _buildTable(string $prefix, array $texts, int $idx)
     {
         if ($idx === count($texts)) {
             return FbtUtils::normalizeSpaces($prefix);
@@ -224,7 +226,7 @@ class JSFbtBuilder
                     ];
                 }
 
-                $table = FbtUtils::objMap(self::PLURAL_KEY_TO_TYPE, function ($type, $key) use ($pluralCount, $prefix, $item, $texts, $idx) {
+                $table = FbtUtils::objMap(self::PLURAL_KEY_TO_TYPE, function (string $type, $key) use ($pluralCount, $prefix, $item, $texts, $idx) {
                     $this->usedPlurals[$pluralCount] = $key;
 
                     return $this->_buildTable($prefix . $item[$type], $texts, $idx + 1);
@@ -236,7 +238,7 @@ class JSFbtBuilder
 
             case 'pronoun':
                 $genderSrc = $item['gender'];
-                $isUsed = in_array($genderSrc, $this->usedPronouns);
+                $isUsed = array_key_exists($genderSrc, $this->usedPronouns);
                 $genders = $isUsed ? $this->usedPronouns[$genderSrc] : Gender::GENDER_CONST;
                 $resTable = [];
                 foreach (array_keys($genders) as $key) {
@@ -260,7 +262,7 @@ class JSFbtBuilder
                 }
 
                 if (! $isUsed) {
-                    unset($this->usedPronouns['genderSrc']);
+                    unset($this->usedPronouns[$genderSrc]);
                 }
 
                 // @see https://stackoverflow.com/questions/5525795/does-javascript-guarantee-object-property-order
@@ -286,7 +288,7 @@ class JSFbtBuilder
                     return $this->_buildTable($prefix . $val, $texts, $idx + 1);
                 }
 
-                $result = FbtUtils::objMap($item['range'], function ($val, $key) use ($enumArg, $prefix, $texts, $idx) {
+                $result = FbtUtils::objMap($item['range'], function (string $val, string $key) use ($enumArg, $prefix, $texts, $idx) {
                     $this->usedEnums[$enumArg] = $key;
 
                     return $this->_buildTable($prefix . $val, $texts, $idx + 1);
@@ -299,7 +301,7 @@ class JSFbtBuilder
                 break;
         }
 
-        return FbtUtils::objMap($textSegments, function ($v) use ($prefix, $texts, $idx) {
+        return FbtUtils::objMap($textSegments, function (string $v) use ($prefix, $texts, $idx) {
             return $this->_buildTable($prefix . $v, $texts, $idx + 1);
         });
     }
@@ -311,7 +313,7 @@ class JSFbtBuilder
      * @return int|null
      * @throws FbtException
      */
-    public static function getPronounGenderKey(string $usage, int $gender)
+    public static function getPronounGenderKey(string $usage, int $gender): int
     {
         switch ($gender) {
             case Gender::GENDER_CONST['NOT_A_PERSON']:
@@ -338,7 +340,5 @@ class JSFbtBuilder
         }
 
         invariant(false, 'Unknown GENDER_CONST value.');
-
-        return null;
     }
 }

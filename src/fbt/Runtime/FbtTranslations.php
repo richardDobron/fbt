@@ -20,7 +20,7 @@ class FbtTranslations
      * @return array|null
      * @throws \fbt\Exceptions\FbtInvalidConfigurationException
      */
-    public static function getTranslatedInput($inputTable, $args, $options)
+    public static function getTranslatedInput($inputTable, array $args, array $options)
     {
         $hashKey = $options['hk'] ?? null;
 

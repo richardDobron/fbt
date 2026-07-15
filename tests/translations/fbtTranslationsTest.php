@@ -265,7 +265,7 @@ FBT;
             'cs_CZ' => 'sk_SK',
         ]);
 
-        $translateFbt = function ($subject) {
+        $translateFbt = function (int $subject) {
             return <<<FBT
 <fbt desc="User(s) have poked the viewer" subject="$subject">
     <fbt:param name="name1">John</fbt:param> <span>poked you</span>.

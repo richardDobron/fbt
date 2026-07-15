@@ -53,7 +53,7 @@ class FbtFunctionCallProcessor
         }
     }
 
-    public static function callFbt($name, $args)
+    public static function callFbt(string $name, array $args)
     {
         return call_user_func_array([fbt::class, '_' . $name], $args);
     }
@@ -152,7 +152,7 @@ class FbtFunctionCallProcessor
                 $this->hasTable = true;
 
                 if (count($args) < 2 || 3 < count($args)) {
-                    throw FbtUtils::errorAt($node, "Expected '(usage, gender [, options])' arguments to $moduleName.pronoun");
+                    throw FbtUtils::errorAt($node, "Expected '(usage, gender [, options])' arguments to $moduleName::pronoun");
                 }
 
                 $usageExpr = $arg0;
@@ -241,9 +241,9 @@ class FbtFunctionCallProcessor
      *
      * @throws \fbt\Exceptions\FbtParserException
      */
-    private function _extractTableTextsFromStringArray($node, array $variations): array
+    private function _extractTableTextsFromStringArray(array $node, array $variations): array
     {
-        return array_reduce($node, function ($results, $element) use ($variations) {
+        return array_reduce($node, function (array $results, $element) use ($variations) {
             return array_merge($results, $this->_extractTableTextsFromStringArrayItem($element, $variations));
         }, []);
     }

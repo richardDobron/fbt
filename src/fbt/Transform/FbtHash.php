@@ -23,7 +23,7 @@ class FbtHash
     {
         return array_map(function (array $phrase) {
             return array_map(
-                function ($text) use ($phrase) {
+                function (string $text) use ($phrase) {
                     $md5 = md5($text . $phrase['desc']);
 
                     if (FbtConfig::get('md5_digest') === 'base64') {
@@ -64,7 +64,7 @@ class FbtHash
     {
         return array_map(function (array $phrase) {
             return array_map(
-                function ($text) use ($phrase) {
+                function (string $text) use ($phrase) {
                     return FbtTransform\fbtHash::oldTigerHash($text . ':::' . $phrase['desc'] . ':');
                 },
                 $phrase['texts']

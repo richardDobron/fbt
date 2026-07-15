@@ -3,6 +3,7 @@
 namespace fbt\Transform\FbtTransform\Translate;
 
 use fbt\Lib\IntlNumberType;
+use fbt\Transform\FbtTransform\Translate\CLDR\IntlNumberConsistency;
 use fbt\Transform\FbtTransform\Translate\Gender\IntlGenderType;
 
 /**
@@ -14,7 +15,7 @@ class TranslationConfig
     private $numberType;
     private $genderType;
 
-    public function __construct($numberType, $genderType)
+    public function __construct(IntlNumberConsistency $numberType, $genderType)
     {
         $this->numberType = $numberType;
         $this->genderType = $genderType;
@@ -35,10 +36,10 @@ class TranslationConfig
     public function isDefaultVariation(
         $variation // mixed
     ): bool {
-        $value = intval($variation);
-        if (is_nan($value)) {
+        if (! is_numeric($variation)) {
             return false;
         }
+        $value = intval($variation);
 
         return (
             $value === $this->numberType->getFallback() ||

@@ -128,7 +128,7 @@ class FbtTransform
         }
     }
 
-    public static function addEnclosingString($childIdx, $parentIdx)
+    public static function addEnclosingString(int $childIdx, int $parentIdx)
     {
         self::$childToParent[$childIdx] = $parentIdx;
     }

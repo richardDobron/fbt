@@ -9,7 +9,7 @@ function cx(string $clsname)
     return str_replace('/', '_', $clsname);
 }
 
-function em($content, $inlineMode, $translation, $hash)
+function em($content, string $inlineMode, string $translation, string $hash)
 {
     // TODO: in the future, might depend on the translation status of the
     // string to decide on the proper inline mode.
