@@ -30,7 +30,7 @@ class TextPackager
      */
     public function pack(array $phrases): array
     {
-        $flatTexts = array_map(function ($phrase) {
+        $flatTexts = array_map(function (array $phrase) {
             return [
                 "desc" => $phrase['desc'],
                 "texts" => $this->_flattenTexts(

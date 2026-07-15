@@ -10,9 +10,8 @@ class fbtHash
     public const BASE_N_SYMBOLS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
     // Compute the baseN string for a given unsigned integer.
-    public static function uintToBaseN($numberArg, $base): string
+    public static function uintToBaseN(int $number, int $base): string
     {
-        $number = $numberArg;
         if ($base < 2 || $base > 62 || $number < 0) {
             return '';
         }
@@ -29,7 +28,7 @@ class fbtHash
     /**
      * @throws \fbt\Exceptions\FbtException
      */
-    public static function fbtHashKey($jsfbt, $desc, $noStringify = false): string
+    public static function fbtHashKey($jsfbt, string $desc, bool $noStringify = false): string
     {
         return self::uintToBaseN(self::fbtJenkinsHash($jsfbt, $desc, $noStringify), 62);
     }
@@ -37,21 +36,21 @@ class fbtHash
     /**
      * @throws \fbt\Exceptions\FbtException
      */
-    public static function fbtJenkinsHash($jsfbt, $desc, $noStringify = false): int
+    public static function fbtJenkinsHash($jsfbt, string $desc, bool $noStringify = false): int
     {
         $payload = $noStringify ? $jsfbt : json_encode($jsfbt, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         invariant(
             is_string($payload),
             'JSFBT is not a string type. Please disable noStringify'
         );
-        $key = mb_convert_encoding($payload . '|' . $desc, 'UTF-8', 'ISO-8859-1');
+        $key = $payload . '|' . $desc;
 
         return self::jenkinsHash($key);
     }
 
-    public static function toUtf8($str): array
+    public static function toUtf8(string $str): array
     {
-        return array_map('mb_ord', mb_str_split($str));
+        return array_values(unpack('C*', $str));
     }
 
     // Hash computation for each string that matches the dump script in i18n's php.

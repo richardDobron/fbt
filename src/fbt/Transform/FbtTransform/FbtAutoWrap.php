@@ -99,7 +99,7 @@ class FbtAutoWrap
      *
      * @throws \fbt\Exceptions\FbtParserException
      */
-    public static function collectRawString($moduleName, Node $node, bool $child = false): string
+    public static function collectRawString(string $moduleName, Node $node, bool $child = false): string
     {
         if (! $node->nodes) {
             return self::getLeafNodeString($node);

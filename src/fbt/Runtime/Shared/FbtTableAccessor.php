@@ -9,19 +9,19 @@ namespace fbt\Runtime\Shared;
 
 class FbtTableAccessor
 {
-    public static function getEnumResult($value): array
+    public static function getEnumResult(string $value): array
     {
         return [$value, null];
     }
 
-    public static function getGenderResult($variation, $substitution, int $_gender): array
+    public static function getGenderResult(array $variation, $substitution, int $_gender): array
     {
         // value is ignored here which will be used in alternative implementation
         // for different platform
         return [$variation, $substitution];
     }
 
-    public static function getNumberResult($variation, $substitution, $value): array
+    public static function getNumberResult(array $variation, array $substitution, $value): array
     {
         // value is ignored here which will be used in alternative implementation
         // for different platform
@@ -29,12 +29,12 @@ class FbtTableAccessor
     }
 
     // For an fbtParam where no gender or plural/number variation exists
-    public static function getSubstitution($substitution): array
+    public static function getSubstitution(array $substitution): array
     {
         return [null, $substitution];
     }
 
-    public static function getPronounResult($genderKey): array
+    public static function getPronounResult(int $genderKey): array
     {
         return [[$genderKey, '*'], null];
     }

@@ -20,7 +20,7 @@ class FbtSiteMetaEntry
     /**
      * @throws \fbt\Exceptions\FbtException
      */
-    public static function wrap($entry): FbtSiteMetaEntry
+    public static function wrap(array $entry): FbtSiteMetaEntry
     {
         FbtSiteMetaEntry::_validate($entry);
 
@@ -84,7 +84,7 @@ class FbtSiteMetaEntry
     /**
      * @throws \fbt\Exceptions\FbtException
      */
-    public static function _validate($entry)
+    public static function _validate(array $entry)
     {
         $type = $entry['type'] ?? null;
         $token = $entry['token'] ?? null;

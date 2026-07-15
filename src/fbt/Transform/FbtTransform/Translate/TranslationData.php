@@ -26,7 +26,7 @@ class TranslationData
 
     public static function deserialize(string $jsonStr)
     {
-        self::fromJSON(json_decode($jsonStr));
+        self::fromJSON(json_decode($jsonStr, true));
     }
 
     public function hasTranslation(): bool
@@ -35,7 +35,7 @@ class TranslationData
     }
 
     // Makes a best effort attempt at finding the default translation.
-    public function getDefaultTranslation($config)
+    public function getDefaultTranslation(TranslationConfig $config)
     {
         if ($this->_defaultTranslation === false) {
             for ($i = 0; $i < count($this->translations); ++$i) {

@@ -41,7 +41,7 @@ class IntlVariationResolverImpl
      *
      * @throws \fbt\Exceptions\FbtException
      */
-    public static function getGenderVariations($gender): array
+    public static function getGenderVariations(int $gender): array
     {
         invariant(
             $gender & IntlVariations::INTL_VARIATION_MASK['GENDER'],

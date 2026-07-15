@@ -41,7 +41,7 @@ class IntlVariations
     /**
      * @throws \fbt\Exceptions\FbtException
      */
-    public static function getType($n): int
+    public static function getType(int $n): int
     {
         if (! self::isValidValue($n)) {
             throw new FbtException('Invalid NumberType: ' . $n);
@@ -60,7 +60,7 @@ class IntlVariations
     public const SUBJECT = '__subject__';
     public const VIEWING_USER = '__viewing_user__';
 
-    public static function isValidValue($v): bool
+    public static function isValidValue(string $v): bool
     {
         $specials = [
             // The default entry.  When no entry exists, we fallback to this in the fbt

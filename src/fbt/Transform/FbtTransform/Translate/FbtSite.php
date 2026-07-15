@@ -85,7 +85,7 @@ class FbtSite
     // Replaces leaves in our table with corresponding hashes
     public static function _hashifyLeaves(
         $entry, // Represents a recursive descent into the table
-        $textToHash // Reverse mapping of hashToText for leaf lookups
+        array $textToHash // Reverse mapping of hashToText for leaf lookups
     ) {
         return is_string($entry)
             ? $textToHash[$entry]
@@ -108,7 +108,7 @@ class FbtSite
      *  } | text
      * }
      */
-    public static function fromScan($json): FbtSite
+    public static function fromScan(array $json): FbtSite
     {
         $tableData = $json['jsfbt'];
         if ($json['type'] === FbtConstants::FBT_TYPE['TABLE']) {
@@ -151,7 +151,7 @@ class FbtSite
         return $json;
     }
 
-    public static function deserialize($json): FbtSite
+    public static function deserialize(array $json): FbtSite
     {
         return new FbtSite($json['_t'], $json['h2t'], $json['_d'], $json['p']);
     }

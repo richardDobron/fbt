@@ -93,7 +93,7 @@ class fbt
                 // translations. If pattern is not a string here, table has not been accessed
                 $pattern = FbtTable::access($pattern, $args, 0);
             }
-            $allSubstitutions = array_merge(...array_map(function ($arg) {
+            $allSubstitutions = array_merge(...array_map(function (array $arg) {
                 return $arg[FbtTable::ARG['SUBSTITUTION']] ?? [];
             }, $args));
             invariant($pattern !== null, 'Table access failed');
@@ -171,7 +171,7 @@ class fbt
      *
      * @throws FbtException
      */
-    public static function _name(string $label, $value, int $gender): array
+    public static function _name(string $label, string $value, int $gender): array
     {
         $variation = IntlVariationResolverImpl::getGenderVariations($gender);
         $substitution = [];
