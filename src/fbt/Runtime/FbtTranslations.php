@@ -2,6 +2,7 @@
 
 namespace fbt\Runtime;
 
+use fbt\Exceptions\FbtInvalidConfigurationException;
 use fbt\fbt;
 use fbt\FbtConfig;
 use fbt\Runtime\Shared\FbtHooks;
@@ -14,11 +15,11 @@ class FbtTranslations
 
     /**
      * @param array|string $inputTable
-     * @param $args
-     * @param $options
+     * @param array $args
+     * @param array $options
      *
      * @return array|null
-     * @throws \fbt\Exceptions\FbtInvalidConfigurationException
+     * @throws FbtInvalidConfigurationException
      */
     public static function getTranslatedInput($inputTable, array $args, array $options)
     {

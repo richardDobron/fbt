@@ -235,7 +235,7 @@ class HTMLFbtProcessor
      */
     private function _createConcatFromExpressions(array $nodes): array
     {
-        invariant(count($nodes) > 1, 'Cannot create an expression without nodes.');
+        invariant(count($nodes) > 1, 'Cannot create HTML element without nodes.');
 
         // js~php diff
         return $nodes;

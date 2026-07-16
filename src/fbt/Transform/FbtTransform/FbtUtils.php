@@ -237,8 +237,8 @@ class FbtUtils
     }
 
     /**
-     * @param $moduleName
-     * @param $variationName
+     * @param string $moduleName
+     * @param string $variationName
      * @param $variationInfo
      * @param Node $node
      *
@@ -255,7 +255,7 @@ class FbtUtils
             if ($variationInfo !== true) {
                 throw self::errorAt(
                     $node,
-                    "$moduleName::param's number option should be an expression or 'true'"
+                    "$moduleName::param's number option should be HTML element or 'true'"
                 );
             }
 

@@ -377,7 +377,7 @@ class FbtFunctionCallProcessor
 
     /**
      * Normalizes first and last elements in the
-     * table texts by triming them left and right accordingly.
+     * table texts by trimming them left and right accordingly.
      * [" Hello, ", {enum}, " world! "] -> ["Hello, ", {enum}, " world!"]
      */
     protected function _normalizeTableTexts(array $texts): array
