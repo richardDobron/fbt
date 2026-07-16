@@ -665,7 +665,7 @@ FBT;
 </fbt>
 FBT;
 
-        $this->assertSame('Bar<br/> Bar<br/> Bar', self::transform($fbt));
+        $this->assertSame('Bar<br> Bar<br> Bar', self::transform($fbt));
 
         $fbt = <<<FBT
 <fbt desc="Bar">
@@ -910,7 +910,7 @@ FBT;
             'subject' => IntlVariations::GENDER_MALE,
         ]);
 
-        $this->assertSame('You<br/>see<br/>the world', (string)$fbt);
+        $this->assertSame('You<br>see<br>the world', (string)$fbt);
     }
 
     public function testJsonSerialization()
