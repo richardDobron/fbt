@@ -65,10 +65,13 @@ class GetNamespacedArgs
     {
         $options = FbtUtils::getOptionsFromAttributes($node, FbtConstants::validPluralOptions(), FbtConstants::PLURAL_REQUIRED_ATTRIBUTES);
         $countAttr = FbtUtils::getAttributeByNameOrThrow($node, 'count');
-        $pluralChildren = FbtUtils::filterEmptyNodes($node->nodes);
+        $children = FbtUtils::filterEmptyNodes($node->nodes);
+        $pluralChildren = array_values(array_filter($children, function (Node $node) {
+            return $node->isText();
+        }));
 
         if (count($pluralChildren) !== 1) {
-            throw FbtUtils::errorAt($node, "$this->moduleName:plural expects text or an expression, and only one");
+            throw FbtUtils::errorAt($node, "$this->moduleName:plural expects text or HTML element, and only one");
         }
 
         $singularNode = $pluralChildren[0];
@@ -116,10 +119,13 @@ class GetNamespacedArgs
     {
         $nameAttribute = FbtUtils::getAttributeByNameOrThrow($node, 'name');
         $genderAttribute = FbtUtils::getAttributeByNameOrThrow($node, 'gender');
-        $nameChildren = FbtUtils::filterEmptyNodes($node->nodes);
+        $children = FbtUtils::filterEmptyNodes($node->nodes);
+        $nameChildren = array_values(array_filter($children, function (Node $node) {
+            return $node->isText();
+        }));
 
         if (count($nameChildren) !== 1) {
-            throw FbtUtils::errorAt($node, "$this->moduleName:name expects text or an expression, and only one");
+            throw FbtUtils::errorAt($node, "$this->moduleName:name expects text or HTML element, and only one");
         }
 
         $singularArg = $nameChildren[0];

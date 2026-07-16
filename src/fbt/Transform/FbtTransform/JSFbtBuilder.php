@@ -34,8 +34,8 @@ class JSFbtBuilder
     }
 
     /**
-     * @param $type
-     * @param $texts
+     * @param string $type
+     * @param array $texts
      * @param bool $reactNativeMode
      * @return array|string
      *
