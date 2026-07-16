@@ -85,7 +85,7 @@ class FbtTransform
             $node->setAttribute('author', self::$defaultOptions['author']);
         }
 
-        $node->outerHtml = (string)$root->convertToFbtFunctionCallNode();
+        $node->outerHtml = (string)$root->convertToFbtFunctionCallNode(count(self::$phrases));
     }
 
     /**

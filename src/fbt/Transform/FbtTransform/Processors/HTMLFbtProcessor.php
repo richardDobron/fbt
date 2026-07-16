@@ -155,6 +155,8 @@ class HTMLFbtProcessor
     private function _addImplicitDescriptionsToChildrenRecursively(): self
     {
         FbtAutoWrap::createImplicitDescriptions($this->moduleName, $this->node);
+
+        return $this;
     }
 
     /**
