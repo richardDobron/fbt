@@ -4,9 +4,6 @@ namespace fbt\Transform\FbtTransform;
 
 use dobron\DomForge\Node;
 use fbt\Exceptions\FbtParserException;
-
-use function fbt\invariant;
-
 use fbt\Runtime\Shared\IntlPunctuation;
 
 class FbtUtils
