@@ -258,7 +258,7 @@ class TranslationBuilder
      * the map via its fallback ('*') keys.
      */
     public function getConstrainedTranslation(
-        string $hash, // string
+        string $hash,
         array $tokenConstraints // dict<string, string> : token => constraint
     ) {
         $constraintKeys = [];
@@ -468,13 +468,13 @@ function getTypesFromMask(int $mask): array
     $type = IntlVariations::getType($mask);
     if ($type === IntlVariations::INTL_VARIATION_MASK['NUMBER']) {
         return array_values(IntlVariations::INTL_NUMBER_VARIATIONS);
-    } else {
-        $gender = IntlVariations::INTL_GENDER_VARIATIONS;
-
-        return [
-            $gender['MALE'],
-            $gender['FEMALE'],
-            $gender['UNKNOWN'],
-        ];
     }
+
+    $gender = IntlVariations::INTL_GENDER_VARIATIONS;
+
+    return [
+        $gender['MALE'],
+        $gender['FEMALE'],
+        $gender['UNKNOWN'],
+    ];
 }

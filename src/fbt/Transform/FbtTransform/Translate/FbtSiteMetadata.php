@@ -9,7 +9,7 @@ class FbtSiteMetadata
      */
     public static function wrap(array $rawEntries): array
     {
-        return array_map(function ($entry) {
+        return array_map(function (?array $entry) {
             if (! $entry) {
                 return null;
             }

@@ -89,7 +89,7 @@ class FbtSite
     ) {
         return is_string($entry)
             ? $textToHash[$entry]
-            : FbtUtils::objMap($entry, function ($branch, $key) use ($textToHash) {
+            : FbtUtils::objMap($entry, function ($branch, string $key) use ($textToHash) {
                 return self::_hashifyLeaves($branch, $textToHash);
             });
     }

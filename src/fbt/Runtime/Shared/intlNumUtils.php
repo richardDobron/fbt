@@ -391,7 +391,7 @@ class intlNumUtils
 
     public static function matchCurrenciesWithDots()
     {
-        return self::_buildRegex(array_reduce(intlNumUtils::CURRENCIES_WITH_DOTS, function ($regex, $representation) {
+        return self::_buildRegex(array_reduce(intlNumUtils::CURRENCIES_WITH_DOTS, function (string $regex, string $representation) {
             return $regex . ($regex ? '|' : '') . '(' . $representation . ')';
         }, ''));
     }

@@ -121,7 +121,7 @@ class HTMLFbtProcessor
      * @throws \fbt\Exceptions\FbtException
      * @throws \fbt\Exceptions\FbtParserException
      */
-    private function _createFbtFunctionCallNode($text, $desc, ?array $options): fbtNamespace
+    private function _createFbtFunctionCallNode($text, ?string $desc, ?array $options): fbtNamespace
     {
         invariant($text, 'text cannot be null');
         invariant($desc, 'desc cannot be null');

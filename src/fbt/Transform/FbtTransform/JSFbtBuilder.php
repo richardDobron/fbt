@@ -226,7 +226,7 @@ class JSFbtBuilder
                     ];
                 }
 
-                $table = FbtUtils::objMap(self::PLURAL_KEY_TO_TYPE, function (string $type, $key) use ($pluralCount, $prefix, $item, $texts, $idx) {
+                $table = FbtUtils::objMap(self::PLURAL_KEY_TO_TYPE, function (string $type, string $key) use ($pluralCount, $prefix, $item, $texts, $idx) {
                     $this->usedPlurals[$pluralCount] = $key;
 
                     return $this->_buildTable($prefix . $item[$type], $texts, $idx + 1);

@@ -52,7 +52,7 @@ class NodeVisitor extends NodeVisitorAbstract
                         $node->args[1] = new String_('name');
                     }
                     if (! ($node->args[2]->value instanceof LNumber)) {
-                        $node->args[2] = new LNumber(1);
+                        $node->args[2] = new LNumber(IntlVariations::GENDER_MALE);
                     }
 
                     break;

@@ -9,7 +9,7 @@ function cx(string $clsname)
     return str_replace('/', '_', $clsname);
 }
 
-function em($content, string $inlineMode, string $translation, string $hash)
+function em($content, string $inlineMode, string $translation, ?string $hash)
 {
     // TODO: in the future, might depend on the translation status of the
     // string to decide on the proper inline mode.
@@ -43,14 +43,13 @@ class InlineFbtResult
     public $contents;
     public $inlineMode;
     public $translation;
-    /** @var null|string */
     public $hash;
 
     public function __construct(
         array $contents,
         string $inlineMode,
         string $translation,
-        $hash
+        ?string $hash
     ) {
         $this->hash = $hash;
         $this->translation = $translation;

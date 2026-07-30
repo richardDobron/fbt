@@ -140,7 +140,7 @@ class FbtUtils
         return $options;
     }
 
-    public static function collectOptions(string $moduleName, $options, array $validOptions): array
+    public static function collectOptions(string $moduleName, ?array $options, array $validOptions): array
     {
         $key2value = [];
         if ($options === null) {
@@ -292,7 +292,7 @@ class FbtUtils
      */
     public static function getAttributeByName(Node $node, string $name): ?string
     {
-        return $node->{$name};
+        return $node->getAttribute($name);
     }
 
     /**
@@ -377,19 +377,12 @@ class FbtUtils
      * Used for in-place substitutions in translation mode.
      *
      * @return string|array
-     * @throws \fbt\Exceptions\FbtException
      */
-    public static function substituteTokens($template, $args)
+    public static function substituteTokens(string $template, array $args)
     {
         if (! $args) {
             return $template;
         }
-
-        invariant(
-            is_array($args),
-            'The 2nd argument must be an object (not a string) for tx(%s, ...)',
-            $template
-        );
 
         // Splice in the arguments while keeping rich object ones separate.
         $objectPieces = [];
@@ -397,7 +390,6 @@ class FbtUtils
         $stringPieces = explode("\x17", preg_replace_callback("/{([^}]+)}(" . IntlPunctuation::PUNCT_CHAR_CLASS . "*)/u", function (array $matches) use ($args, &$argNames, &$objectPieces) {
             $parameter = $matches[1];
             $punctuation = $matches[2] ?? '';
-
             $argument = $args[$parameter] ?? null;
 
             if (is_object($argument)) {

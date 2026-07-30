@@ -52,7 +52,7 @@ class FbtConstants
         );
     }
 
-    public const VALID_PRONOUN_OPTIONS = [ // js~php diff
+    public const VALID_PRONOUN_OPTIONS = [
         'human' => ['true' => true, 'false' => true],
         'capitalize' => ['true' => true, 'false' => true],
     ];
@@ -110,7 +110,6 @@ class FbtConstants
 
     public const MODULE_NAME = [
         'FBT' => 'fbt',
-        // 'REACT_FBT' => 'Fbt',
         'FBS' => 'fbs',
     ];
 }

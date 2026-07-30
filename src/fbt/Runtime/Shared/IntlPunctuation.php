@@ -60,9 +60,9 @@ class IntlPunctuation
      * the fact that we consider a string like "foo." to end with a period even
      * though there's a quote mark afterward.
      */
-    public static function endsInPunct($str): bool
+    public static function endsInPunct(string $str): bool
     {
-        if (! is_string($str)) {
+        if (! $str) {
             return false;
         }
 
