@@ -53,7 +53,7 @@ class FbtFunctionCallProcessor
         }
     }
 
-    public static function callFbt(string $name, array $args)
+    public static function callFbt(string $name, array $args): array
     {
         return call_user_func_array([fbt::class, '_' . $name], $args);
     }
@@ -72,7 +72,7 @@ class FbtFunctionCallProcessor
             $node = $construct->node;
             $constructName = $construct->name;
             $args = $construct->args;
-            @list($arg0, $arg1, $arg2) = $args;
+            @[$arg0, $arg1, $arg2] = $args;
 
             if ($constructName === 'param' || $constructName === 'sameParam') {
                 // Collect params only if it's original one (not "sameParam").
@@ -274,7 +274,7 @@ class FbtFunctionCallProcessor
             return $texts;
         } elseif ($node instanceof fbtNode) {
             $args = $node->args;
-            @list($arg0, $arg1, $arg2) = $args;
+            @[$arg0, $arg1, $arg2] = $args;
 
             switch ($node->name) {
                 case 'param':

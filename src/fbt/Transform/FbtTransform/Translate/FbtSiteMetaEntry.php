@@ -10,7 +10,7 @@ class FbtSiteMetaEntry
     private $_token;
     private $_mask;
 
-    public function __construct($type, $token, $mask)
+    public function __construct(?int $type, ?string $token, ?int $mask)
     {
         $this->_type = $type;
         $this->_token = $token;
@@ -51,7 +51,7 @@ class FbtSiteMetaEntry
     /**
      * @throws \fbt\Exceptions\FbtException
      */
-    public function getVariationMask()
+    public function getVariationMask(): ?int
     {
         invariant(
             $this->hasVariationMask() === true,
@@ -115,13 +115,14 @@ class FbtSiteMetaEntry
 
     /**
      * @param int|null $type
-     * @return int|mixed|null
+     * @return int|null
      */
-    public static function getVariationMaskFromType(?int $type)
+    public static function getVariationMaskFromType(?int $type): ?int
     {
-        $_variationTypeToMask = [];
-        $_variationTypeToMask[IntlVariations::INTL_FBT_VARIATION_TYPE['GENDER']] = IntlVariations::INTL_VARIATION_MASK['GENDER'];
-        $_variationTypeToMask[IntlVariations::INTL_FBT_VARIATION_TYPE['NUMBER']] = IntlVariations::INTL_VARIATION_MASK['NUMBER'];
+        $_variationTypeToMask = [
+            IntlVariations::INTL_FBT_VARIATION_TYPE['GENDER'] => IntlVariations::INTL_VARIATION_MASK['GENDER'],
+            IntlVariations::INTL_FBT_VARIATION_TYPE['NUMBER'] => IntlVariations::INTL_VARIATION_MASK['NUMBER'],
+        ];
 
         return $_variationTypeToMask[$type] ?? null;
     }

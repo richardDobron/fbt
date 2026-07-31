@@ -53,7 +53,7 @@ class fbtTranslationsTest extends \tests\TestCase
 
     public function testViewingUserTokenWithUserGender()
     {
-        $translateFbt = function ($gender, $viewer) {
+        $translateFbt = function (int $gender, int $viewer) {
             IntlViewerContext::setGender($viewer);
 
             return <<<FBT
@@ -90,7 +90,7 @@ FBT;
 
     public function testFbtNameWithUserGender()
     {
-        $translateFbt = function ($gender, $number) {
+        $translateFbt = function (int $gender, int $number) {
             return <<<FBT
 <fbt desc="Notification about adding a photos.">
     <fbt:name name="name1" gender="$gender">Alex</fbt:name> added <fbt:param name="number" number="true">$number</fbt:param> new photos.
@@ -214,7 +214,7 @@ FBT;
 
     public function testSubject()
     {
-        $translateFbt = function ($subject) {
+        $translateFbt = function (int $subject) {
             return <<<FBT
 <fbt desc="User(s) have poked the viewer" subject="$subject">
     <fbt:param name="name1">John</fbt:param> <span>poked you</span>.

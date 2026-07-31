@@ -27,7 +27,7 @@ class tigerHashTest extends \tests\TestCase
     /**
      * @dataProvider dataProvider
      */
-    public function testTigerHash($input, $expected)
+    public function testTigerHash(string $input, string $expected): void
     {
         $this->assertEquals($expected, fbtHash::oldTigerHash($input));
     }

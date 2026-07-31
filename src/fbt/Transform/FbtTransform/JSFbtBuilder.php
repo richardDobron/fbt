@@ -178,7 +178,7 @@ class JSFbtBuilder
      *
      * @throws \fbt\Exceptions\FbtException
      */
-    public function buildTable($texts)
+    public function buildTable(array $texts)
     {
         return $this->_buildTable('', $texts, 0);
     }

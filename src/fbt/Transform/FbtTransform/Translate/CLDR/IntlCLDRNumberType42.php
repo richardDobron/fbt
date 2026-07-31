@@ -18,12 +18,12 @@ class IntlCLDRNumberType42 implements IntlNumberConsistency
         return IntlVariations::INTL_NUMBER_VARIATIONS['OTHER'];
     }
 
-    public function getExample(int $variation)
+    public function getExample(int $variation): ?string
     {
         return null;
     }
 
-    public function getVariation($n): int
+    public function getVariation(int $n): int
     {
         return IntlVariations::INTL_NUMBER_VARIATIONS['OTHER'];
     }

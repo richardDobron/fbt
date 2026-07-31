@@ -8,7 +8,7 @@ interface IntlNumberConsistency
 
     public function getFallback(): int;
 
-    public function getExample(int $variation);
+    public function getExample(int $variation): ?string;
 
-    public function getVariation($n);
+    public function getVariation(int $n): int;
 }

@@ -158,7 +158,7 @@ class FbtHooks
     /**
      * @throws \Throwable
      */
-    public static function storePhrases()
+    public static function storePhrases(): void
     {
         $fbtDir = FbtConfig::get('path') . '/';
         $file = $fbtDir . '.source_strings.json';

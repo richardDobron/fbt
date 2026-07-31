@@ -37,7 +37,7 @@ class IntlCLDRNumberType35 implements IntlNumberConsistency
         return $examples[$variation] ?? null;
     }
 
-    public function getVariation($n): int
+    public function getVariation(int $n): int
     {
         if ($n === 0) {
             return IntlVariations::INTL_NUMBER_VARIATIONS['ZERO'];

@@ -103,7 +103,7 @@ namespace fbt {
      * @return void
      * @throws \fbt\Exceptions\FbtException
      */
-    function invariant($condition, $message): void
+    function invariant($condition, string $message): void
     {
         if (! $condition) {
             if (func_num_args() > 2) {

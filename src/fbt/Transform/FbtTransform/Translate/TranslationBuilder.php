@@ -455,7 +455,7 @@ function shouldStore($branch): bool
 function buildConstraintKey(
     array $keys // [[token, constraint]]
 ): string {
-    return implode(':', array_map(function ($kv) {
+    return implode(':', array_map(function (array $kv) {
         return $kv[0] . '%' . $kv[1];
     }, $keys));
 }

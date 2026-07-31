@@ -17,7 +17,7 @@ use fbt\Transform\FbtTransform\Translate\IntlVariations;
 
 class fbtTest extends \tests\TestCase
 {
-    private static function transform($document): string
+    private static function transform(string $document): string
     {
         return FbtTransform::transform($document);
     }

@@ -10,6 +10,7 @@ use function fbt\fbt;
 use function fbt\invariant;
 
 use fbt\Runtime\fbtNamespace;
+use fbt\Runtime\fbtNode;
 use fbt\Transform\FbtTransform\FbtAutoWrap;
 use fbt\Transform\FbtTransform\FbtCommon;
 use fbt\Transform\FbtTransform\FbtConstants;
@@ -211,7 +212,7 @@ class HTMLFbtProcessor
      */
     // WARNING: this method has side-effects because it alters the given `node` object
     // You shouldn't try to run this multiple times on the same `node`.
-    private function _toFbtNamespacedCall(Node $node)
+    private function _toFbtNamespacedCall(Node $node): fbtNode
     {
         $moduleName = $this->moduleName;
         $name = FbtUtils::validateNamespacedFbtElement($moduleName, $node);

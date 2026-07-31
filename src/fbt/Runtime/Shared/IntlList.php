@@ -83,7 +83,7 @@ class IntlList
     /**
      * @throws \fbt\Exceptions\FbtException
      */
-    private static function _getConjunction($list, $lastItem, string $conjunction, string $delimiter): \fbt\fbt
+    private static function _getConjunction($list, $lastItem, string $conjunction, string $delimiter): fbt
     {
         switch ($conjunction) {
             case self::CONJUNCTIONS['AND']:

@@ -47,7 +47,7 @@ class TranslationConfig
         );
     }
 
-    public static function fromFBLocale($locale): TranslationConfig
+    public static function fromFBLocale(string $locale): TranslationConfig
     {
         return new TranslationConfig(
             IntlNumberType::forLocale($locale),

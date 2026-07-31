@@ -389,7 +389,7 @@ class intlNumUtils
         return $nativeDigitMap;
     }
 
-    public static function matchCurrenciesWithDots()
+    public static function matchCurrenciesWithDots(): string
     {
         return self::_buildRegex(array_reduce(intlNumUtils::CURRENCIES_WITH_DOTS, function (string $regex, string $representation) {
             return $regex . ($regex ? '|' : '') . '(' . $representation . ')';
@@ -405,7 +405,7 @@ class intlNumUtils
         return preg_quote($str, '/');
     }
 
-    protected static function _buildRegex(string $pattern)
+    protected static function _buildRegex(string $pattern): string
     {
         static $_regexCache;
 

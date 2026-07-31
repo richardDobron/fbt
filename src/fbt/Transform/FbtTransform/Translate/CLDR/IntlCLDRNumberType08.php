@@ -29,7 +29,7 @@ class IntlCLDRNumberType08 implements IntlNumberConsistency
         return $examples[$variation] ?? null;
     }
 
-    public function getVariation($n): int
+    public function getVariation(int $n): int
     {
         if ($n >= 0 && $n <= 1 || $n >= 11 && $n <= 99) {
             return IntlVariations::INTL_NUMBER_VARIATIONS['ONE'];

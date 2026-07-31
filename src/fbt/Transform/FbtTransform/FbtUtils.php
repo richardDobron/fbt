@@ -299,7 +299,7 @@ class FbtUtils
      * @throws FbtParserException
      * @throws \Exception
      */
-    public static function extractEnumRange($range): array
+    public static function extractEnumRange(?string $range): array
     {
         if (! is_string($range)) {
             throw new FbtParserException("fbt enum range values must be string, got " . getType($range));

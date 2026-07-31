@@ -84,7 +84,7 @@ class TranslationsGeneratorService
      *
      * @return void
      */
-    private function prepareTranslations(string $path, ?string $translationsPath, bool $pretty)
+    private function prepareTranslations(string $path, ?string $translationsPath, bool $pretty): void
     {
         $fbtDir = $path . '/';
 
@@ -167,7 +167,7 @@ class TranslationsGeneratorService
      *
      * @throws \Exception
      */
-    public function generateTranslations(string $source, ?string $translationsPath, string $inputPath)
+    public function generateTranslations(string $source, ?string $translationsPath, string $inputPath): void
     {
         if (! file_exists($source)) {
             throw new \Exception('Source strings file does not exist: ' . $source);
@@ -275,7 +275,7 @@ class TranslationsGeneratorService
      *
      * @throws \fbt\Exceptions\FbtException
      */
-    public function exportTranslations(string $path, ?string $translationsPath, ?string $stdin, bool $pretty)
+    public function exportTranslations(string $path, ?string $translationsPath, ?string $stdin, bool $pretty): void
     {
         if (empty($stdin)) {
             $this->prepareTranslations($path, $translationsPath, $pretty);

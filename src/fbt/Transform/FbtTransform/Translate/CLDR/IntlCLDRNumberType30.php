@@ -31,7 +31,7 @@ class IntlCLDRNumberType30 implements IntlNumberConsistency
         return $examples[$variation] ?? null;
     }
 
-    public function getVariation($n): int
+    public function getVariation(int $n): int
     {
         if ($n % 10 === 1 && $n % 100 !== 11) {
             return IntlVariations::INTL_NUMBER_VARIATIONS['ONE'];
