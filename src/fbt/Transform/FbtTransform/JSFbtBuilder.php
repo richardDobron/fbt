@@ -212,13 +212,13 @@ class JSFbtBuilder
                 break;
 
             case 'plural':
-                $pluralCount = $item['count'];
+                $pluralVal = $item['value'];
 
-                if (array_key_exists($pluralCount, $this->usedPlurals)) {
+                if (array_key_exists($pluralVal, $this->usedPlurals)) {
                     // Constrain our plural value ('many'/'singular') BUT still add a
                     // single level.  We don't currently prune runtime args like we do
                     // with enums, but we ought to...
-                    $key = $this->usedPlurals[$pluralCount];
+                    $key = $this->usedPlurals[$pluralVal];
                     $val = $item[self::PLURAL_KEY_TO_TYPE[$key]];
 
                     return [
@@ -226,13 +226,13 @@ class JSFbtBuilder
                     ];
                 }
 
-                $table = FbtUtils::objMap(self::PLURAL_KEY_TO_TYPE, function (string $type, string $key) use ($pluralCount, $prefix, $item, $texts, $idx) {
-                    $this->usedPlurals[$pluralCount] = $key;
+                $table = FbtUtils::objMap(self::PLURAL_KEY_TO_TYPE, function (string $type, string $key) use ($pluralVal, $prefix, $item, $texts, $idx) {
+                    $this->usedPlurals[$pluralVal] = $key;
 
                     return $this->_buildTable($prefix . $item[$type], $texts, $idx + 1);
                 });
 
-                unset($this->usedPlurals[$pluralCount]);
+                unset($this->usedPlurals[$pluralVal]);
 
                 return $table;
 

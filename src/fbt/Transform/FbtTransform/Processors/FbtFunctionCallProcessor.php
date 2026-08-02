@@ -310,7 +310,7 @@ class FbtFunctionCallProcessor
                         'showCount' => $opts['showCount'] ?? 'no',
                         'name' => $opts['name'] ?? $defaultToken,
                         'singular' => $singular,
-                        'count' => $arg1,
+                        'value' => $opts['value'] ?? $node->args[0],
                         'many' => $opts['many'] ?? $singular . 's',
                     ]);
 

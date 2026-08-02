@@ -41,10 +41,10 @@ FBT
         $fbt = fbt(\fbt\fbt::plural('translator', 2, ['showCount' => 'yes']), 'Plural word test');
 
         $this->assertSame('2 translators', (string)$fbt);
-        $this->assertSame(FbtTransform::$phrases[0]['hashToText'], [
+        $this->assertSame([
             "c51b14178c6598f298852310115a6749" => "{number} translators",
             "562f0f79a8eda7c1ffe4d7add7b0cb5d" => "1 translator",
-        ]);
+        ], FbtTransform::$phrases[0]['hashToText']);
 
         $fbt = <<<FBT
 <fbt desc="Plural word test">
@@ -55,10 +55,10 @@ FBT
 FBT;
 
         $this->assertSame('2 translators', self::transform($fbt));
-        $this->assertSame(FbtTransform::$phrases[1]['hashToText'], [
+        $this->assertSame([
             "c51b14178c6598f298852310115a6749" => "{number} translators",
             "562f0f79a8eda7c1ffe4d7add7b0cb5d" => "1 translator",
-        ]);
+        ], FbtTransform::$phrases[1]['hashToText']);
 
         $fbt = <<<FBT
 <fbt desc="Plural test">
@@ -71,12 +71,12 @@ FBT;
 FBT;
 
         $this->assertSame('2 Days view', self::transform($fbt));
-        $this->assertSame(FbtTransform::$phrases[2]['hashToText'], [
+        $this->assertSame([
             "9df30d437e4bd97db0c66d55e499cf17" => '{number_of_days} Days view',
             "6d588b81916eb38a23d93a3ae4c9dbd2" => '{number_of_days} Days click',
             "4f47975189c39c6cb6d58c6ab9dec189" => '1 Day view',
             "576573c9e5e2704b0ed08a45f776332d" => '1 Day click',
-        ]);
+        ], FbtTransform::$phrases[2]['hashToText']);
     }
 
     public function testMultiplePlurals()
@@ -94,10 +94,12 @@ FBT;
 FBT;
 
         $this->assertSame('There are 4 likes', self::transform($fbt));
-        $this->assertSame(FbtTransform::$phrases[0]['hashToText'], [
+        $this->assertSame([
             "42a393dd2b55260c83e7bafa05df2a61" => 'There are {number} likes',
+            '8aaee3b7e778e2a46a4b332dc5c396af' => 'There are a like',
+            'f2f1db36ff15f6ad7d756c033e540ae8' => 'There is {number} likes',
             "4e9cfbe296285409426b97021b93272a" => 'There is a like',
-        ]);
+        ], FbtTransform::$phrases[0]['hashToText']);
     }
 
     public function testPluralHtml()
@@ -269,7 +271,7 @@ FBT;
 FBT;
 
         $this->assertSame('Buy a brand <a class="special-class">new <strong><span>iPhone</span></strong></a> with <strong><a>mac</a></strong>!', self::transform($fbt));
-        $this->assertSame(array_merge(...array_column(FbtTransform::$phrases, 'hashToText')), [
+        $this->assertSame([
             "eb665fb6c93a275e904f184fa0a46d94" => 'iPhone',
             "d0bf42a9f49fd73bf3931260ec68a55a" => '{=iPhone}',
             "010fa0eac2c489474a31c0da315faa73" => 'new {=iPhone}',
@@ -277,7 +279,7 @@ FBT;
             "f0e74fee456d6ba81660e441e68a5caf" => 'mac',
             "8054af86343ecb042bae839a78f9c0c2" => '{=}',
             "49c205e4713737f90d6f3b2b9d9fb0c6" => 'Buy a brand {=new iPhone} with {=}!',
-        ]);
+        ], array_merge(...array_column(FbtTransform::$phrases, 'hashToText')));
     }
 
     public function testMixedPluralHtmlTagsWithParams()
