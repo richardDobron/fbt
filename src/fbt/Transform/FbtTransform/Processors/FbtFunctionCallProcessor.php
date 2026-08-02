@@ -108,6 +108,8 @@ class FbtFunctionCallProcessor
                     $this->runtimeArgs[] = self::callFbt('param', $args);
 
                     FbtUtils::setUniqueToken($node, $this->moduleName, $arg0, $this->paramSet);
+                } elseif (! isset($this->paramSet[$arg0])) {
+                    throw FbtUtils::errorAt($node, 'Expected ' . $this->moduleName . ' sameParam construct with name="' . $arg0 . '" to refer to a `name` or `param` construct using the same token name');
                 }
 
                 if (count($construct->args) === 3) {

@@ -107,7 +107,7 @@ class intlNumUtils
         $wholeNumber = $valueParts[0];
         $decimal = $valueParts[1] ?? null;
 
-        if (abs(mb_strlen(strval(intval($wholeNumber)))) >= $minDigitsForThousandDelimiter) {
+        if (mb_strlen((string)abs(intval($wholeNumber))) >= $minDigitsForThousandDelimiter) {
             $replaceWith = '$1' . $thousandDelimiter . '$2$3';
             $primaryPattern = '(\\d)(\\d{' . ($primaryGroupingSize - 0) . '})($|\\D)';
             $replaced = preg_replace(self::_buildRegex($primaryPattern), $replaceWith, $wholeNumber);

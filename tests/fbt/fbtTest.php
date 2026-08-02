@@ -554,6 +554,34 @@ FBT;
         $this->assertSame('str {Bar} and {Bar}', self::transform($fbt));
     }
 
+    public function testSameParamThatDoesNotExist()
+    {
+        self::expectExceptionMessage('Expected fbt sameParam construct with name="bar" to refer to a `name` or `param` construct using the same token name');
+
+        self::transform(
+            <<<FBT
+<fbt desc="d">str
+    <fbt:param name="foo">{bar}</fbt:param> and
+    <fbt:same-param name="bar"/>
+</fbt>
+FBT
+        );
+    }
+
+    public function testSameParamWithPlural()
+    {
+        self::expectExceptionMessage('Expected fbt sameParam construct with name="tokenName" to refer to a `name` or `param` construct using the same token name');
+
+        self::transform(
+            <<<FBT
+<fbt desc="d">str
+    <fbt:plural name="tokenName" count="3">cat</fbt:plural> and
+    <fbt:same-param name="tokenName"/>
+</fbt>
+FBT
+        );
+    }
+
     // TODO: t17559607 Fix space normalization
     // public function testPreservedWhitespaceInText()
     // {
