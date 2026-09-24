@@ -82,6 +82,11 @@ class FbtTable
         $arg = $args[$argsIndex];
         $tableIndex = $arg[self::ARG['INDEX']];
 
+        // A pattern string cannot be indexed (it would return a single character)
+        if ($tableIndex !== null && is_string($table)) {
+            return null;
+        }
+
         // Do we have a variation? Attempt table access in variation order
         if (is_array($tableIndex)) {
             foreach ($tableIndex as $index) {

@@ -37,25 +37,25 @@ class IntlCLDRNumberType35 implements IntlNumberConsistency
         return $examples[$variation] ?? null;
     }
 
-    public function getVariation(int $n): int
+    public function getVariation($n): int
     {
-        if ($n === 0) {
+        if ($n == 0) {
             return IntlVariations::INTL_NUMBER_VARIATIONS['ZERO'];
         }
 
-        if ($n === 1) {
+        if ($n == 1) {
             return IntlVariations::INTL_NUMBER_VARIATIONS['ONE'];
         }
 
-        if ($n === 2) {
+        if ($n == 2) {
             return IntlVariations::INTL_NUMBER_VARIATIONS['TWO'];
         }
 
-        if ($n === 3) {
+        if ($n == 3) {
             return IntlVariations::INTL_NUMBER_VARIATIONS['FEW'];
         }
 
-        if ($n === 6) {
+        if ($n == 6) {
             return IntlVariations::INTL_NUMBER_VARIATIONS['MANY'];
         }
 

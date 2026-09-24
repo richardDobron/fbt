@@ -50,7 +50,10 @@ class CollectFbtsService
 
     public function __construct()
     {
-        $this->parser = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
+        $parserFactory = new ParserFactory();
+        $this->parser = method_exists($parserFactory, "createForNewestSupportedVersion")
+            ? $parserFactory->createForNewestSupportedVersion()
+            : $parserFactory->create(ParserFactory::PREFER_PHP7);
         $this->traverser = new NodeTraverser();
         $this->traverser->addVisitor(new NodeVisitor());
         $this->printer = new Standard();
@@ -78,12 +81,18 @@ class CollectFbtsService
         FbtConfig::set('path', $path);
         FbtConfig::set('fbtCommonPath', $fbtCommonPath);
 
-        foreach (rsearch($src, '/.php$/') as $path) {
+        $files = rsearch($src, '/.php$/');
+        sort($files);
+
+        foreach ($files as $path) {
             $this->collectFromOneFile(file_get_contents($path), $path);
         }
 
         if (class_exists(\Latte\Engine::class)) {
-            foreach (rsearch($src, "/.latte$/") as $path) {
+            $files = rsearch($src, "/.latte$/");
+            sort($files);
+
+            foreach ($files as $path) {
                 $this->collectFromOneFile($this->compileLatte($path), $path);
             }
         }

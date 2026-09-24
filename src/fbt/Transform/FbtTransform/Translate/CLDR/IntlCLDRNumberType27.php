@@ -31,13 +31,13 @@ class IntlCLDRNumberType27 implements IntlNumberConsistency
         return $examples[$variation] ?? null;
     }
 
-    public function getVariation(int $n): int
+    public function getVariation($n): int
     {
-        if ($n % 10 === 1 && $n % 100 !== 11) {
+        if (fmod($n, 10) == 1 && fmod($n, 100) != 11) {
             return IntlVariations::INTL_NUMBER_VARIATIONS['ONE'];
         }
 
-        if ($n % 10 >= 2 && $n % 10 <= 4 && ($n % 100 < 12 || $n % 100 > 14)) {
+        if (fmod($n, 10) >= 2 && fmod($n, 10) <= 4 && (fmod($n, 100) < 12 || fmod($n, 100) > 14)) {
             return IntlVariations::INTL_NUMBER_VARIATIONS['FEW'];
         }
 

@@ -2,6 +2,7 @@
 
 namespace fbt;
 
+use fbt\Runtime\Shared\FbtHooks;
 use fbt\Transform\FbtTransform\FbtTransform;
 use fbt\Transform\FbtTransform\FbtUtils;
 use Latte\Runtime\HtmlStringable;
@@ -11,6 +12,7 @@ class fbt implements \JsonSerializable, HtmlStringable
     /* @var string */
     protected static $moduleName = 'fbt';
     protected static $cachedFbt = [];
+    protected static $collectedFbt = [];
     /* @var bool */
     protected $transform;
     /* @var string|array */
@@ -125,6 +127,7 @@ class fbt implements \JsonSerializable, HtmlStringable
     public static function _purgeCache(): void
     {
         self::$cachedFbt = [];
+        self::$collectedFbt = [];
     }
 
     /**
@@ -150,15 +153,34 @@ class fbt implements \JsonSerializable, HtmlStringable
 
         $fbt = createElement(self::$moduleName, implode('', $text), $attributes);
         if ($this->transform) {
-            $hash = md5($fbt);
+            $hash = md5($fbt . "\0" . FbtHooks::locale() . "\0" . FbtHooks::getIntlViewerContext()->getGender() . "\0" . FbtHooks::inlineMode());
             if (! isset(self::$cachedFbt[$hash])) {
-                self::$cachedFbt[$hash] = FbtTransform::transform($fbt, $this->trace);
+                self::$cachedFbt[$hash] = $this->_transformOnce($fbt);
             }
 
             return self::$cachedFbt[$hash];
         }
 
         return $fbt;
+    }
+
+    protected function _transformOnce(string $html): string
+    {
+        $key = md5($html);
+        if (! isset(self::$collectedFbt[$key])) {
+            self::$collectedFbt[$key] = true;
+
+            return FbtTransform::transform($html, $this->trace);
+        }
+
+        $collectPhrases = FbtTransform::$collectPhrases;
+        FbtTransform::$collectPhrases = false;
+
+        try {
+            return FbtTransform::transform($html, $this->trace);
+        } finally {
+            FbtTransform::$collectPhrases = $collectPhrases;
+        }
     }
 
     public function jsonSerialize(): string

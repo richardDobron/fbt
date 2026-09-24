@@ -35,21 +35,21 @@ class IntlCLDRNumberType31 implements IntlNumberConsistency
         return $examples[$variation] ?? null;
     }
 
-    public function getVariation(int $n): int
+    public function getVariation($n): int
     {
-        if ($n % 10 === 1 && ($n % 100 !== 11 && $n % 100 !== 71 && $n % 100 !== 91)) {
+        if (fmod($n, 10) == 1 && (fmod($n, 100) != 11 && fmod($n, 100) != 71 && fmod($n, 100) != 91)) {
             return IntlVariations::INTL_NUMBER_VARIATIONS['ONE'];
         }
 
-        if ($n % 10 === 2 && ($n % 100 !== 12 && $n % 100 !== 72 && $n % 100 !== 92)) {
+        if (fmod($n, 10) == 2 && (fmod($n, 100) != 12 && fmod($n, 100) != 72 && fmod($n, 100) != 92)) {
             return IntlVariations::INTL_NUMBER_VARIATIONS['TWO'];
         }
 
-        if (($n % 10 >= 3 && $n % 10 <= 4 || $n % 10 === 9) && (($n % 100 < 10 || $n % 100 > 19) && ($n % 100 < 70 || $n % 100 > 79) && ($n % 100 < 90 || $n % 100 > 99))) {
+        if ((fmod($n, 10) >= 3 && fmod($n, 10) <= 4 || fmod($n, 10) == 9) && ((fmod($n, 100) < 10 || fmod($n, 100) > 19) && (fmod($n, 100) < 70 || fmod($n, 100) > 79) && (fmod($n, 100) < 90 || fmod($n, 100) > 99))) {
             return IntlVariations::INTL_NUMBER_VARIATIONS['FEW'];
         }
 
-        if ($n !== 0 && $n % 1000000 === 0) {
+        if ($n != 0 && fmod($n, 1000000) == 0) {
             return IntlVariations::INTL_NUMBER_VARIATIONS['MANY'];
         }
 

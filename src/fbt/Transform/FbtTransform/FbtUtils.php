@@ -242,7 +242,7 @@ class FbtUtils
      * @return int|null
      * @throws FbtParserException
      */
-    public static function getVariationValue(string $moduleName, string $variationName, $variationInfo, Node $node): ?int
+    public static function getVariationValue(string $moduleName, string $variationName, $variationInfo, Node $node)
     {
         // Numbers allow only `true` or expression.
         if (

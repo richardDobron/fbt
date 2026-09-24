@@ -327,7 +327,7 @@ class JSFbtBuilder
             case Gender::GENDER_CONST['MALE_SINGULAR_GUESS']:
                 return Gender::GENDER_CONST['MALE_SINGULAR'];
 
-            case Gender::GENDER_CONST['MIXED_SINGULAR']: // And MIXED_PLURAL; they have the same integer values.
+            case Gender::GENDER_CONST['MIXED_UNKNOWN']:
             case Gender::GENDER_CONST['FEMALE_PLURAL']:
             case Gender::GENDER_CONST['MALE_PLURAL']:
             case Gender::GENDER_CONST['NEUTER_PLURAL']:

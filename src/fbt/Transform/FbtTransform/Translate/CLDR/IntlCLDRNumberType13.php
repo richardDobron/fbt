@@ -29,9 +29,9 @@ class IntlCLDRNumberType13 implements IntlNumberConsistency
         return $examples[$variation] ?? null;
     }
 
-    public function getVariation(int $n): int
+    public function getVariation($n): int
     {
-        if (($n === 1 || $n === 2 || $n === 3) || ($n % 10 !== 4 && $n % 10 !== 6 && $n % 10 !== 9)) {
+        if (($n == 1 || $n == 2 || $n == 3) || (fmod($n, 10) != 4 && fmod($n, 10) != 6 && fmod($n, 10) != 9)) {
             return IntlVariations::INTL_NUMBER_VARIATIONS['ONE'];
         }
 

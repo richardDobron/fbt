@@ -7,17 +7,27 @@ use fbt\Transform\FbtTransform\Translate\FBLocaleToLang;
 class IntlGenderType
 {
     public const MERGED_LOCALES = [
-        "ht_HT" => 1,
-        "lv_LV" => 1,
         "ar_AR" => 1,
         "ks_IN" => 1,
+        "lv_LV" => 1,
+        "ps_AF" => 1,
+        "qk_DZ" => 1,
+        "qs_DE" => 1,
+        "qv_IT" => 1,
+        "sq_AL" => 1,
+        "ti_ET" => 1,
     ];
 
     public const MERGED_LANGS = [
-        "ht" => 1,
-        "lv" => 1,
         "ar" => 1,
         "ks" => 1,
+        "lv" => 1,
+        "ps" => 1,
+        "kab" => 1,
+        "dsb" => 1,
+        "vec" => 1,
+        "sq" => 1,
+        "ti" => 1,
     ];
 
     /**

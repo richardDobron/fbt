@@ -31,13 +31,13 @@ class intlNumUtils
         "\u{0644}.\u{0633}.",
         "\u{0644}.\u{0644}.",
         "\u{0783}.",
-        'B\/.',
+        'B/.',
         'Bs.',
         'Fr.',
         'kr.',
         'L.',
         'p.',
-        'S\/.',
+        'S/.',
     ];
 
     public static function config(?array $config = null): ?array
@@ -88,15 +88,15 @@ class intlNumUtils
         ],
         ?array $numberingSystemData = null
     ): string {
-        $primaryGroupingSize = $standardPatternInfo['primaryGroupSize'] ?? self::DEFAULT_GROUPING_SIZE;
-        $secondaryGroupingSize = $standardPatternInfo['secondaryGroupSize'] ?? $primaryGroupingSize;
+        $primaryGroupingSize = ($standardPatternInfo['primaryGroupSize'] ?? null) ?: self::DEFAULT_GROUPING_SIZE;
+        $secondaryGroupingSize = ($standardPatternInfo['secondaryGroupSize'] ?? null) ?: $primaryGroupingSize;
 
         $digits = $numberingSystemData['digits'] ?? null;
 
         if (is_float($value) && is_nan($value)) {
             $v = 0;
         } elseif ($decimals === null) {
-            $v = (string)$value;
+            $v = self::_floatToString($value);
         } elseif (is_string($value)) {
             $v = self::truncateLongNumber($value, $decimals);
         } else {
@@ -122,13 +122,13 @@ class intlNumUtils
         }
         if ($digits !== null) {
             $wholeNumber = self::_replaceWithNativeDigits($wholeNumber, $digits);
-            if ($decimal) {
+            if ($decimal !== null && $decimal !== '') {
                 $decimal = self::_replaceWithNativeDigits($decimal, $digits);
             }
         }
 
         $result = $wholeNumber;
-        if ($decimal) {
+        if ($decimal !== null && $decimal !== '') {
             $result .= $decimalDelimiter . $decimal;
         }
 
@@ -180,20 +180,20 @@ class intlNumUtils
     public static function formatNumberWithLimitedSigFig(float $value, ?int $decimals, int $numSigFigs): string
     {
         // First make the number sufficiently integer-like.
-        $power = self::_getNumberOfPowersOfTen((int) $value);
+        $power = self::_getNumberOfPowersOfTen($value);
         $inflatedValue = $value;
         if ($power < $numSigFigs) {
             $inflatedValue = $value * pow(10, -$power + $numSigFigs);
         }
         // Now that we have a large enough integer, round to cut off some digits.
-        $roundTo = pow(10, self::_getNumberOfPowersOfTen((int) $inflatedValue) - $numSigFigs + 1);
+        $roundTo = pow(10, self::_getNumberOfPowersOfTen($inflatedValue) - $numSigFigs + 1);
         $truncatedValue = round($inflatedValue / $roundTo) * $roundTo;
         // Bring it back to whatever the number's magnitude was before.
         if ($power < $numSigFigs) {
             $truncatedValue /= pow(10, -$power + $numSigFigs);
             // Determine number of decimals based on sig figs
             if ($decimals === null) {
-                return self::formatNumberWithThousandDelimiters($truncatedValue, $numSigFigs - $power - 1);
+                return self::formatNumberWithThousandDelimiters($truncatedValue, (int)($numSigFigs - $power - 1));
             }
         }
 
@@ -330,7 +330,7 @@ class intlNumUtils
         $pow = 10 ** $decimals;
         $value = $valueParam;
         $value = round($value * $pow) / $pow;
-        $value = (string)$value;
+        $value = self::_floatToString($value);
         if (! $decimals) {
             return $value;
         }
@@ -367,9 +367,7 @@ class intlNumUtils
         $_text = preg_replace("/\u{0001}/", '.', $_text);// restore decimal separator
         $_text = preg_replace("/\u{0002}/", '-', $_text);// restore negative sign
 
-        $value = floatval($_text);
-
-        return $_text === '' || is_nan($value) ? null : $value;
+        return is_numeric($_text) ? (float)$_text : null;
     }
 
     public static function _getNativeDigitsMap(): ?array
@@ -392,7 +390,7 @@ class intlNumUtils
     public static function matchCurrenciesWithDots(): string
     {
         return self::_buildRegex(array_reduce(intlNumUtils::CURRENCIES_WITH_DOTS, function (string $regex, string $representation) {
-            return $regex . ($regex ? '|' : '') . '(' . $representation . ')';
+            return $regex . ($regex ? '|' : '') . '(' . self::escapeRegex($representation) . ')';
         }, ''));
     }
 
@@ -403,6 +401,45 @@ class intlNumUtils
     public static function escapeRegex(string $str): string
     {
         return preg_quote($str, '/');
+    }
+
+    /**
+     * Expands PHP's exponent notation (e.g. "1.0E+15", "1.0E-5") in the range
+     * where JavaScript prints plain digits (1e-6 <= |value| < 1e21).
+     *
+     * @param int|float|string $value
+     */
+    private static function _floatToString($value): string
+    {
+        $str = (string)$value;
+        if (! is_float($value) || stripos($str, 'E') === false) {
+            return $str;
+        }
+
+        $abs = abs($value);
+        if ($abs < 1e-6 || $abs >= 1e21) {
+            return $str;
+        }
+
+        [$mantissa, $exponent] = explode('E', strtoupper($str));
+        $sign = $mantissa[0] === '-' ? '-' : '';
+        [$int, $frac] = array_pad(explode('.', ltrim($mantissa, '-'), 2), 2, '');
+        $digits = $int . $frac;
+        $point = strlen($int) + (int)$exponent;
+
+        if ($point <= 0) {
+            $result = '0.' . str_repeat('0', -$point) . $digits;
+        } elseif ($point >= strlen($digits)) {
+            $result = $digits . str_repeat('0', $point - strlen($digits));
+        } else {
+            $result = substr($digits, 0, $point) . '.' . substr($digits, $point);
+        }
+
+        if (strpos($result, '.') !== false) {
+            $result = rtrim(rtrim($result, '0'), '.');
+        }
+
+        return $sign . $result;
     }
 
     protected static function _buildRegex(string $pattern): string
@@ -440,9 +477,9 @@ class intlNumUtils
      * I.e. 1.23 has 0, 100 and 999 have 2, and 1000 has 3.
      * Used in the inflation and rounding calculations below.
      */
-    protected static function _getNumberOfPowersOfTen(int $value): float
+    protected static function _getNumberOfPowersOfTen(float $value): float
     {
-        if ($value === 0) {
+        if ($value == 0) {
             return 0;
         }
 

@@ -56,7 +56,7 @@ class fbtHash
     // Hash computation for each string that matches the dump script in i18n's php.
     public static function jenkinsHash(string $str): int
     {
-        if (! $str) {
+        if ($str === '') {
             return 0;
         }
 

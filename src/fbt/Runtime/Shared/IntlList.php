@@ -27,7 +27,7 @@ class IntlList
 
     public function __construct(array $items, ?string $conjunction = null, ?string $delimiter = null)
     {
-        $this->items = $items;
+        $this->items = array_values($items);
         $this->conjunction = $conjunction;
         $this->delimiter = $delimiter;
     }

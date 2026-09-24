@@ -2,7 +2,6 @@
 
 namespace fbt;
 
-use fbt\Transform\FbtTransform\FbtTransform;
 use fbt\Transform\FbtTransform\FbtUtils;
 
 class fbs extends fbt
@@ -30,8 +29,6 @@ class fbs extends fbt
 
     public function __toString(): string
     {
-        static $cache;
-
         $text = $this->text;
         if (is_string($text)) {
             $text = [$this->text];
@@ -51,12 +48,12 @@ class fbs extends fbt
 
         $fbs = createElement(self::$moduleName, implode('', $text), $attributes);
         if ($this->transform) {
-            $hash = md5($fbs);
-            if (! isset($cache[$hash])) {
-                $cache[$hash] = FbtTransform::transform($fbs, $this->trace);
+            $hash = md5($fbs . "\0" . \fbt\Runtime\Shared\FbtHooks::locale() . "\0" . \fbt\Runtime\Shared\FbtHooks::getIntlViewerContext()->getGender() . "\0" . \fbt\Runtime\Shared\FbtHooks::inlineMode());
+            if (! isset(self::$cachedFbt[$hash])) {
+                self::$cachedFbt[$hash] = $this->_transformOnce($fbs);
             }
 
-            return $cache[$hash];
+            return self::$cachedFbt[$hash];
         }
 
         return $fbs;

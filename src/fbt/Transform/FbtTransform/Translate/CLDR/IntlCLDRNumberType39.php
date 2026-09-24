@@ -23,7 +23,7 @@ class IntlCLDRNumberType39 implements IntlNumberConsistency
         return null;
     }
 
-    public function getVariation(int $n): int
+    public function getVariation($n): int
     {
         return IntlVariations::INTL_NUMBER_VARIATIONS['OTHER'];
     }

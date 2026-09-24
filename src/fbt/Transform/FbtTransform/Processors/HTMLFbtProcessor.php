@@ -124,8 +124,8 @@ class HTMLFbtProcessor
      */
     private function _createFbtFunctionCallNode($text, ?string $desc, ?array $options): fbtNamespace
     {
-        invariant($text, 'text cannot be null');
-        invariant($desc, 'desc cannot be null');
+        invariant($text !== null, 'text cannot be null');
+        invariant($desc !== null, 'desc cannot be null');
 
         $args = [$text, $desc];
 

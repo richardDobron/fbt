@@ -93,9 +93,11 @@ class fbt
                 // translations. If pattern is not a string here, table has not been accessed
                 $pattern = FbtTable::access($pattern, $args, 0);
             }
-            $allSubstitutions = array_merge(...array_map(function (array $arg) {
-                return $arg[FbtTable::ARG['SUBSTITUTION']] ?? [];
-            }, $args));
+            foreach ($args as $arg) {
+                foreach ($arg[FbtTable::ARG['SUBSTITUTION']] ?? [] as $tokenName => $value) {
+                    $allSubstitutions[$tokenName] = $value;
+                }
+            }
             invariant($pattern !== null, 'Table access failed');
         }
 
@@ -217,6 +219,7 @@ class fbt
             if ($variations[0] === FbtRuntimeTypes::PARAM_VARIATION_TYPE['number']) {
                 $number = count($variations) > 1 ? $variations[1] : $value;
                 invariant(is_numeric($number), 'fbt::param expected number');
+                $number = +$number;
 
                 $variation = IntlVariationResolverImpl::getNumberVariations($number); // this will throw if `number` is invalid
                 if (is_numeric($value)) {
@@ -285,6 +288,9 @@ class fbt
             $gender !== Gender::GENDER_CONST['NOT_A_PERSON'] || ! $options || empty($options['human']),
             'Gender cannot be Gender::GENDER_CONST[\'NOT_A_PERSON\'] if you set "human" to true'
         );
+        if (is_numeric($usage)) {
+            $usage = array_search((int)$usage, FbtRuntimeTypes::VALID_PRONOUN_USAGES_TYPE, true) ?: $usage;
+        }
         $genderKey = JSFbtBuilder::getPronounGenderKey($usage, $gender);
 
         return FbtTableAccessor::getPronounResult($genderKey);

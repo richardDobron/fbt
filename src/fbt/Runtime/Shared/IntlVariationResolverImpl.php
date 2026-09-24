@@ -20,7 +20,7 @@ class IntlVariationResolverImpl
      *
      * @throws \fbt\Exceptions\FbtException
      */
-    public static function getNumberVariations(int $number): array
+    public static function getNumberVariations($number): array
     {
         $locale = FbtHooks::locale();
 
@@ -33,7 +33,7 @@ class IntlVariationResolverImpl
             gettype($numType)
         );
 
-        return $number === 1 ? [self::EXACTLY_ONE, $numType, "*"] : [$numType, "*"];
+        return $number == 1 ? [self::EXACTLY_ONE, $numType, "*"] : [$numType, "*"];
     }
 
     /**

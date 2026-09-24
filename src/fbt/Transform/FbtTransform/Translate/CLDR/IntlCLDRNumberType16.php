@@ -31,13 +31,13 @@ class IntlCLDRNumberType16 implements IntlNumberConsistency
         return $examples[$variation] ?? null;
     }
 
-    public function getVariation(int $n): int
+    public function getVariation($n): int
     {
-        if ($n === 0) {
+        if ($n == 0) {
             return IntlVariations::INTL_NUMBER_VARIATIONS['ZERO'];
         }
 
-        if ($n === 1) {
+        if ($n == 1) {
             return IntlVariations::INTL_NUMBER_VARIATIONS['ONE'];
         }
 

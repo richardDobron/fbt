@@ -97,7 +97,7 @@ class FbtFunctionCallProcessor
                         $variationInfo,
                         $node
                     );
-                    if ($variationValue) {
+                    if ($variationValue !== null) {
                         $variationValues[] = $variationValue;
                     }
 

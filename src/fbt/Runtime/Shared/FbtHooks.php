@@ -23,6 +23,8 @@ class FbtHooks
     public static $sourceHashes = [];
     /* @var array */
     public static $storedHashes = [];
+    /* @var array<string, int|null> index of the stored phrase of each hash */
+    private static $storedPhraseIds = [];
     /* @var array */
     public static $impression = [];
 
@@ -148,7 +150,7 @@ class FbtHooks
         self::$sourceStrings['phrases'][] = $phrase;
         self::$sourceHashes[$hash] = count(self::$sourceStrings['phrases']) - 1;
 
-        if (! empty($parentId)) {
+        if ($parentId !== null) {
             self::$sourceStrings['childParentMappings'][self::$sourceHashes[$hash]] = $parentId;
         }
 
@@ -163,50 +165,115 @@ class FbtHooks
         $fbtDir = FbtConfig::get('path') . '/';
         $file = $fbtDir . '.source_strings.json';
 
-        if (file_exists($file)) {
-            self::$sourceStrings = json_decode(file_get_contents($file), true);
-            $phrases = self::$sourceStrings['phrases'] ?? [];
+        self::$sourceHashes = [];
+        self::$sourceStrings = ['phrases' => []];
+        self::$storedPhraseIds = [];
 
-            if ($phrases) {
-                $hashToText = array_merge(...array_column($phrases, 'hashToText'));
-                foreach (array_keys($hashToText) as $hash) {
-                    self::$storedHashes[$hash] = true;
-                }
-            }
-        } elseif (! is_dir($fbtDir)) {
+        if (! is_dir($fbtDir)) {
             mkdir($fbtDir, 0777, true);
         }
 
         if (isset(self::$actions[__FUNCTION__])) {
+            if (file_exists($file)) {
+                self::loadSourceStrings(self::readLocked($file));
+            }
+
             self::$actions[__FUNCTION__](...func_get_args());
 
             return;
         }
 
+        // The file is read and written under an exclusive lock, so that concurrent
+        // processes neither fail to read it nor overwrite each other's phrases
+        $handle = fopen($file, 'c+');
+        if ($handle === false) {
+            throw new \RuntimeException("Unable to open the source strings file: $file");
+        }
+
+        try {
+            flock($handle, LOCK_EX);
+            self::loadSourceStrings((string)stream_get_contents($handle));
+            self::mergeCollectedPhrases();
+
+            $flags = 0;
+
+            if (FbtConfig::get('prettyPrint')) {
+                $flags |= JSON_PRETTY_PRINT;
+            }
+
+            ftruncate($handle, 0);
+            rewind($handle);
+            fwrite($handle, json_encode(self::$sourceStrings, $flags));
+            fflush($handle);
+        } finally {
+            flock($handle, LOCK_UN);
+            fclose($handle);
+        }
+
+        FbtTransform::$childToParent = [];
+        FbtTransform::$phrases = [];
+        self::$sourceHashes = [];
+    }
+
+    /**
+     * Reads a file under a shared lock (see storePhrases())
+     */
+    public static function readLocked(string $file): string
+    {
+        $handle = fopen($file, 'r');
+        if ($handle === false) {
+            return '';
+        }
+
+        try {
+            flock($handle, LOCK_SH);
+
+            return (string)stream_get_contents($handle);
+        } finally {
+            flock($handle, LOCK_UN);
+            fclose($handle);
+        }
+    }
+
+    private static function loadSourceStrings(string $contents): void
+    {
+        self::$sourceStrings = json_decode($contents, true) ?: [];
+        self::$sourceStrings['phrases'] = self::$sourceStrings['phrases'] ?? [];
+
+        foreach (self::$sourceStrings['phrases'] as $index => $phrase) {
+            foreach (array_keys($phrase['hashToText'] ?? []) as $hash) {
+                self::$storedHashes[$hash] = true;
+                self::$storedPhraseIds[$hash] = $index;
+            }
+        }
+    }
+
+    /**
+     * Adds the phrases collected by the transform to the stored ones.
+     */
+    private static function mergeCollectedPhrases(): void
+    {
         $sourceStrings = FbtTransform::toArray();
         $parentIds = [];
 
         foreach ($sourceStrings['phrases'] as $index => $phrase) {
-            if (isset(self::$storedHashes[array_keys($phrase['hashToText'])[0]])) {
+            $hash = array_keys($phrase['hashToText'])[0];
+
+            if (array_key_exists($hash, self::$storedPhraseIds)) {
+                // already stored, its inner strings still refer to it
+                $parentIds[$index] = self::$storedPhraseIds[$hash];
+
                 continue;
             }
 
             $parentKey = $sourceStrings['childParentMappings'][$index] ?? null;
 
             $parentIds[$index] = self::savePhrase($phrase, $parentIds[$parentKey] ?? null);
+
+            foreach (array_keys($phrase['hashToText']) as $phraseHash) {
+                self::$storedPhraseIds[$phraseHash] = $parentIds[$index];
+            }
         }
-
-        $flags = 0;
-
-        if (FbtConfig::get('prettyPrint')) {
-            $flags |= JSON_PRETTY_PRINT;
-        }
-
-        file_put_contents($file, json_encode(self::$sourceStrings, $flags), LOCK_EX);
-
-        FbtTransform::$childToParent = [];
-        FbtTransform::$phrases = [];
-        self::$sourceHashes = [];
     }
 
     /**

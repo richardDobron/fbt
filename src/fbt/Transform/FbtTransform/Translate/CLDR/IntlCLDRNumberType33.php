@@ -33,17 +33,17 @@ class IntlCLDRNumberType33 implements IntlNumberConsistency
         return $examples[$variation] ?? null;
     }
 
-    public function getVariation(int $n): int
+    public function getVariation($n): int
     {
-        if ($n % 10 === 1) {
+        if (fmod($n, 10) == 1) {
             return IntlVariations::INTL_NUMBER_VARIATIONS['ONE'];
         }
 
-        if ($n % 10 === 2) {
+        if (fmod($n, 10) == 2) {
             return IntlVariations::INTL_NUMBER_VARIATIONS['TWO'];
         }
 
-        if (($n % 100 === 0 || $n % 100 === 20 || $n % 100 === 40 || $n % 100 === 60 || $n % 100 === 80)) {
+        if ((fmod($n, 100) == 0 || fmod($n, 100) == 20 || fmod($n, 100) == 40 || fmod($n, 100) == 60 || fmod($n, 100) == 80)) {
             return IntlVariations::INTL_NUMBER_VARIATIONS['FEW'];
         }
 

@@ -10,8 +10,7 @@ class Gender
         'MALE_SINGULAR' => 2,
         'FEMALE_SINGULAR_GUESS' => 3,
         'MALE_SINGULAR_GUESS' => 4,
-        'MIXED_SINGULAR' => 5,
-        'MIXED_PLURAL' => 5,
+        'MIXED_UNKNOWN' => 5,
         'NEUTER_SINGULAR' => 6,
         'UNKNOWN_SINGULAR' => 7,
         'FEMALE_PLURAL' => 8,
@@ -119,7 +118,7 @@ class Gender
             "object" => 'them',
             "string" => 'neuter singular',
         ],
-        self::GENDER_CONST['MIXED_PLURAL'] => [
+        self::GENDER_CONST['MIXED_UNKNOWN'] => [
             "is_male" => false,
             "is_female" => false,
             "is_neuter" => false,

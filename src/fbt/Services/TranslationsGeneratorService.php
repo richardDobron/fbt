@@ -175,7 +175,7 @@ class TranslationsGeneratorService
 
         $flags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT;
 
-        $sourceStrings = json_decode(file_get_contents($source), true);
+        $sourceStrings = json_decode(FbtHooks::readLocked($source), true);
         $phrases = $sourceStrings['phrases'];
 
         $translations = [];
@@ -206,7 +206,7 @@ class TranslationsGeneratorService
                     continue;
                 }
 
-                $localeTranslations = json_decode(file_get_contents($file), true);
+                $localeTranslations = json_decode(FbtHooks::readLocked($file), true);
 
                 if (! $localeTranslations) {
                     $localeTranslations = [
@@ -219,7 +219,7 @@ class TranslationsGeneratorService
                     $localeTranslations[$match[1]]['translations'] += $translations;
                 }
 
-                file_put_contents($file, json_encode($localeTranslations, $flags));
+                file_put_contents($file, json_encode($localeTranslations, $flags), LOCK_EX);
             }
         } else {
             if (! file_exists($inputPath)) {
@@ -281,7 +281,7 @@ class TranslationsGeneratorService
             $this->prepareTranslations($path, $translationsPath, $pretty);
 
             $file = $path . '/.source_strings.json';
-            $sourceStrings = json_decode(file_get_contents($file), true);
+            $sourceStrings = json_decode(FbtHooks::readLocked($file), true);
         } else {
             $sourceStrings = json_decode($stdin, true);
             $this->translations = $sourceStrings['translationGroups'];
@@ -298,6 +298,6 @@ class TranslationsGeneratorService
             $flags |= JSON_PRETTY_PRINT;
         }
 
-        file_put_contents($path . '/translatedFbts.json', json_encode($this->processGroups($phrases, $translatedGroups), $flags));
+        file_put_contents($path . '/translatedFbts.json', json_encode($this->processGroups($phrases, $translatedGroups), $flags), LOCK_EX);
     }
 }

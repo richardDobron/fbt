@@ -27,6 +27,8 @@ class FbtTransform
      * @var array
      */
     public static $childToParent = [];
+    /** @var bool */
+    public static $collectPhrases = true;
 
     /**
      * @param fbt|string $html
@@ -48,7 +50,7 @@ class FbtTransform
         if (! self::$init) {
             $translations = FbtConfig::get('path') . '/translatedFbts.json';
             if (file_exists($translations)) {
-                FbtTranslations::registerTranslations(json_decode(file_get_contents($translations), true));
+                FbtTranslations::registerTranslations(json_decode(FbtHooks::readLocked($translations), true));
             }
 
             FbtHooks::onTerminating();

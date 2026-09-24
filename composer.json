@@ -9,7 +9,7 @@
         "ext-mbstring": "*",
         "ext-iconv": "*",
         "minicli/minicli": "1.0.4",
-        "nikic/php-parser": "^4.1",
+        "nikic/php-parser": "^4.1 || ^5.0",
         "richarddobron/dom-forge": "^2.0.1"
     },
     "require-dev": {

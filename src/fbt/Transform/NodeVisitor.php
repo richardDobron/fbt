@@ -40,6 +40,20 @@ class NodeVisitor extends NodeVisitorAbstract
                     }
 
                     break;
+                case "enum":
+                    if (! ($node->args[0]->value instanceof String_)
+                        && isset($node->args[1])
+                        && $node->args[1]->value instanceof Node\Expr\Array_
+                        && ! empty($node->args[1]->value->items)
+                    ) {
+                        $item = $node->args[1]->value->items[0];
+                        $key = $item->key ?? $item->value;
+                        if ($key instanceof String_ || $key instanceof LNumber) {
+                            $node->args[0] = new Node\Arg(new String_((string)$key->value));
+                        }
+                    }
+
+                    break;
                 case "plural":
                 case "pronoun":
                     if (! ($node->args[1]->value instanceof LNumber)) {

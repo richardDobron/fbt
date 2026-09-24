@@ -232,6 +232,7 @@ class IntlNumberType
         "co" => \fbt\Transform\FbtTransform\Translate\CLDR\IntlCLDRNumberType37::class,
         "ht" => \fbt\Transform\FbtTransform\Translate\CLDR\IntlCLDRNumberType37::class,
         "quc" => \fbt\Transform\FbtTransform\Translate\CLDR\IntlCLDRNumberType37::class,
+        "rn" => \fbt\Transform\FbtTransform\Translate\CLDR\IntlCLDRNumberType37::class,
         "mi" => \fbt\Transform\FbtTransform\Translate\CLDR\IntlCLDRNumberType38::class,
         "tg" => \fbt\Transform\FbtTransform\Translate\CLDR\IntlCLDRNumberType38::class,
         "tt" => \fbt\Transform\FbtTransform\Translate\CLDR\IntlCLDRNumberType39::class,

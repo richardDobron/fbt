@@ -23,7 +23,7 @@ class FbtResult
         $stringValue = "";
         $contents = $this->flattenToArray($this->content);
         foreach ($contents as $content) {
-            if (is_string($content) || $content instanceof FbtResult) {
+            if (is_string($content) || (is_object($content) && method_exists($content, '__toString'))) {
                 $stringValue .= $content;
             } else {
                 // $this->onStringSerializationError($content);
