@@ -48,12 +48,7 @@ class fbs extends fbt
 
         $fbs = createElement(self::$moduleName, implode('', $text), $attributes);
         if ($this->transform) {
-            $hash = md5($fbs . "\0" . \fbt\Runtime\Shared\FbtHooks::locale() . "\0" . \fbt\Runtime\Shared\FbtHooks::getIntlViewerContext()->getGender() . "\0" . \fbt\Runtime\Shared\FbtHooks::inlineMode());
-            if (! isset(self::$cachedFbt[$hash])) {
-                self::$cachedFbt[$hash] = $this->_transformOnce($fbs);
-            }
-
-            return self::$cachedFbt[$hash];
+            return $this->_transform($fbs);
         }
 
         return $fbs;

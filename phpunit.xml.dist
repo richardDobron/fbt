@@ -6,8 +6,7 @@
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
          processIsolation="false"
-         stopOnFailure="false"
-         strict="true">
+         stopOnFailure="false">
   <coverage>
     <include>
       <directory suffix=".php">src/</directory>

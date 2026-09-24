@@ -40,6 +40,27 @@ class FbtHash
     }
 
     /**
+     * Takes an fbt text and description and returns the unique identifier as calculated by
+     * the MD5 algorithm.
+     *
+     * @throws \fbt\Exceptions\FbtException
+     * @throws \fbt\Exceptions\FbtInvalidConfigurationException
+     */
+    public static function md5Text(string $text, string $description): string
+    {
+        return self::md5([['desc' => $description, 'texts' => [$text]]])[0][0];
+    }
+
+    /**
+     * Takes an fbt text and description and returns the unique identifier as calculated by
+     * the FB version of tiger128.
+     */
+    public static function tigerText(string $text, string $description): string
+    {
+        return self::tiger([['desc' => $description, 'texts' => [$text]]])[0][0];
+    }
+
+    /**
      * Takes fbt callsite data where each entry in the following array
      * represents one individual fbt callsite:
      *

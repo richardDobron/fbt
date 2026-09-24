@@ -46,35 +46,51 @@ When extracted for translation, the result of the `\fbt\Transform\FbtTransform\F
 ```php
 [
   "phrases" => [
-    2 => [
-      "hashToText" => [
-        "576c64dce7dc0eb30803b1c2feb21722": "Go on an {=awesome vacation}"
+    0 => [
+      "hashToLeaf" => [
+        "V2xk3OfcDrMIA7HC/rIXIg==" => [
+          "text" => "Go on an {=awesome vacation}",
+          "desc" => "auto-wrap example",
+        ],
       ],
-      "desc": "auto-wrap example",
-      ...,
+      "project" => "website app",
+      "jsfbt" => [
+        "t" => [
+          "desc" => "auto-wrap example",
+          "text" => "Go on an {=awesome vacation}",
+          "tokenAliases" => ["=awesome vacation" => "=m1"],
+        ],
+        "m" => [],
+      ],
     ],
     1 => [
-      "hashToText" => [
-        "7de5f69602b0c289965183f9ffbf2496": "{=awesome} vacation"
+      "hashToLeaf" => [
+        "feX2lgKwwomWUYP5/78klg==" => [
+          "text" => "{=awesome} vacation",
+          "desc" => "In the phrase: \"Go on an {=awesome vacation}\"",
+        ],
       ],
-      "desc": "In the phrase: \"Go on an {=awesome vacation}\"",
       ...,
     ],
-    0 => [
-      "hashToText" => [
-        "6bbb015218a9c99babf7213c1fa764d8": "awesome"
+    2 => [
+      "hashToLeaf" => [
+        "a7sBUhipyZur9yE8H6dk2A==" => [
+          "text" => "awesome",
+          "desc" => "In the phrase: \"Go on an {=awesome} vacation\"",
+        ],
       ],
-      "desc": "In the phrase: \"Go on an {=awesome} vacation\"",
       ...,
-    ]
+    ],
   ],
   "childParentMappings" => [
-    0 => 1,
-    1 => 2
-  ]
-}
+    1 => 0,
+    2 => 1,
+  ],
+]
 ```
 
+The `tokenAliases` map the tokens of inner strings to the parameters used at runtime (`{=m1}`), so
+that translations can freely reorder or change the text of the inner strings.
 Notice the description for "vacation" is auto-generated with an `"In
 the phrase: ..."` prefix.  Additionally, we use a convention of adding an equal sign (`=`)
 prefix in the interpolation `{=awesome vacation}` to signal to the

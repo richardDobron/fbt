@@ -4,48 +4,20 @@ namespace fbt\Transform\FbtTransform\Translate;
 
 use function fbt\invariant;
 
-class FbtSiteMetaEntry
+class FbtSiteMetaEntry extends FbtSiteMetaEntryBase
 {
-    private $_type;
-    private $_token;
-    private $_mask;
+    /** @var array<int, string>|null */
+    private $_range;
 
-    public function __construct(?int $type, ?string $token, ?int $mask)
+    public function __construct(?int $type, ?string $token, ?array $range)
     {
-        $this->_type = $type;
-        $this->_token = $token;
-        $this->_mask = $mask;
-    }
-
-    /**
-     * @throws \fbt\Exceptions\FbtException
-     */
-    public static function wrap(array $entry): FbtSiteMetaEntry
-    {
-        FbtSiteMetaEntry::_validate($entry);
-
-        return new FbtSiteMetaEntry(
-            $entry['type'] ?? null,
-            $entry['token'] ?? null,
-            $entry['mask'] ?? null
-        );
-    }
-
-    public function getToken()
-    {
-        return $this->_token;
+        parent::__construct($type, $token);
+        $this->_range = $range;
     }
 
     public function hasVariationMask(): bool
     {
-        if ($this->_token === null) {
-            return false;
-        }
-        if ($this->_type === null) {
-            return $this->_mask !== null;
-        }
-
-        return self::getVariationMaskFromType($this->_type) !== null;
+        return self::getVariationMaskFromType($this->type) !== null;
     }
 
     /**
@@ -54,76 +26,83 @@ class FbtSiteMetaEntry
     public function getVariationMask(): ?int
     {
         invariant(
-            $this->hasVariationMask() === true,
+            $this->hasVariationMask(),
             'check hasVariationMask to avoid this invariant'
         );
 
-        if ($this->_type === null) {
-            return $this->_mask;
-        }
-
-        return self::getVariationMaskFromType($this->_type);
-    }
-
-    public function unwrap(): array
-    {
-        $entry = [];
-        if ($this->_token !== null) {
-            $entry['token'] = $this->_token;
-        }
-        if ($this->_mask !== null) {
-            $entry['mask'] = $this->_mask;
-        }
-        if ($this->_type !== null) {
-            $entry['type'] = $this->_type;
-        }
-
-        return $entry;
+        return self::getVariationMaskFromType($this->type);
     }
 
     /**
      * @throws \fbt\Exceptions\FbtException
      */
-    public static function _validate(array $entry)
+    public static function wrap(array $entry): self
     {
-        $type = $entry['type'] ?? null;
-        $token = $entry['token'] ?? null;
-        $mask = $entry['mask'] ?? null;
-        if ($type === null) {
-            invariant(
-                $token !== null && $mask !== null,
-                'token and mask should be specified when there is not type'
-            );
-        } else {
-            invariant(
-                $mask === null,
-                'mask should not be specified when there is type'
-            );
-            if ($type === IntlVariations::INTL_FBT_VARIATION_TYPE['GENDER']) {
-                invariant(
-                    $token !== null,
-                    'token should be specified for gender variation'
-                );
-            } elseif ($type === IntlVariations::INTL_FBT_VARIATION_TYPE['PRONOUN']) {
-                invariant(
-                    $token === null,
-                    'token should not be specified for pronoun variation'
-                );
-            }
-        }
+        self::_validate($entry);
+
+        return new self(
+            ($entry['type'] ?? null) ?: null,
+            $entry['token'] ?? null,
+            ($entry['range'] ?? null) ?: null
+        );
     }
 
     /**
-     * @param int|null $type
-     * @return int|null
+     * @throws \fbt\Exceptions\FbtException
      */
-    public static function getVariationMaskFromType(?int $type): ?int
+    public function unwrap(): array
     {
-        $_variationTypeToMask = [
-            IntlVariations::INTL_FBT_VARIATION_TYPE['GENDER'] => IntlVariations::INTL_VARIATION_MASK['GENDER'],
-            IntlVariations::INTL_FBT_VARIATION_TYPE['NUMBER'] => IntlVariations::INTL_VARIATION_MASK['NUMBER'],
-        ];
+        $token = $this->token;
+        $type = $this->type;
 
-        return $_variationTypeToMask[$type] ?? null;
+        if ($type === IntlVariations::INTL_FBT_VARIATION_TYPE['NUMBER']) {
+            $entry = ['type' => $type];
+            if ($token !== null) {
+                $entry['token'] = $token;
+            }
+
+            return $entry;
+        }
+
+        if ($type === IntlVariations::INTL_FBT_VARIATION_TYPE['GENDER']) {
+            invariant($token !== null, 'token should be specified for gender variation');
+
+            return ['type' => $type, 'token' => $token];
+        }
+
+        if ($type === IntlVariations::INTL_FBT_VARIATION_TYPE['PRONOUN']) {
+            return ['type' => $type];
+        }
+
+        invariant($this->_range !== null, 'range should be specified for enum variation');
+
+        return ['range' => $this->_range];
+    }
+
+    /**
+     * @throws \fbt\Exceptions\FbtException
+     */
+    public static function _validate(array $entry): void
+    {
+        $type = ($entry['type'] ?? null) ?: null;
+        $token = $entry['token'] ?? null;
+        $range = ($entry['range'] ?? null) ?: null;
+
+        if ($type === null) {
+            invariant(
+                $range !== null,
+                'if no type is provided, this must be enum variation and thus range must be specified '
+            );
+        } elseif ($type === IntlVariations::INTL_FBT_VARIATION_TYPE['GENDER']) {
+            invariant(
+                $token !== null,
+                'token should be specified for gender variation'
+            );
+        } elseif ($type === IntlVariations::INTL_FBT_VARIATION_TYPE['PRONOUN']) {
+            invariant(
+                $token === null,
+                'token should not be specified for pronoun variation'
+            );
+        }
     }
 }

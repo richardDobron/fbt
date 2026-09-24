@@ -10,6 +10,8 @@ class Gender
         'MALE_SINGULAR' => 2,
         'FEMALE_SINGULAR_GUESS' => 3,
         'MALE_SINGULAR_GUESS' => 4,
+        'MIXED_SINGULAR' => 5,
+        'MIXED_PLURAL' => 5,
         'MIXED_UNKNOWN' => 5,
         'NEUTER_SINGULAR' => 6,
         'UNKNOWN_SINGULAR' => 7,
@@ -118,7 +120,7 @@ class Gender
             "object" => 'them',
             "string" => 'neuter singular',
         ],
-        self::GENDER_CONST['MIXED_UNKNOWN'] => [
+        self::GENDER_CONST['MIXED_PLURAL'] => [
             "is_male" => false,
             "is_female" => false,
             "is_neuter" => false,
@@ -194,7 +196,7 @@ class Gender
     {
         $data = self::DATA;
 
-        return $data[$gender]
+        return isset($data[$gender])
             ? $data[$gender][$usage]
             : $data[self::GENDER_CONST['NOT_A_PERSON']][$usage];
     }

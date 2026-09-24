@@ -25,6 +25,9 @@ FbtHooks::inlineMode('NO_INLINE');
 ```
 
 ## Excluded translations
+Strings created with `fbs()` / `<fbs>` are never inlined, since they are meant to be used as plain text
+(e.g. in HTML attributes).
+
 If you need to turn off inline mode for specific phrases, you can use option `reporting`:
 
 ```php

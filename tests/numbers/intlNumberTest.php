@@ -82,8 +82,8 @@ class intlNumberTest extends \tests\TestCase
         $this->assertEquals('-1000000000000000.12', $this->util->formatNumberRaw('-1000000000000000.123', 2));
 
         // Testing small numbers
-        $this->assertEquals('1.99E-7', $this->util->formatNumberRaw(0.000000199, 9));
-        $this->assertEquals('2.0E-7', $this->util->formatNumberRaw(0.000000199, 7));
+        $this->assertEquals('1.99e-7', $this->util->formatNumberRaw(0.000000199, 9));
+        $this->assertEquals('2e-7', $this->util->formatNumberRaw(0.000000199, 7));
         $this->assertEquals('0.0000000', $this->util->formatNumberRaw(0.0000000199, 7));
         $this->assertEquals('0.000000199', $this->util->formatNumberRaw('0.000000199', 9));
     }

@@ -10,14 +10,11 @@ use function fbt\invariant;
 use fbt\Lib\FbtQTOverrides;
 use fbt\Runtime\FbtRuntimeTypes;
 use fbt\Runtime\FbtTable;
-use fbt\Runtime\FbtTranslations;
 use fbt\Runtime\Gender;
-use fbt\Transform\FbtTransform\FbtUtils;
-use fbt\Transform\FbtTransform\JSFbtBuilder;
 
 class fbt
 {
-    /** @var array */
+    /** @var array<string, FbtResultBase> */
     private static $_cachedFbtResults = [];
 
     /**
@@ -47,11 +44,11 @@ class fbt
      * translation dictionary access. hk stands for hash key which is used to look
      * up translated payload in React Native. ehk stands for enum hash key which
      * contains a structured enums to hash keys map which will later be traversed
-     * to look up enum-less translated payload.
+     * to look up enum-less translated payload. eo stands for extra options.
      *
-     * @param bool $reporting
+     * @param bool $reporting - js~php diff: whether the result can be inlined
      *
-     * @return FbtResult|InlineFbtResult
+     * @return FbtResultBase|mixed - result of the getFbtResult/getFbsResult hook
      * @throws FbtException
      * @throws \fbt\Exceptions\FbtInvalidConfigurationException
      */
@@ -68,7 +65,13 @@ class fbt
         //
         // OSS: The table is the English payload, and, by default, we lookup the
         //      translated payload via FbtTranslations
-        [$pattern, $args] = FbtTranslations::getTranslatedInput($inputTable, $inputArgs, $options) ?? [$inputTable, $inputArgs, FbtTranslations::DEFAULT_SRC_LOCALE];
+        $translatedInput = FbtHooks::getTranslatedInput([
+            'table' => $inputTable,
+            'args' => $inputArgs,
+            'options' => $options,
+        ]);
+        $pattern = $translatedInput['table'];
+        $args = $translatedInput['args'];
 
         // [fbt_impressions]
         // If this is a string literal (no tokens to substitute) then 'args' is empty
@@ -79,8 +82,9 @@ class fbt
         // need to traverse in order to pick the correct string, based on the
         // args that follow.
         $allSubstitutions = [];
+        $tokens = [];
 
-        if (! empty($pattern['__vcg'])) {
+        if (is_array($pattern) && isset($pattern['__vcg'])) {
             $args = $args ?? [];
             $gender = FbtHooks::getIntlViewerContext()->getGender();
             $variation = IntlVariationResolverImpl::getGenderVariations($gender);
@@ -91,13 +95,10 @@ class fbt
             if (! is_string($pattern)) {
                 // On mobile, table can be accessed at the native layer when fetching
                 // translations. If pattern is not a string here, table has not been accessed
-                $pattern = FbtTable::access($pattern, $args, 0);
+                $pattern = FbtTable::access($pattern, $args, 0, $tokens);
             }
-            foreach ($args as $arg) {
-                foreach ($arg[FbtTable::ARG['SUBSTITUTION']] ?? [] as $tokenName => $value) {
-                    $allSubstitutions[$tokenName] = $value;
-                }
-            }
+
+            $allSubstitutions = self::getAllSubstitutions($args);
             invariant($pattern !== null, 'Table access failed');
         }
 
@@ -111,11 +112,15 @@ class fbt
             // Append '1_' for appid's prepended to our i18n hash
             // (see intl_get_application_id)
             $stringID = '1_' . $patternHash;
-            if (! empty(FbtQTOverrides::$overrides[$stringID])) {
+            if (isset(FbtQTOverrides::$overrides[$stringID]) && FbtQTOverrides::$overrides[$stringID] !== '') {
                 $patternString = FbtQTOverrides::$overrides[$stringID];
                 FbtHooks::onTranslationOverride($patternHash);
             }
-            FbtHooks::logImpression($patternHash);
+            $impressionOptions = [
+                'inputTable' => $inputTable,
+                'tokens' => $tokens,
+            ];
+            FbtHooks::logImpression($patternHash, $impressionOptions);
         } elseif (is_string($pattern)) {
             $patternString = $pattern;
         } else {
@@ -127,15 +132,33 @@ class fbt
             );
         }
 
-        $cachedFbt = self::$_cachedFbtResults[$patternString] ?? null;
-        $hasSubstitutions = FbtUtils::hasKeys($allSubstitutions);
+        // js~php diff: cached results are separated per runtime (fbt/fbs) and locale
+        $cacheKey = static::class . "\0" . FbtHooks::locale() . "\0" . $patternString;
+        $cachedFbt = self::$_cachedFbtResults[$cacheKey] ?? null;
+        $hasSubstitutions = self::_hasKeys($allSubstitutions);
+
         if ($cachedFbt && ! $hasSubstitutions) {
             return $cachedFbt;
         } else {
-            $fbtContent = FbtUtils::substituteTokens($patternString, $allSubstitutions);
-            $result = $this->_wrapContent($fbtContent, $patternString, $patternHash, $reporting);
+            $fbtContent = substituteTokens::substitute(
+                $patternString,
+                $allSubstitutions,
+                FbtHooks::getErrorListener([
+                    'translation' => $patternString,
+                    'hash' => $patternHash,
+                ])
+            );
+            $result = $this->_wrapContent(
+                $fbtContent,
+                $patternString,
+                $patternHash,
+                $options['eo'] ?? null,
+                $reporting
+            );
+            // js~php diff: results that can be inlined depend on the inline mode,
+            // so they are never cached
             if (! $hasSubstitutions && ! $reporting) {
-                self::$_cachedFbtResults[$patternString] = $result;
+                self::$_cachedFbtResults[$cacheKey] = $result;
             }
 
             return $result;
@@ -143,43 +166,59 @@ class fbt
     }
 
     /**
+     * @throws FbtException
+     */
+    private static function getAllSubstitutions(array $args): array
+    {
+        $allSubstitutions = [];
+        foreach ($args as $arg) {
+            $substitution = $arg[FbtTable::ARG['SUBSTITUTION']] ?? null;
+            if (! $substitution) {
+                continue;
+            }
+
+            foreach ($substitution as $tokenName => $value) {
+                invariant(
+                    ! isset($allSubstitutions[$tokenName]),
+                    'Cannot register a substitution with token=`%s` more than once',
+                    $tokenName
+                );
+                $allSubstitutions[$tokenName] = $value;
+            }
+        }
+
+        return $allSubstitutions;
+    }
+
+    /**
+     * _hasKeys takes an array and returns whether it has any keys. It purposefully
+     * avoids creating the temporary arrays incurred by calling array_keys($o)
+     */
+    private static function _hasKeys(array $o): bool
+    {
+        foreach ($o as $_) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * fbt::enum() takes an enum value and returns a tuple in the format:
      * [value, null]
-     * @param $value - Example: "id1"
-     * @param $range - Example: ["id1" => "groups", "id2" => "videos", ...]
+     * @param string|int $value - Example: "id1"
+     * @param array $range - Example: ["id1" => "groups", "id2" => "videos", ...]
      *
      * @throws \fbt\Exceptions\FbtException
      * @throws \fbt\Exceptions\FbtInvalidConfigurationException
      */
-    public static function _enum(string $value, array $range): array
+    public static function _enum($value, array $range): array
     {
         if (FbtConfig::get('debug')) {
-            invariant(isset($range[$value]), 'invalid value: %s', $value);
+            invariant(array_key_exists($value, $range), 'invalid value: %s', $value);
         }
 
         return FbtTableAccessor::getEnumResult($value);
-    }
-
-    /**
-     * fbt::name() takes a `label`, `value`, and `gender` and
-     * returns a tuple in the format:
-     * [gender, {label: "replaces {label} in pattern string"}]
-     * @param string $label - Example: "label"
-     * @param mixed $value
-     *   - E.g. 'replaces {label} in pattern'
-     * @param int $gender - Example: "IntlVariations::GENDER_FEMALE"
-     *
-     * @return array
-     *
-     * @throws FbtException
-     */
-    public static function _name(string $label, string $value, int $gender): array
-    {
-        $variation = IntlVariationResolverImpl::getGenderVariations($gender);
-        $substitution = [];
-        $substitution[$label] = $value;
-
-        return FbtTableAccessor::getGenderResult($variation, $substitution, $gender);
     }
 
     /**
@@ -218,18 +257,19 @@ class fbt
         if ($variations) {
             if ($variations[0] === FbtRuntimeTypes::PARAM_VARIATION_TYPE['number']) {
                 $number = count($variations) > 1 ? $variations[1] : $value;
+                // js~php diff: numeric strings are accepted as numbers
                 invariant(is_numeric($number), 'fbt::param expected number');
                 $number = +$number;
 
                 $variation = IntlVariationResolverImpl::getNumberVariations($number); // this will throw if `number` is invalid
                 if (is_numeric($value)) {
                     $substitution[$label] =
-                        intlNumUtils::formatNumberWithThousandDelimiters($value);
+                        intlNumUtils::formatNumberWithThousandDelimiters(+$value);
                 }
 
                 return FbtTableAccessor::getNumberResult($variation, $substitution, $number);
             } elseif ($variations[0] === FbtRuntimeTypes::PARAM_VARIATION_TYPE['gender']) {
-                $gender = $variations[1];
+                $gender = $variations[1] ?? null;
                 invariant($gender !== null, 'expected gender value');
 
                 return FbtTableAccessor::getGenderResult(
@@ -246,10 +286,25 @@ class fbt
     }
 
     /**
+     * fbt::_implicitParam() behaves like fbt::_param()
+     *
+     * @param string $label
+     * @param mixed $value
+     * @param array $variations
+     *
+     * @return array
+     * @throws FbtException
+     */
+    public static function _implicitParam(string $label, $value, array $variations = []): array
+    {
+        return static::_param($label, $value, $variations);
+    }
+
+    /**
      * fbt::_plural() takes a `count` and 2 optional params: `label` and `value`.
      * It returns a tuple in the format:
      * [?variation, {label: "replaces {label} in pattern string"}]
-     * @param float $count - Example: 2
+     * @param float|int|string $count - Example: 2
      * @param string|null $label
      *   - E.g. 'replaces {number} in pattern'
      * @param mixed|null $value
@@ -258,15 +313,21 @@ class fbt
      * @return array
      * @throws FbtException
      */
-    public static function _plural(float $count, ?string $label = null, $value = null): array
+    public static function _plural($count, ?string $label = null, $value = null): array
     {
+        // js~php diff: numeric strings are accepted as numbers
+        invariant(is_numeric($count), 'fbt::plural expected number');
+        $count = +$count;
+
         $variation = IntlVariationResolverImpl::getNumberVariations($count);
         $substitution = [];
         if ($label) {
             if (is_numeric($value)) {
-                $substitution[$label] = intlNumUtils::formatNumberWithThousandDelimiters($value);
+                $substitution[$label] = intlNumUtils::formatNumberWithThousandDelimiters(+$value);
             } else {
-                $substitution[$label] = $value ?? intlNumUtils::formatNumberWithThousandDelimiters($count);
+                $substitution[$label] = $value !== null && $value !== ''
+                    ? $value
+                    : intlNumUtils::formatNumberWithThousandDelimiters($count);
             }
         }
 
@@ -276,49 +337,136 @@ class fbt
     /**
      * fbt::pronoun() takes a 'usage' string and a Gender::GENDER_CONST value and returns a tuple in the format:
      * [variations, null]
-     * @param $usage - Example: FbtConstants::PRONOUN_USAGE['OBJECT'].
-     * @param $gender - Example: Gender::GENDER_CONST['MALE_SINGULAR']
-     * @param $options - Example: [ 'human' => 1 ]
+     * @param int|string $usage - Example: FbtRuntimeTypes::VALID_PRONOUN_USAGES_TYPE['object'].
+     * @param int $gender - Example: Gender::GENDER_CONST['MALE_SINGULAR']
+     * @param array|null $options - Example: [ 'human' => 1 ]
      *
      * @throws \fbt\Exceptions\FbtException
      */
-    public static function _pronoun(string $usage, int $gender, array $options = []): array
+    public static function _pronoun($usage, int $gender, ?array $options = null): array
     {
         invariant(
             $gender !== Gender::GENDER_CONST['NOT_A_PERSON'] || ! $options || empty($options['human']),
             'Gender cannot be Gender::GENDER_CONST[\'NOT_A_PERSON\'] if you set "human" to true'
         );
-        if (is_numeric($usage)) {
-            $usage = array_search((int)$usage, FbtRuntimeTypes::VALID_PRONOUN_USAGES_TYPE, true) ?: $usage;
+
+        // js~php diff: usage names are accepted too
+        if (is_string($usage) && isset(FbtRuntimeTypes::VALID_PRONOUN_USAGES_TYPE[$usage])) {
+            $usage = FbtRuntimeTypes::VALID_PRONOUN_USAGES_TYPE[$usage];
         }
-        $genderKey = JSFbtBuilder::getPronounGenderKey($usage, $gender);
+
+        $genderKey = self::getPronounGenderKey((int)$usage, $gender);
 
         return FbtTableAccessor::getPronounResult($genderKey);
     }
 
     /**
-     * @param string|array $fbtContent
-     * @param string $patternString
-     * @param string|null $patternHash
-     * @param bool $reporting
-     *
-     * @return FbtResult|InlineFbtResult
+     * Must match implementation from JSFbtBuilder::getPronounGenderKey()
      */
-    private function _wrapContent($fbtContent, string $patternString, ?string $patternHash, bool $reporting = true)
+    private static function getPronounGenderKey(int $usage, int $gender): int
     {
-        $contents = is_string($fbtContent) ? [$fbtContent] : $fbtContent;
+        $validPronounUsages = FbtRuntimeTypes::VALID_PRONOUN_USAGES_TYPE;
 
-        $inlineMode = FbtHooks::inlineMode();
+        switch ($gender) {
+            case Gender::GENDER_CONST['NOT_A_PERSON']:
+                return $usage === $validPronounUsages['object'] ||
+                    $usage === $validPronounUsages['reflexive']
+                    ? Gender::GENDER_CONST['NOT_A_PERSON']
+                    : Gender::GENDER_CONST['UNKNOWN_PLURAL'];
 
-        if ($reporting && $inlineMode && $inlineMode !== 'NO_INLINE') {
-            return new InlineFbtResult(
-                $contents,
-                $inlineMode,
-                $patternString,
-                $patternHash
-            );
+            case Gender::GENDER_CONST['FEMALE_SINGULAR']:
+            case Gender::GENDER_CONST['FEMALE_SINGULAR_GUESS']:
+                return Gender::GENDER_CONST['FEMALE_SINGULAR'];
+
+            case Gender::GENDER_CONST['MALE_SINGULAR']:
+            case Gender::GENDER_CONST['MALE_SINGULAR_GUESS']:
+                return Gender::GENDER_CONST['MALE_SINGULAR'];
+
+            case Gender::GENDER_CONST['MIXED_UNKNOWN']:
+            case Gender::GENDER_CONST['FEMALE_PLURAL']:
+            case Gender::GENDER_CONST['MALE_PLURAL']:
+            case Gender::GENDER_CONST['NEUTER_PLURAL']:
+            case Gender::GENDER_CONST['UNKNOWN_PLURAL']:
+                return Gender::GENDER_CONST['UNKNOWN_PLURAL'];
+
+            case Gender::GENDER_CONST['NEUTER_SINGULAR']:
+            case Gender::GENDER_CONST['UNKNOWN_SINGULAR']:
+                return $usage === $validPronounUsages['reflexive']
+                    ? Gender::GENDER_CONST['NOT_A_PERSON']
+                    : Gender::GENDER_CONST['UNKNOWN_PLURAL'];
         }
 
-        return new FbtResult($contents);
+        // Mirrors the behavior of :fbt:pronoun when an unknown gender value is given.
+        return Gender::GENDER_CONST['NOT_A_PERSON'];
+    }
+
+    /**
+     * fbt::name() takes a `label`, `value`, and `gender` and
+     * returns a tuple in the format:
+     * [gender, {label: "replaces {label} in pattern string"}]
+     * @param string $label - Example: "label"
+     * @param mixed $value
+     *   - E.g. 'replaces {label} in pattern'
+     * @param int $gender - Example: "IntlVariations::GENDER_FEMALE"
+     *
+     * @return array
+     *
+     * @throws FbtException
+     */
+    public static function _name(string $label, $value, int $gender): array
+    {
+        $variation = IntlVariationResolverImpl::getGenderVariations($gender);
+        $substitution = [];
+        $substitution[$label] = $value;
+
+        return FbtTableAccessor::getGenderResult($variation, $substitution, $gender);
+    }
+
+    /**
+     * @param string|array $fbtContent
+     * @param string $translation
+     * @param string|null $hash
+     * @param array|null $extraOptions
+     * @param bool $reporting
+     *
+     * @return FbtResultBase|mixed
+     */
+    protected function _wrapContent(
+        $fbtContent,
+        string $translation,
+        ?string $hash,
+        ?array $extraOptions = null,
+        bool $reporting = true
+    ) {
+        $contents = is_string($fbtContent) ? [$fbtContent] : $fbtContent;
+        $errorListener = FbtHooks::getErrorListener([
+            'translation' => $translation,
+            'hash' => $hash,
+        ]);
+
+        return FbtHooks::getFbtResult([
+            'contents' => $contents,
+            'errorListener' => $errorListener,
+            'extraOptions' => $extraOptions,
+            'patternHash' => $hash,
+            'patternString' => $translation,
+            'reporting' => $reporting,
+        ]);
+    }
+
+    /**
+     * @param mixed $value
+     */
+    public static function isFbtInstance($value): bool
+    {
+        return $value instanceof FbtResultBase;
+    }
+
+    /**
+     * @internal
+     */
+    public static function _purgeCache(): void
+    {
+        self::$_cachedFbtResults = [];
     }
 }

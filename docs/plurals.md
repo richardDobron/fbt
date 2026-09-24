@@ -38,23 +38,36 @@ fbt(
 );
 ```
 
-Both the above examples generate the following during [collection](collection).
-```
+Both the above examples generate the following during [collection](collection.md).
+```json
 "phrases": [
   {
-    "hashToText": {
-      "90d6ec6e0a0483edd5e9754592a4ac61": "You have {number of likes} likes on your photos.",
-      "158a5d707da85b56353cdfc05c92f4e9": "You have {number of likes} likes on your photo.",
-      "421273e69049f26d76c70fb33c6a9aea": "You have a like on your photos.",
-      "279c992f92809657b1240d1c955615a3": "You have a like on your photo."
+    "hashToLeaf": {
+      "kNbsbgoEg+3V6XVFkqSsYQ==": {"text": "You have {number of likes} likes on your photos.", "desc": "plural example"},
+      "FYpdcH2oW1Y1PN/AXJL06Q==": {"text": "You have {number of likes} likes on your photo.", "desc": "plural example"},
+      "QhJz5pBJ8m12xw+zPGqa6g==": {"text": "You have a like on your photos.", "desc": "plural example"},
+      "J5yZL5KAllexJA0clVYVow==": {"text": "You have a like on your photo.", "desc": "plural example"}
     },
-    "type": "table",
-    "desc": "plural example",
-    ...
+    "project": "website app",
+    "jsfbt": {
+      "t": {
+        "*": {
+          "*": {"desc": "plural example", "text": "You have {number of likes} likes on your photos."},
+          "_1": {"desc": "plural example", "text": "You have {number of likes} likes on your photo."}
+        },
+        "_1": {
+          "*": {"desc": "plural example", "text": "You have a like on your photos."},
+          "_1": {"desc": "plural example", "text": "You have a like on your photo."}
+        }
+      },
+      "m": [
+        {"token": "number of likes", "type": 2, "singular": true},
+        null
+      ]
+    }
   }
 ]
-```
-#### Required arguments:
+```#### Required arguments:
 * **singular phrase** `string`: HTML child in `<fbt:plural>` and argument 1 in `fbt::plural`
 * **count** `number`: `count` in `<fbt:plural>` and argument 2 in `fbt::plural`
 
@@ -68,3 +81,21 @@ Both the above examples generate the following during [collection](collection).
   * **"yes"**: Show the count in all cases
 * **name** `string`: Name of the token where count shows up. (*Default*: `"number"`)
 * **value** `mixed`: For overriding the displayed `number`
+* **key** `string`: Plurals with the same `key` share the same count, so that only the consistent
+  combinations of their variations are generated for translation (see below).
+
+### Plurals depending on the same count
+
+```
+<fbt desc="likes">
+  There
+  <fbt:plural count="<?=$count?>" many="are" key="likes">is</fbt:plural>
+  <fbt:plural count="<?=$count?>" showCount="ifMany" many="likes" key="likes">a like</fbt:plural>
+</fbt>
+```
+
+generates only 2 strings: `There are {number} likes` and `There is a like` (without the `key`,
+all 4 combinations would be generated).
+
+*Facebook's fbt detects that the same variable is used for the count. In PHP, the source code of
+values isn't available, so the `key` option has to be used instead.*

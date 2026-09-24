@@ -14,65 +14,82 @@ use fbt\Transform\FbtTransform\FbtUtils;
  */
 class TranslationBuilder
 {
-    /** @var TranslationData[] */
-    private $_translations;
-    /** @var TranslationData[] */
-    private $_fallbackTranslations;
     /** @var TranslationConfig */
     private $_config;
     /** @var FbtSite */
     private $_fbtSite;
-    /** @var array */
-    private $_metadata;
-    /** @var bool */
-    private $_hasVCGenderVariation;
+    /**
+     * Memoized constraint to translation maps per hash
+     * @var array<string, array<string, string>>
+     */
+    private $_constraintMaps = [];
     /** @var bool */
     private $_hasTranslations;
     /** @var bool */
+    private $_hasVCGenderVariation;
+    /** @var bool */
     private $_inclHash;
-    /** @var array|string */
+    /** @var array<int, FbtSiteMetaEntry|null> */
+    private $_metadata;
+    /** @var string|array */
     private $_tableOrHash;
-    /** @var array */
-    private $_tokenMasks;
+    /** @var array<string, int> */
+    private $_tokenToMask = [];
+    /**
+     * Map from a string's hash to its translation payload.
+     * If the translation is string type, it implies it was machine generated.
+     * @var array<string, TranslationData|string|null>
+     */
+    private $_translations;
+    /**
+     * js~php diff: translations of the fallback locale
+     * @var array<string, TranslationData|string|null>
+     */
+    private $_fallbackTranslations;
 
     /**
-     * @throws \fbt\Exceptions\FbtException
+     * @param array $translations Hash of a string to its translation
+     * @param TranslationConfig $config Configuration for variation defaults (number/gender)
+     * @param FbtSite $fbtSite Representation of the <fbt> or fbt() to be translated
+     * @param bool $inclHash Include hash/identifer in leaf of payloads
+     * @param array $fallbackTranslations js~php diff: translations of the fallback locale
+     *
+     * @throws FbtException
      */
     public function __construct(
-        array $translations, // hash/id => translation (TranslationData | string)
-        TranslationConfig $config, // Configuration for variation defaults (number/gender)
-        FbtSite $fbtSite, // fbtSite to translate
-        bool $inclHash, // include hash/identifer in leaf of payloads
-        array $fallbackTranslations = [] // hash/id => translation (TranslationData | string)
+        array $translations,
+        TranslationConfig $config,
+        FbtSite $fbtSite,
+        bool $inclHash,
+        array $fallbackTranslations = []
     ) {
         $this->_translations = $translations;
         $this->_fallbackTranslations = $fallbackTranslations;
         $this->_config = $config;
         $this->_fbtSite = $fbtSite;
-        $this->_tokenMasks = []; // token => mask
-        $this->_metadata = $fbtSite->getMetadata(); // [{token: ..., mask: ...}, ...]
+        $this->_metadata = $fbtSite->getMetadata();
         $this->_tableOrHash = $fbtSite->getTableOrHash();
         $this->_hasVCGenderVariation = $this->_findVCGenderVariation();
         $this->_hasTranslations = $this->_translationsExist();
         $this->_inclHash = $inclHash;
-        self::$_mem = [];
 
         // If a gender variation exists, add it to our table
         if ($this->_hasVCGenderVariation) {
             $this->_tableOrHash = ['*' => $this->_tableOrHash];
-            array_unshift(
-                $this->_metadata,
-                FbtSiteMetaEntry::wrap([
-                    'token' => IntlVariations::VIEWING_USER,
-                    'mask' => IntlVariations::INTL_VARIATION_MASK['GENDER'],
-                ])
-            );
+            array_unshift($this->_metadata, FbtSiteMetaEntry::wrap([
+                'token' => IntlVariations::VIEWING_USER,
+                'type' => IntlVariations::INTL_FBT_VARIATION_TYPE['GENDER'],
+            ]));
         }
 
-        for ($ii = 0; $ii < count($this->_metadata); ++$ii) {
-            $metadata = $this->_metadata[$ii];
+        foreach ($this->_metadata as $metadata) {
             if ($metadata !== null && $metadata->hasVariationMask()) {
-                $this->_tokenMasks[$metadata->getToken()] = $metadata->getVariationMask();
+                $token = $metadata->getToken();
+                invariant(
+                    $token !== null,
+                    'Expect `token` to not be null as the metadata has variation mask.'
+                );
+                $this->_tokenToMask[$token] = $metadata->getVariationMask();
             }
         }
     }
@@ -82,25 +99,44 @@ class TranslationBuilder
         return $this->_hasTranslations;
     }
 
+    /**
+     * @return string|array|null
+     * @throws FbtException
+     */
     public function build()
     {
         $table = $this->_buildRecursive($this->_tableOrHash);
         if ($this->_hasVCGenderVariation) {
-            // This hidden key is checked during JS fbt runtime to signal that we
+            invariant(
+                is_array($table) && ! array_key_exists(0, $table),
+                'Expect `table` to not be a TranslationLeaf when ' .
+                'the string has a hidden viewer context token.'
+            );
+
+            // This hidden key is checked during fbt runtime to signal that we
             // should access the first entry of our table with the viewer's gender
-            $table['__vcg'] = 1;
+            return $table + ['__vcg' => 1];
         }
 
         return $table;
     }
 
+    /**
+     * @return TranslationData|string|null
+     */
+    private function _getTranslationData(string $hash)
+    {
+        // js~php diff: falls back to the translations of the fallback locale
+        return $this->_translations[$hash] ?? $this->_fallbackTranslations[$hash] ?? null;
+    }
+
     private function _translationsExist(): bool
     {
-        foreach ($this->_fbtSite->getHashToText() as $hash) {
-            $transData = $this->_translations[$hash] ?? $this->_fallbackTranslations[$hash] ?? null;
+        foreach (array_keys($this->_fbtSite->getHashToLeaf()) as $hash) {
+            $transData = $this->_getTranslationData((string)$hash);
             if (
-                ! ($transData instanceof TranslationData) ||
-                $transData->hasTranslation()
+                is_string($transData) ||
+                ($transData instanceof TranslationData && $transData->hasTranslation())
             ) {
                 // There is a translation or simple string for generated translation
                 return true;
@@ -115,14 +151,13 @@ class TranslationBuilder
      */
     private function _findVCGenderVariation(): bool
     {
-        foreach (array_keys($this->_fbtSite->getHashToText()) as $hash) {
-            $transData = $this->_translations[$hash] ?? $this->_fallbackTranslations[$hash] ?? null;
+        foreach (array_keys($this->_fbtSite->getHashToLeaf()) as $hash) {
+            $transData = $this->_getTranslationData((string)$hash);
             if (! ($transData instanceof TranslationData)) {
                 continue;
             }
 
-            $tokens = $transData->tokens;
-            foreach ($tokens as $token) {
+            foreach ($transData->tokens as $token) {
                 if ($token === IntlVariations::VIEWING_USER) {
                     return true;
                 }
@@ -143,27 +178,20 @@ class TranslationBuilder
      * @param string|array $hashOrTable
      * @param array $tokenConstraints
      * @param int $levelIdx
-     * @return array|TranslationData|string|null
      *
+     * @return string|array|null
      * @throws FbtException
      */
-    private function _buildRecursive(
-        $hashOrTable,
-        array $tokenConstraints = [], // token_name => variation constraint
-        int $levelIdx = 0
-    ) {
+    private function _buildRecursive($hashOrTable, array $tokenConstraints = [], int $levelIdx = 0)
+    {
         if (is_string($hashOrTable)) {
             return $this->_getLeafTranslation($hashOrTable, $tokenConstraints);
         }
 
         $table = [];
         foreach ($hashOrTable as $key => $branchOrLeaf) {
-            $trans = $this->_buildRecursive(
-                $branchOrLeaf,
-                $tokenConstraints,
-                $levelIdx + 1
-            );
-            if (shouldStore($trans)) {
+            $trans = $this->_buildRecursive($branchOrLeaf, $tokenConstraints, $levelIdx + 1);
+            if (self::_shouldStore($trans)) {
                 $table[$key] = $trans;
             }
 
@@ -177,73 +205,75 @@ class TranslationBuilder
             if (
                 $metadata !== null &&
                 $metadata->hasVariationMask() &&
-                $key !== IntlVariations::EXACTLY_ONE
+                (string)$key !== IntlVariations::EXACTLY_ONE
             ) {
                 $mask = $metadata->getVariationMask();
                 invariant(
-                    $mask === IntlVariations::INTL_VARIATION_MASK['NUMBER'] || $mask === IntlVariations::INTL_VARIATION_MASK['GENDER'],
-                    'Unknown variation mask'
+                    $mask === IntlVariations::INTL_VARIATION_MASK['NUMBER'] ||
+                    $mask === IntlVariations::INTL_VARIATION_MASK['GENDER'],
+                    'Unknown variation mask: %s (%s)',
+                    (string)$mask,
+                    gettype($mask)
                 );
                 invariant(
-                    IntlVariations::isValidValue($key),
-                    'We expect variation value keys for variations'
+                    IntlVariations::isValidValue((string)$key),
+                    'Expect variation keys to be coercible to IntlVariationsEnum: current key=%s (%s)',
+                    (string)$key,
+                    gettype($key)
                 );
                 $token = $metadata->getToken();
-                $variationCandidates = getTypesFromMask($mask);
-                foreach ($variationCandidates as $variationKey) {
+                invariant(
+                    $token !== null,
+                    'Expect `token` to not be falsy when the metadata has a variation mask.'
+                );
+                foreach (self::_getTypesFromMask($mask) as $variationKey) {
                     $tokenConstraints[$token] = $variationKey;
-                    $trans = $this->_buildRecursive(
-                        $branchOrLeaf,
-                        $tokenConstraints,
-                        $levelIdx + 1
-                    );
-                    if (shouldStore($trans)) {
+                    $trans = $this->_buildRecursive($branchOrLeaf, $tokenConstraints, $levelIdx + 1);
+                    if (self::_shouldStore($trans)) {
                         $table[$variationKey] = $trans;
                     }
                 }
                 unset($tokenConstraints[$token]);
             }
-
-            // @see https://stackoverflow.com/questions/5525795/does-javascript-guarantee-object-property-order
-            uksort($table, function ($a, $b) {
-                return is_int($b) - is_int($a) ?: strnatcmp($a, $b);
-            });
         }
 
         return $table;
     }
 
     /**
-     * @param string $hash
-     * @param array $tokenConstraints
-     *
-     * @return string|array|TranslationData|null
+     * @return string|array|null
+     * @throws FbtException
      */
-    private function _getLeafTranslation(
-        string $hash, // string
-        array $tokenConstraints // {string: string}: token => constraint
-    ) {
-        $transData = $this->_translations[$hash] ?? $this->_fallbackTranslations[$hash] ?? null;
+    private function _getLeafTranslation(string $hash, array $tokenConstraints = [])
+    {
+        $transData = $this->_getTranslationData($hash);
         if (is_string($transData)) {
             // Fake translations are just simple strings.  There's no such thing as
             // variation support for these locales.  So if token constraints were
             // specified, return null and rely on runtime fallback to wildcard.
+            // js~php diff: upstream checks the truthiness of an object, which is always truthy
             $translation = $tokenConstraints ? null : $transData;
+        } elseif (FbtUtils::hasKeys($tokenConstraints)) {
+            $translation = $this->getConstrainedTranslation($hash, $tokenConstraints);
         } else {
             // Real translations are TranslationData objects, so we call the
-            // getDefaultTranslation() method to get the translation (we hope), or use
-            // original text if no translation exist.
-            $source = $this->_fbtSite->getHashToText()[$hash];
-            $defTranslation = $transData ? $transData->getDefaultTranslation($this->_config) : null;
-            $translation = FbtUtils::hasKeys($tokenConstraints)
-                ? $this->getConstrainedTranslation($hash, $tokenConstraints)
-                : // If no translation available, use the English source text
-                $defTranslation ?? $source;
+            // getDefaultTranslation() method to get the translation (we hope)
+            $defaultTranslation = $transData ? $transData->getDefaultTranslation($this->_config) : null;
+
+            // If no translation available, use the English source text
+            $translation = $defaultTranslation ?? $this->_fbtSite->getHashToLeaf()[$hash]['text'];
         }
 
+        // js~php diff: a missing translation isn't stored in the table
         if ($translation === null) {
             return null;
         }
+
+        // Replace clear tokens with their token aliases
+        $translation = FbtUtils::replaceClearTokensWithTokenAliases(
+            $translation,
+            $this->_fbtSite->getHashToTokenAliases()[$hash] ?? null
+        );
 
         // Couple the string with a hash if it was marked as such.  We do this
         // when logging impressions or when using QuickTranslations.  The logging
@@ -256,24 +286,23 @@ class TranslationBuilder
      * appropriate translation for our map.  A null entry is a signal
      * not to add the translation to the map, because it's already in
      * the map via its fallback ('*') keys.
+     *
+     * @throws FbtException
      */
-    public function getConstrainedTranslation(
-        string $hash,
-        array $tokenConstraints // dict<string, string> : token => constraint
-    ) {
+    public function getConstrainedTranslation(string $hash, array $tokenConstraints): ?string
+    {
         $constraintKeys = [];
-        foreach ($this->_tokenMasks as $token => $mask) {
-            $val = $tokenConstraints[$token] ?? '*';
-            $constraintKeys[] = [$token, $val];
+        foreach (array_keys($this->_tokenToMask) as $token) {
+            $constraintKeys[] = [(string)$token, $tokenConstraints[$token] ?? '*'];
         }
         $constraintMap = $this->_getConstraintMap($hash);
-        $aggregateKey = buildConstraintKey($constraintKeys);
+        $aggregateKey = VariationConstraintUtils::buildConstraintKey($constraintKeys);
         $translation = $constraintMap[$aggregateKey] ?? null;
         if (! $translation) {
             return null;
         }
-        for ($ii = 0; $ii < count($constraintKeys); ++$ii) {
-            [$token, $constraint] = $constraintKeys[$ii];
+
+        foreach ($constraintKeys as $ii => [$token, $constraint]) {
             if ($constraint === '*') {
                 continue;
             }
@@ -282,7 +311,7 @@ class TranslationBuilder
             // (default) entry at this level, don't add an entry to the table.  They
             // will be in the table under the '*' key.
             $constraintKeys[$ii] = [$token, '*'];
-            $wildKey = buildConstraintKey($constraintKeys);
+            $wildKey = VariationConstraintUtils::buildConstraintKey($constraintKeys);
             $wildTranslation = $constraintMap[$wildKey] ?? null;
             if ($wildTranslation === $translation) {
                 return null;
@@ -295,15 +324,48 @@ class TranslationBuilder
     }
 
     /**
+     * @throws FbtException
+     */
+    private function _insertConstraint(
+        array $constraintKeys,
+        array &$constraintMap,
+        string $translation,
+        int $defaultingLevel
+    ): void {
+        $aggregateKey = VariationConstraintUtils::buildConstraintKey($constraintKeys);
+        if (! empty($constraintMap[$aggregateKey])) {
+            throw new FbtException(
+                'Unexpected duplicate key: ' .
+                $aggregateKey .
+                "\nOriginal: " .
+                $constraintMap[$aggregateKey] .
+                "\nNew " .
+                $translation
+            );
+        }
+        $constraintMap[$aggregateKey] = $translation;
+
+        // Also include duplicate '*' entries if it is a default value
+        for ($ii = $defaultingLevel; $ii < count($constraintKeys); $ii++) {
+            [$token, $val] = $constraintKeys[$ii];
+            if ($val !== '*' && $this->_config->isDefaultVariation($val)) {
+                $constraintKeys[$ii] = [$token, '*'];
+                $this->_insertConstraint($constraintKeys, $constraintMap, $translation, $ii + 1);
+                $constraintKeys[$ii] = [$token, $val]; // return the value back
+            }
+        }
+    }
+
+    /**
      * Populates our variation constraint map.  The map is of all possible
      * variation combinations (serialized as a string) to the appropriate
-     * translation.  For example, JavaScript like:
+     * translation.  For example, a PHP code like:
      *
      *   fbt('Hi ' . fbt::param('user', $viewer->name, ['gender' => $viewer->gender]) .
      *       ', would you like to play ' .
      *        fbt::param('count', $gameCount, ['number' => true]) .
-     *        ' games of ' . fbt::enum($game, ['chess','backgammon','poker']) .
-     *        '?  Click ' . fbt::param('link', createElement('a', ...)), 'sample'),
+     *        ' games of ' . fbt::enum($game, ['chess', 'backgammon', 'poker']) .
+     *        '?', 'sample')
      *
      * will have variations for the 'user' and 'count' parameters.  Accounting for
      * all variations in a locale where we don't merge unknown gender into male
@@ -334,51 +396,37 @@ class TranslationBuilder
      *    'user%3:count%24' (unknown - other)
      *
      *  These translations are deduped later in getConstrainedTranslation such
-     *  that only the 'user%*:count%*' in our tree is in the JSON map.  i.e.
+     *  that only the 'user%*:count%*' in our tree is in the JSON map.
      *
-     *  {
-     *    // No unknown gender entry exists at this level - we rely on fallback
-     *    '*' => {
-     *      // no plural entry exists at this level
-     *      '*' => {translation},
-     *      ...
-     *
-     *    },
-     *    ...
-     *  }
+     * @return array<string, string>
+     * @throws FbtException
      */
-
-    // Yes this is hand-rolled memoization :(
-    // TODO: T37795723 - Pull in a lightweight (not bloated) memoization library
-    /** @var array */
-    private static $_mem;
-
-    private function _getConstraintMap(string $hash)
+    private function _getConstraintMap(string $hash): array
     {
-        if (array_key_exists($hash, self::$_mem)) {
-            return self::$_mem[$hash];
+        if (isset($this->_constraintMaps[$hash])) {
+            return $this->_constraintMaps[$hash];
         }
 
         $constraintMap = [];
-        $transData = $this->_translations[$hash] ?? $this->_fallbackTranslations[$hash] ?? null;
-        if (! $transData) {
+        $transData = $this->_getTranslationData($hash);
+        if ($transData === null || is_string($transData)) {
             // No translation? No constraints.
-            return (self::$_mem[$hash] = $constraintMap);
+            return $this->_constraintMaps[$hash] = $constraintMap;
         }
 
         // For every possible variation combination, create a mapping to its
         // corresponding translation
         foreach ($transData->translations as $translation) {
             $constraints = [];
-            foreach ($translation['variations'] as $idx => $variation) {
+            foreach ($translation['variations'] ?? [] as $idx => $variation) {
                 // We prune entries that contain non-default variations
                 // for tokens we haven't specified.
-                $token = $transData->tokens[$idx];
+                $token = $transData->tokens[(int)$idx];
                 if (
                     // Token variation type not specified
-                    empty($this->_tokenMasks[$token]) ||
+                    empty($this->_tokenToMask[$token]) ||
                     // Translated variation type is different than token variation type
-                    $this->_tokenMasks[$token] !== $transData->types[$idx]
+                    $this->_tokenToMask[$token] !== $transData->types[(int)$idx]
                 ) {
                     // Only add default tokens we haven't specified.
                     if (! $this->_config->isDefaultVariation($variation)) {
@@ -387,94 +435,47 @@ class TranslationBuilder
                 }
                 $constraints[$token] = $variation;
             }
+
             // A note about fbt:plurals.  They can introduce global token
             // discrepancies between leaf nodes.  Singular translations don't have
             // number tokens, but their plural counterparts can (when showCount =
             // "ifMany" or "yes").  If we are dealing with the singular leaf of an
-            // fbt:plural, since it has a unique hash, we can $it masquerade as
+            // fbt:plural, since it has a unique hash, we can let it masquerade as
             // default: '*', since no such variation actually exists for a
             // non-existent token
             $constraintKeys = [];
-            foreach ($this->_tokenMasks as $k => $mask) {
-                $constraintKeys[] = [$k, $constraints[$k] ?? '*'];
+            foreach (array_keys($this->_tokenToMask) as $k) {
+                $constraintKeys[] = [(string)$k, ($constraints[$k] ?? null) ?: '*'];
             }
-            $this->_insertConstraint(
-                $constraintKeys,
-                $constraintMap,
-                $translation['translation'],
-                0
-            );
+            $this->_insertConstraint($constraintKeys, $constraintMap, $translation['translation'], 0);
         }
 
-        return self::$_mem[$hash] = $constraintMap;
+        return $this->_constraintMaps[$hash] = $constraintMap;
     }
 
     /**
+     * @param mixed $branch
+     */
+    private static function _shouldStore($branch): bool
+    {
+        return $branch !== null && (is_string($branch) || (is_array($branch) && FbtUtils::hasKeys($branch)));
+    }
+
+    /**
+     * @return array<int, int>
      * @throws FbtException
      */
-    private function _insertConstraint(
-        array $keys, // [[token, constraint]]
-        array &$constraintMap, // {key: translation}
-        string $translation, // string
-        int $defaultingLevel // int
-    ) {
-        $aggregateKey = buildConstraintKey($keys);
-        if (isset($constraintMap[$aggregateKey])) {
-            throw new FbtException(
-                'Unexpected duplicate key: ' .
-                $aggregateKey .
-                "\nOriginal: " .
-                $constraintMap[$aggregateKey] .
-                "\nNew: " .
-                $translation
-            );
+    private static function _getTypesFromMask(int $mask): array
+    {
+        $type = IntlVariations::getType($mask);
+        if ($type === IntlVariations::INTL_VARIATION_MASK['NUMBER']) {
+            return array_values(IntlVariations::INTL_NUMBER_VARIATIONS);
         }
-        $constraintMap[$aggregateKey] = $translation;
 
-        // Also include duplicate '*' entries if it is a default value
-        for ($ii = $defaultingLevel; $ii < count($keys); $ii++) {
-            [$tok, $val] = $keys[$ii];
-            if ($val !== '*' && $this->_config->isDefaultVariation($val)) {
-                $keys[$ii] = [$tok, '*'];
-                $this->_insertConstraint($keys, $constraintMap, $translation, $ii + 1);
-                $keys[$ii] = [$tok, $val]; // return the value back
-            }
-        }
+        return [
+            IntlVariations::INTL_GENDER_VARIATIONS['MALE'],
+            IntlVariations::INTL_GENDER_VARIATIONS['FEMALE'],
+            IntlVariations::INTL_GENDER_VARIATIONS['UNKNOWN'],
+        ];
     }
-}
-
-function shouldStore($branch): bool
-{
-    return $branch !== null && (is_string($branch) || FbtUtils::hasKeys($branch));
-}
-
-/**
- * Build the aggregate key with which we access the constraint map.  The
- * constraint map maps the given constraints to the appropriate translation
- */
-function buildConstraintKey(
-    array $keys // [[token, constraint]]
-): string {
-    return implode(':', array_map(function (array $kv) {
-        return $kv[0] . '%' . $kv[1];
-    }, $keys));
-}
-
-/**
- * @throws \fbt\Exceptions\FbtException
- */
-function getTypesFromMask(int $mask): array
-{
-    $type = IntlVariations::getType($mask);
-    if ($type === IntlVariations::INTL_VARIATION_MASK['NUMBER']) {
-        return array_values(IntlVariations::INTL_NUMBER_VARIATIONS);
-    }
-
-    $gender = IntlVariations::INTL_GENDER_VARIATIONS;
-
-    return [
-        $gender['MALE'],
-        $gender['FEMALE'],
-        $gender['UNKNOWN'],
-    ];
 }

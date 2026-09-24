@@ -2,6 +2,8 @@
 
 namespace fbt\Runtime;
 
+use function fbt\invariant;
+
 class FbtTable
 {
     /**
@@ -60,47 +62,66 @@ class FbtTable
      *
      * @param array $args - fbt runtime arguments
      * @param int $argsIndex - argument index we're currently visiting
+     * @param array $tokens - inout param. Array will populate the keys used to access the table
      *
      * @return string|array|null
      *
      * @throws \fbt\Exceptions\FbtException
      */
-    public static function access($table, array $args, int $argsIndex)
+    public static function access($table, array $args, int $argsIndex, array &$tokens = [])
     {
-        // js~php diff:
-
-        // Either we've reached the end of our arguments at a valid entry, in which
-        // case table is now a string (leaf) or we've accessed a key that didn't exist
-        // in the table, in which case we return null
         if ($argsIndex >= count($args)) {
+            // We've reached the end of our arguments at a valid entry, in which case
+            // table is now a string (leaf) or undefined (key doesn't exist)
+            // js~php diff: a [pattern, hash] leaf is a list of two strings
+            invariant(
+                is_string($table) || (
+                    is_array($table)
+                    && count($table) === 2
+                    && is_string($table[0] ?? null)
+                    && is_string($table[1] ?? null)
+                ),
+                'Expected leaf, but got: %s',
+                json_encode($table)
+            );
+
             return $table;
-        } elseif ($table === null) {
-            return null;
         }
 
-        $pattern = null;
         $arg = $args[$argsIndex];
-        $tableIndex = $arg[self::ARG['INDEX']];
+        $tableIndices = $arg[self::ARG['INDEX']];
 
-        // A pattern string cannot be indexed (it would return a single character)
-        if ($tableIndex !== null && is_string($table)) {
-            return null;
+        if ($tableIndices === null) {
+            return self::access($table, $args, $argsIndex + 1, $tokens);
         }
 
-        // Do we have a variation? Attempt table access in variation order
-        if (is_array($tableIndex)) {
-            foreach ($tableIndex as $index) {
-                $subTable = $table[$index] ?? null;
-                $pattern = self::access($subTable, $args, $argsIndex + 1);
-                if ($pattern !== null) {
-                    break;
-                }
+        // js~php diff: a leaf pattern can also be an array ([pattern, hash]), so only
+        // the string leaf can be ruled out here
+        invariant(
+            ! is_string($table),
+            'If tableIndex is non-null, we should have a table, but we got: %s',
+            gettype($table)
+        );
+
+        // js~php diff: keep supporting scalar indices
+        if (! is_array($tableIndices)) {
+            $tableIndices = [$tableIndices];
+        }
+
+        // Is there a variation? Attempt table access in order of variation preference
+        foreach ($tableIndices as $tableIndex) {
+            $subTable = $table[$tableIndex] ?? null;
+            if ($subTable === null) {
+                continue;
             }
-        } else {
-            $table = $tableIndex !== null ? $table[$tableIndex] ?? null : $table;
-            $pattern = self::access($table, $args, $argsIndex + 1);
+
+            $tokens[] = $tableIndex;
+            $pattern = self::access($subTable, $args, $argsIndex + 1, $tokens);
+            if ($pattern !== null) {
+                return $pattern;
+            }
         }
 
-        return $pattern;
+        return null;
     }
 }

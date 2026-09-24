@@ -67,6 +67,10 @@ lookup translated payloads generated during execution.  FBT creates tables
 of all possible variations for each fbt phrase and accesses them
 at runtime.
 
+## ⬆️ Upgrading
+
+See [UPGRADE-5.0.md](UPGRADE-5.0.md) for upgrading from 4.x to 5.0.
+
 ## 📕 Full documentation
 
 - [API Reference](https://richarddobron.github.io/fbt/)

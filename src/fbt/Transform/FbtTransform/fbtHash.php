@@ -5,6 +5,8 @@ namespace fbt\Transform\FbtTransform;
 use function fbt\invariant;
 use function fbt\unsignedRightShift;
 
+use fbt\Util\JsJson;
+
 class fbtHash
 {
     public const BASE_N_SYMBOLS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -19,33 +21,64 @@ class fbtHash
         $output = '';
         do {
             $output = self::BASE_N_SYMBOLS[$number % $base] . $output;
-            $number = floor($number / $base);
+            $number = intdiv($number, $base);
         } while ($number > 0);
 
         return $output;
     }
 
     /**
+     * @param array $jsfbt - TableJSFBTTree (a leaf or a tree of leaves)
+     *
      * @throws \fbt\Exceptions\FbtException
      */
-    public static function fbtHashKey($jsfbt, string $desc, bool $noStringify = false): string
+    public static function fbtHashKey(array $jsfbt): string
     {
-        return self::uintToBaseN(self::fbtJenkinsHash($jsfbt, $desc, $noStringify), 62);
+        return self::uintToBaseN(self::fbtJenkinsHash($jsfbt), 62);
     }
 
     /**
+     * @param array $jsfbt - TableJSFBTTree (a leaf or a tree of leaves)
+     *
      * @throws \fbt\Exceptions\FbtException
      */
-    public static function fbtJenkinsHash($jsfbt, string $desc, bool $noStringify = false): int
+    public static function fbtJenkinsHash(array $jsfbt): int
     {
-        $payload = $noStringify ? $jsfbt : json_encode($jsfbt, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        invariant(
-            is_string($payload),
-            'JSFBT is not a string type. Please disable noStringify'
-        );
-        $key = $payload . '|' . $desc;
+        $desc = null;
+        $leavesHaveSameDesc = true;
+        JSFbtUtil::onEachLeaf(['jsfbt' => ['t' => $jsfbt, 'm' => []]], function (array $leaf) use (&$desc, &$leavesHaveSameDesc) {
+            if ($desc === null) {
+                $desc = $leaf['desc'];
+            } elseif ($desc !== $leaf['desc']) {
+                $leavesHaveSameDesc = false;
+            }
+        });
 
-        return self::jenkinsHash($key);
+        if ($leavesHaveSameDesc) {
+            $hashInputTree = JSFbtUtil::mapLeaves($jsfbt, function (array $leaf) {
+                return isset($leaf['tokenAliases'])
+                    ? ['text' => $leaf['text'], 'tokenAliases' => $leaf['tokenAliases']]
+                    : $leaf['text'];
+            });
+            invariant(
+                $desc !== null,
+                'Expect `desc` to be nonnull as `TableJSFBTTree` should contain at least ' .
+                'one leaf.'
+            );
+            $key = JsJson::stringify($hashInputTree) . '|' . $desc;
+
+            return self::jenkinsHash($key);
+        }
+
+        $hashInputTree = JSFbtUtil::mapLeaves($jsfbt, function (array $leaf) {
+            $newLeaf = ['desc' => $leaf['desc'], 'text' => $leaf['text']];
+
+            return isset($leaf['tokenAliases'])
+                ? $newLeaf + ['tokenAliases' => $leaf['tokenAliases']]
+                : $newLeaf;
+        });
+
+        return self::jenkinsHash(JsJson::stringify($hashInputTree));
     }
 
     public static function toUtf8(string $str): array
@@ -56,7 +89,7 @@ class fbtHash
     // Hash computation for each string that matches the dump script in i18n's php.
     public static function jenkinsHash(string $str): int
     {
-        if ($str === '') {
+        if (! $str) {
             return 0;
         }
 

@@ -4,17 +4,62 @@ namespace fbt\Transform\FbtTransform;
 
 use dobron\DomForge\Node;
 use fbt\Exceptions\FbtParserException;
-use fbt\Runtime\Shared\IntlPunctuation;
+use fbt\Runtime\Shared\substituteTokens;
+use fbt\Transform\FbtTransform\FbtNodes\FbtNodeUtil;
 
 class FbtUtils
 {
+    /**
+     * js~php diff: equivalent of the JS `\s` character class (whitespace and line
+     * terminators as defined by ECMAScript), without the non-breaking space
+     */
+    private const JS_WHITESPACE_WITHOUT_NBSP = '\x{9}-\x{D}\x{20}\x{1680}\x{2000}-\x{200A}\x{2028}\x{2029}\x{202F}\x{205F}\x{3000}\x{FEFF}';
+
     public static function normalizeSpaces(string $value, array $options = []): string
     {
         if (! empty($options['preserveWhitespace'])) {
             return $value;
         }
 
-        return preg_replace("/\s+/m", " ", $value);
+        // We're willingly preserving non-breaking space characters ( )
+        return preg_replace('/[' . self::JS_WHITESPACE_WITHOUT_NBSP . ']+/u', ' ', $value);
+    }
+
+    /**
+     * js~php diff: equivalent of JS `String.prototype.trim()`
+     */
+    public static function jsTrim(string $value): string
+    {
+        return preg_replace('/^[' . self::JS_WHITESPACE_WITHOUT_NBSP . '\x{A0}]+|[' . self::JS_WHITESPACE_WITHOUT_NBSP . '\x{A0}]+$/uD', '', $value);
+    }
+
+    /**
+     * js~php diff: equivalent of JS `String.prototype.trimRight()`
+     */
+    public static function jsTrimRight(string $value): string
+    {
+        return preg_replace('/[' . self::JS_WHITESPACE_WITHOUT_NBSP . '\x{A0}]+$/uD', '', $value);
+    }
+
+    /**
+     * js~php diff: equivalent of `Object.keys()` (integer-like keys come first, in ascending order)
+     *
+     * @return array<int, string>
+     */
+    public static function jsObjectKeys(array $object): array
+    {
+        $indices = [];
+        $others = [];
+        foreach (array_keys($object) as $key) {
+            if (is_int($key) && $key >= 0) {
+                $indices[] = $key;
+            } else {
+                $others[] = (string)$key;
+            }
+        }
+        sort($indices);
+
+        return array_merge(array_map('strval', $indices), $others);
     }
 
     /**
@@ -158,6 +203,40 @@ class FbtUtils
     }
 
     /**
+     * Collect options from an fbt construct in functional form only.
+     *
+     * js~php diff: string values are normalized, except the `value` option,
+     * since it's not possible to differentiate literals from runtime values
+     *
+     * @param string $moduleName
+     * @param array|null $options - raw options of the fbt construct
+     * @param array $validOptions
+     * @param array $booleanOptions
+     *
+     * @throws FbtParserException
+     */
+    public static function collectOptionsFromFbtConstruct(
+        string $moduleName,
+        ?array $options,
+        array $validOptions,
+        array $booleanOptions = []
+    ): array {
+        $options = self::collectOptions($moduleName, $options, $validOptions);
+
+        foreach ($options as $key => $value) {
+            if (is_string($value) && $key !== 'value') {
+                $options[$key] = self::normalizeSpaces($value);
+            }
+
+            if (isset($booleanOptions[$key])) {
+                $options[$key] = self::getOptionBooleanValue($options, $key);
+            }
+        }
+
+        return $options;
+    }
+
+    /**
      * Build options list form corresponding attributes.
      *
      * @throws \fbt\Exceptions\FbtParserException
@@ -177,9 +256,10 @@ class FbtUtils
                 continue;
             }
 
-            if (self::canBeShortBoolAttr($name) && $value === null) {
+            if (self::canBeShortBoolAttr($name) && ($value === null || $value === true)) {
+                // A tag attribute without value is default to boolean value true
                 $value = true;
-            } elseif (in_array($value, ['true', 'false'])) {
+            } elseif ($value === 'true' || $value === 'false') {
                 $value = $value === 'true';
             }
 
@@ -239,7 +319,7 @@ class FbtUtils
      * @param $variationInfo
      * @param Node $node
      *
-     * @return int|null
+     * @return int|float|string|null
      * @throws FbtParserException
      */
     public static function getVariationValue(string $moduleName, string $variationName, $variationInfo, Node $node)
@@ -289,7 +369,10 @@ class FbtUtils
      */
     public static function getAttributeByName(Node $node, string $name): ?string
     {
-        return $node->getAttribute($name);
+        $value = $node->getAttribute($name);
+
+        // An attribute without value
+        return $value === true ? '' : $value;
     }
 
     /**
@@ -370,52 +453,43 @@ class FbtUtils
     }
 
     /**
+     * Clear token names in translations and runtime call texts need to be replaced
+     * by their aliases in order for the runtime logic to work.
+     */
+    public static function replaceClearTokensWithTokenAliases(string $textOrTranslation, ?array $tokenAliases): string
+    {
+        if ($tokenAliases === null) {
+            return $textOrTranslation;
+        }
+
+        $mangledText = $textOrTranslation;
+        foreach ($tokenAliases as $clearToken => $alias) {
+            $clearTokenName = FbtNodeUtil::tokenNameToTextPattern((string)$clearToken);
+            $mangledTokenName = FbtNodeUtil::tokenNameToTextPattern($alias);
+            // Since a string is not allowed to have implicit params with duplicated
+            // token names, replacing the first and therefore the only occurence of
+            // `clearTokenName` is sufficient.
+            $position = strpos($mangledText, $clearTokenName);
+            if ($position !== false) {
+                $mangledText = substr_replace($mangledText, $mangledTokenName, $position, strlen($clearTokenName));
+            }
+        }
+
+        return $mangledText;
+    }
+
+    /**
      * Does the token substitution fbt() but without the string lookup.
      * Used for in-place substitutions in translation mode.
      *
+     * @deprecated Use \fbt\Runtime\Shared\substituteTokens::substitute()
+     *
      * @return string|array
+     * @throws \fbt\Exceptions\FbtException
+     * @throws \fbt\Exceptions\FbtInvalidConfigurationException
      */
     public static function substituteTokens(string $template, array $args)
     {
-        if (! $args) {
-            return $template;
-        }
-
-        // Splice in the arguments while keeping rich object ones separate.
-        $objectPieces = [];
-        $argNames = [];
-        $stringPieces = explode("\x17", preg_replace_callback("/{([^}]+)}(" . IntlPunctuation::PUNCT_CHAR_CLASS . "*)/u", function (array $matches) use ($args, &$argNames, &$objectPieces) {
-            $parameter = $matches[1];
-            $punctuation = $matches[2] ?? '';
-            $argument = $args[$parameter] ?? null;
-
-            if (is_object($argument)) {
-                $objectPieces[] = $argument;
-                $argNames[] = $parameter;
-
-                // End of Transmission Block sentinel marker
-                return "\x17" . $punctuation;
-            } elseif ($argument === null) {
-                return '';
-            }
-
-            return (
-                $argument . (IntlPunctuation::endsInPunct($argument) ? '' : $punctuation)
-            );
-        }, $template));
-
-        if (count($stringPieces) === 1) {
-            return $stringPieces[0];
-        }
-
-        // Zip together the lists of pieces.
-        $pieces = [$stringPieces[0]];
-
-        foreach ($objectPieces as $i => $piece) {
-            $pieces[] = $piece;
-            $pieces[] = $stringPieces[$i + 1];
-        }
-
-        return $pieces;
+        return substituteTokens::substitute($template, $args);
     }
 }

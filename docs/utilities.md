@@ -13,9 +13,9 @@ As an example
 
 ```php
 $CONJUNCTIONS = \fbt\Runtime\Shared\intlList::CONJUNCTIONS;
-$DELIMITER = \fbt\Runtime\Shared\intlList::DELIMITER;
+$DELIMITERS = \fbt\Runtime\Shared\intlList::DELIMITERS;
 $people = ['Adam', 'Becky', fbt('4 others', 'last item')];
-intlList($people, $CONJUNCTIONS['AND'], $DELIMITER['COMMA']);
+intlList($people, $CONJUNCTIONS['AND'], $DELIMITERS['COMMA']);
 ```
 produces the fbt
 ```
@@ -27,6 +27,39 @@ produces the fbt
 ```
 recursively combining fbts.
 **Note that genders are not used in this `fbt:param` instances, so they default to `UNKNOWN`**
+
+Available delimiters are `COMMA` (default), `SEMICOLON` and `BULLET`:
+
+```php
+intlList(['Menlo Park, CA', 'Seattle, WA', 'New York City, NY'], $CONJUNCTIONS['NONE'], $DELIMITERS['BULLET']);
+// Menlo Park, CA • Seattle, WA • New York City, NY
+```
+
+### formatNumber
+[`formatNumber`](https://github.com/richardDobron/fbt/blob/master/src/fbt/Runtime/Shared/formatNumber.php)
+formats numbers according to the viewer's locale:
+
+```php
+use fbt\Runtime\Shared\formatNumber;
+
+formatNumber::formatNumber(1234.5, 2);          // "1234.50"
+formatNumber::withThousandDelimiters(1234.5);   // "1,234.5"
+formatNumber::withMaxLimit(1500, 1000);         // fbs "1,000+"
+formatNumber::withMinLimit(3, 10);              // fbs "<10"
+```
+
+### IntlGender
+[`IntlGender`](https://github.com/richardDobron/fbt/blob/master/src/fbt/Runtime/Shared/IntlGender.php)
+maps genders to `Gender::GENDER_CONST` values usable by fbt:
+
+```php
+use fbt\Lib\DisplayGenderConst;
+use fbt\Runtime\Shared\IntlGender;
+
+IntlGender::fromMultiple([$gender]);                  // $gender
+IntlGender::fromMultiple([$gender1, $gender2]);       // Gender::GENDER_CONST['UNKNOWN_PLURAL']
+IntlGender::fromDisplayGender(DisplayGenderConst::FEMALE); // Gender::GENDER_CONST['FEMALE_SINGULAR']
+```
 
 ### intlNumUtils and intlSummarizeNumber
 There are a few utilities in both `intlNumUtils` and

@@ -35,6 +35,16 @@ class intlListTest extends \tests\TestCase
         $this->assertSame('1, 2, 3, 4, 5, 6, 7 and 8', (string)intlList(['1', '2', '3', '4', '5', '6', '7', '8']));
     }
 
+    public function testNullItemsAreIgnored()
+    {
+        $this->assertSame('', (string)intlList([null, null]));
+        $this->assertSame(
+            '1, 2, 3, 4, 5, 6, 7 and 8',
+            (string)intlList(['1', '2', '3', '4', null, '5', null, '6', '7', '8'])
+        );
+        $this->assertSame('0 and 1', (string)intlList(['', '0', false, '1']));
+    }
+
     public function testEmptyConjunction()
     {
         $this->assertSame('first, second, third', (string)intlList(['first', 'second', 'third'], intlList::CONJUNCTIONS['NONE']));
@@ -43,5 +53,22 @@ class intlListTest extends \tests\TestCase
     public function testOptionalDelimiter()
     {
         $this->assertSame('first; second; third', (string)intlList(['first', 'second', 'third'], intlList::CONJUNCTIONS['NONE'], intlList::DELIMITERS['SEMICOLON']));
+    }
+
+    public function testBulletDelimiters()
+    {
+        $this->assertSame("first \u{2022} second \u{2022} third", (string)intlList(['first', 'second', 'third'], intlList::CONJUNCTIONS['NONE'], intlList::DELIMITERS['BULLET']));
+        $this->assertSame("first \u{2022} second and third", (string)intlList(['first', 'second', 'third'], null, intlList::DELIMITERS['BULLET']));
+    }
+
+    public function testEmptyConjunctionAndDelimiterFallBackToDefaults()
+    {
+        $this->assertSame('first, second and third', (string)intlList(['first', 'second', 'third'], '', ''));
+    }
+
+    public function testNonSequentialKeys()
+    {
+        $this->assertSame('first and second', (string)intlList([3 => 'first', 7 => 'second']));
+        $this->assertSame('first', (string)intlList(['a' => 'first']));
     }
 }

@@ -27,7 +27,7 @@ class fbtTranslationsTest extends \tests\TestCase
         );
 
         $translations = FbtConfig::get('path') . '/translatedFbts.json';
-        FbtTranslations::registerTranslations(json_decode(file_get_contents($translations), true));
+        FbtTranslations::registerTranslations(json_decode(FbtHooks::readLocked($translations), true));
     }
 
     private function registerStdinTranslations()
@@ -43,7 +43,7 @@ class fbtTranslationsTest extends \tests\TestCase
         );
 
         $translations = FbtConfig::get('path') . '/translatedFbts.json';
-        FbtTranslations::registerTranslations(json_decode(file_get_contents($translations), true));
+        FbtTranslations::registerTranslations(json_decode(FbtHooks::readLocked($translations), true));
     }
 
     private static function transform($document): string
@@ -137,34 +137,41 @@ FBT;
         FbtHooks::locale('en_US');
 
         $this->assertEquals('Followed by <strong>66 person</strong>', self::transform($translateFbt(1, 66)));
+        $metadata = [
+            [
+                "token" => "__subject__",
+                "type" => 1,
+            ],
+            [
+                "token" => "number of followers",
+                "type" => 2,
+            ],
+        ];
         $this->assertEquals([
             [
                 "t" => [
                     "*" => [
-                        "*" => "{number of followers} person",
+                        "*" => [
+                            "desc" => "Text indicating the number of followers of a user",
+                            "text" => "Followed by {=[number of followers] person}",
+                            "tokenAliases" => [
+                                "=[number of followers] person" => "=m1",
+                            ],
+                        ],
                     ],
                 ],
-                "m" => [
-                    [
-                        "token" => "__subject__",
-                        "type" => 1,
-                    ],
-                    [
-                        "token" => "number of followers",
-                        "type" => 2,
-                    ],
-                ],
+                "m" => $metadata,
             ],
             [
                 "t" => [
-                    "*" => "Followed by {=[number of followers] person}",
-                ],
-                "m" => [
-                    [
-                        "token" => "__subject__",
-                        "type" => 1,
+                    "*" => [
+                        "*" => [
+                            "desc" => "In the phrase: \"Followed by {=[number of followers] person}\"",
+                            "text" => "{number of followers} person",
+                        ],
                     ],
                 ],
+                "m" => $metadata,
             ],
         ], array_column(FbtTransform::$phrases, 'jsfbt'));
 
@@ -191,7 +198,10 @@ FBT;
             [
                 't' =>
                     [
-                        '*' => '+{count} more',
+                        '*' => [
+                            'desc' => 'text in product gallery',
+                            'text' => '+{count} more',
+                        ],
                     ],
                 'm' =>
                     [
@@ -228,7 +238,13 @@ FBT;
         $this->assertEquals([
             [
                 "t" => [
-                    "*" => "poked you",
+                    "*" => [
+                        "desc" => "User(s) have poked the viewer",
+                        "text" => "{name1} {=poked you}.",
+                        "tokenAliases" => [
+                            "=poked you" => "=m3",
+                        ],
+                    ],
                 ],
                 "m" => [
                     [
@@ -239,7 +255,10 @@ FBT;
             ],
             [
                 "t" => [
-                    "*" => "{name1} {=poked you}.",
+                    "*" => [
+                        "desc" => "In the phrase: \"{name1} {=poked you}.\"",
+                        "text" => "poked you",
+                    ],
                 ],
                 "m" => [
                     [
@@ -342,8 +361,8 @@ FBT;
 
         FbtTranslations::registerTranslations([
             'sk_SK' => [
-                "414lhL" => [
-                    "{=Please note:} Ak si zmeníte meno na Facebooku, najbližších 60 dní si ho nebudete môcť znova zmeniť. V mene nepoužite žiadne neštandardné veľké písmená, interpunkčné znamienka, znaky ani nezvyčajné slová. {=Learn more}.",
+                "27PXyZ" => [
+                    "{=m1} Ak si zmeníte meno na Facebooku, najbližších 60 dní si ho nebudete môcť znova zmeniť. V mene nepoužite žiadne neštandardné veľké písmená, interpunkčné znamienka, znaky ani nezvyčajné slová. {=m3}.",
                     "c119116e3a5d3f69b55d8aa5545c036e",
                 ],
                 "4r61hf" => [

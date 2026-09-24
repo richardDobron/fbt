@@ -15,25 +15,24 @@ class IntlVariationResolverImpl
      * Wrapper around FbtNumberType::getVariation that special cases our EXACTLY_ONE
      * value to accommodate the singular form of fbt:plural
      *
-     * @param int $number
+     * @param int|float $number
      * @return array
      *
      * @throws \fbt\Exceptions\FbtException
      */
     public static function getNumberVariations($number): array
     {
-        $locale = FbtHooks::locale();
-
-        $numType = IntlNumberType::forLocale($locale)->getVariation($number);
+        $numType = IntlNumberType::get(FbtHooks::locale())->getVariation($number);
 
         invariant(
             $numType & IntlVariations::INTL_VARIATION_MASK['NUMBER'],
-            'Invalid number provided',
+            'Invalid number provided: %s (%s)',
             $numType,
             gettype($numType)
         );
 
-        return $number == 1 ? [self::EXACTLY_ONE, $numType, "*"] : [$numType, "*"];
+        // js~php diff: JS has a single number type, so 1.0 is exactly one as well
+        return $number == 1 ? [self::EXACTLY_ONE, $numType, '*'] : [$numType, '*'];
     }
 
     /**

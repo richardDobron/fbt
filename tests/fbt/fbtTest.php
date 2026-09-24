@@ -17,23 +17,44 @@ use fbt\Transform\FbtTransform\Translate\IntlVariations;
 
 class fbtTest extends \tests\TestCase
 {
+    /**
+     * @return array<string, string> hash => text
+     */
+    private static function hashToText(array $phrase): array
+    {
+        return array_map(function (array $leaf) {
+            return $leaf['text'];
+        }, $phrase['hashToLeaf']);
+    }
+
     private static function transform(string $document): string
     {
         return FbtTransform::transform($document);
     }
 
-    public function testDisableTagsWithoutContent()
+    public function testKeepEmptyTagsAsText()
     {
-        self::expectExceptionMessage('text cannot be null');
-
-        self::transform(
+        $this->assertSame('first test <p></p> <i class="icon"> </i>', self::transform(
             <<<FBT
 <fbt desc="Empty tags test">
     first <fbt:param name="text">test</fbt:param>
     <p></p>
+    <i class="icon"> </i>
 </fbt>
 FBT
+        ));
+        $this->assertSame(
+            ['first {text} <p></p> <i class="icon"> </i>'],
+            array_values(self::hashToText(FbtTransform::$phrases[0]))
         );
+        $this->assertCount(1, FbtTransform::$phrases);
+    }
+
+    public function testDisableEmptyFbt()
+    {
+        self::expectExceptionMessage('text cannot be null');
+
+        self::transform('<fbt desc="Empty fbt"></fbt>');
     }
 
     public function testPlural()
@@ -42,9 +63,9 @@ FBT
 
         $this->assertSame('2 translators', (string)$fbt);
         $this->assertSame([
-            "c51b14178c6598f298852310115a6749" => "{number} translators",
-            "562f0f79a8eda7c1ffe4d7add7b0cb5d" => "1 translator",
-        ], FbtTransform::$phrases[0]['hashToText']);
+            "xRsUF4xlmPKYhSMQEVpnSQ==" => "{number} translators",
+            "Vi8Peajtp8H/5Net17DLXQ==" => "1 translator",
+        ], self::hashToText(FbtTransform::$phrases[0]));
 
         $fbt = <<<FBT
 <fbt desc="Plural word test">
@@ -56,9 +77,9 @@ FBT;
 
         $this->assertSame('2 translators', self::transform($fbt));
         $this->assertSame([
-            "c51b14178c6598f298852310115a6749" => "{number} translators",
-            "562f0f79a8eda7c1ffe4d7add7b0cb5d" => "1 translator",
-        ], FbtTransform::$phrases[1]['hashToText']);
+            "xRsUF4xlmPKYhSMQEVpnSQ==" => "{number} translators",
+            "Vi8Peajtp8H/5Net17DLXQ==" => "1 translator",
+        ], self::hashToText(FbtTransform::$phrases[1]));
 
         $fbt = <<<FBT
 <fbt desc="Plural test">
@@ -72,11 +93,11 @@ FBT;
 
         $this->assertSame('2 Days view', self::transform($fbt));
         $this->assertSame([
-            "9df30d437e4bd97db0c66d55e499cf17" => '{number_of_days} Days view',
-            "6d588b81916eb38a23d93a3ae4c9dbd2" => '{number_of_days} Days click',
-            "4f47975189c39c6cb6d58c6ab9dec189" => '1 Day view',
-            "576573c9e5e2704b0ed08a45f776332d" => '1 Day click',
-        ], FbtTransform::$phrases[2]['hashToText']);
+            "nfMNQ35L2X2wxm1V5JnPFw==" => '{number_of_days} Days view',
+            "bViLgZFus4oj2To65Mnb0g==" => '{number_of_days} Days click',
+            "T0eXUYnDnGy21Yxqud7BiQ==" => '1 Day view',
+            "V2VzyeXicEsO0IpF93YzLQ==" => '1 Day click',
+        ], self::hashToText(FbtTransform::$phrases[2]));
     }
 
     public function testMultiplePlurals()
@@ -95,11 +116,11 @@ FBT;
 
         $this->assertSame('There are 4 likes', self::transform($fbt));
         $this->assertSame([
-            "42a393dd2b55260c83e7bafa05df2a61" => 'There are {number} likes',
-            '8aaee3b7e778e2a46a4b332dc5c396af' => 'There are a like',
-            'f2f1db36ff15f6ad7d756c033e540ae8' => 'There is {number} likes',
-            "4e9cfbe296285409426b97021b93272a" => 'There is a like',
-        ], FbtTransform::$phrases[0]['hashToText']);
+            "QqOT3StVJgyD57r6Bd8qYQ==" => 'There are {number} likes',
+            'iq7jt+d44qRqSzMtxcOWrw==' => 'There are a like',
+            '8vHbNv8V9q19dWwDPlQK6A==' => 'There is {number} likes',
+            "Tpz74pYoVAlCa5cCG5MnKg==" => 'There is a like',
+        ], self::hashToText(FbtTransform::$phrases[0]));
     }
 
     public function testPluralHtml()
@@ -272,14 +293,20 @@ FBT;
 
         $this->assertSame('Buy a brand <a class="special-class">new <strong><span>iPhone</span></strong></a> with <strong><a>mac</a></strong>!', self::transform($fbt));
         $this->assertSame([
-            "eb665fb6c93a275e904f184fa0a46d94" => 'iPhone',
-            "d0bf42a9f49fd73bf3931260ec68a55a" => '{=iPhone}',
-            "010fa0eac2c489474a31c0da315faa73" => 'new {=iPhone}',
-            "2d68445daeadc16144862d04c13c9ac9" => 'charger',
-            "f0e74fee456d6ba81660e441e68a5caf" => 'mac',
-            "8054af86343ecb042bae839a78f9c0c2" => '{=}',
-            "49c205e4713737f90d6f3b2b9d9fb0c6" => 'Buy a brand {=new iPhone} with {=}!',
-        ], array_merge(...array_column(FbtTransform::$phrases, 'hashToText')));
+            'pQKZTyowAK5XN4xLyWYszQ==' => 'Buy a brand {=new [=iPhone]} with {=charger}!',
+            'P6tpQpCTjgH64zOvNI2wrw==' => 'Buy a brand {=new [=iPhone]} with {=mac}!',
+            'J7FLBX6iQuohPZFtIb78+A==' => 'new {=iPhone}',
+            'E0z3iFtvr9OsekekkTDKqg==' => 'new {=iPhone}',
+            '5h8zfIIQzx/UfYfNuvbgDQ==' => '{=iPhone}',
+            '07YBa7/RuKHWbuPO7TJebg==' => '{=iPhone}',
+            'HeifMT106tBKO7ohN9hl4A==' => 'iPhone',
+            'hjckygRDYszt9X7DOf08+g==' => 'iPhone',
+            'DpHTNrxeDA5ZtpheHn6iSw==' => '{=charger}',
+            '2cgDd+HW7aIYLdUIop9owQ==' => '{=mac}',
+            'BFobYZ6Gaq+4V4YW93Lv5g==' => 'charger',
+            'bmReaYa94Kfnl/XkcLGlYA==' => 'mac',
+        ], array_merge(...array_map([self::class, 'hashToText'], FbtTransform::$phrases)));
+        $this->assertSame([1 => 0, 2 => 1, 3 => 2, 4 => 0, 5 => 4], FbtTransform::$childToParent);
     }
 
     public function testMixedPluralHtmlTagsWithParams()
@@ -361,40 +388,67 @@ FBT;
         $this->assertSame('Go on an <a href="#"><span>awesome</span> vacation</a>', self::transform($fbt));
         $this->assertSame([
             "phrases" => [
-                2 => [
-                    "hashToText" => [
-                        "576c64dce7dc0eb30803b1c2feb21722" => "Go on an {=awesome vacation}",
+                0 => [
+                    "hashToLeaf" => [
+                        "V2xk3OfcDrMIA7HC/rIXIg==" => [
+                            "text" => "Go on an {=awesome vacation}",
+                            "desc" => "auto-wrap example",
+                        ],
                     ],
-                    "desc" => "auto-wrap example",
-                    "project" => "awesome sauce",
-                    "author" => "me",
-                    "type" => "text",
-                    "jsfbt" => "Go on an {=awesome vacation}",
+                    "author" => "richard",
+                    "project" => "website app",
+                    "jsfbt" => [
+                        "t" => [
+                            "desc" => "auto-wrap example",
+                            "text" => "Go on an {=awesome vacation}",
+                            "tokenAliases" => [
+                                "=awesome vacation" => "=m1",
+                            ],
+                        ],
+                        "m" => [],
+                    ],
                 ],
                 1 => [
-                    "hashToText" => [
-                        "7de5f69602b0c289965183f9ffbf2496" => "{=awesome} vacation",
+                    "hashToLeaf" => [
+                        "feX2lgKwwomWUYP5/78klg==" => [
+                            "text" => "{=awesome} vacation",
+                            "desc" => "In the phrase: \"Go on an {=awesome vacation}\"",
+                        ],
                     ],
-                    "desc" => "In the phrase: \"Go on an {=awesome vacation}\"",
-                    "project" => "awesome sauce",
-                    "author" => "me",
-                    "type" => "text",
-                    "jsfbt" => "{=awesome} vacation",
+                    "author" => "richard",
+                    "project" => "website app",
+                    "jsfbt" => [
+                        "t" => [
+                            "desc" => "In the phrase: \"Go on an {=awesome vacation}\"",
+                            "text" => "{=awesome} vacation",
+                            "tokenAliases" => [
+                                "=awesome" => "=m1",
+                            ],
+                        ],
+                        "m" => [],
+                    ],
                 ],
-                0 => [
-                    "hashToText" => [
-                        "6bbb015218a9c99babf7213c1fa764d8" => "awesome",
+                2 => [
+                    "hashToLeaf" => [
+                        "a7sBUhipyZur9yE8H6dk2A==" => [
+                            "text" => "awesome",
+                            "desc" => "In the phrase: \"Go on an {=awesome} vacation\"",
+                        ],
                     ],
-                    "desc" => "In the phrase: \"Go on an {=awesome} vacation\"",
-                    "project" => "awesome sauce",
-                    "author" => "me",
-                    "type" => "text",
-                    "jsfbt" => "awesome",
+                    "author" => "richard",
+                    "project" => "website app",
+                    "jsfbt" => [
+                        "t" => [
+                            "desc" => "In the phrase: \"Go on an {=awesome} vacation\"",
+                            "text" => "awesome",
+                        ],
+                        "m" => [],
+                    ],
                 ],
             ],
             "childParentMappings" => [
-                0 => 1,
-                1 => 2,
+                1 => 0,
+                2 => 1,
             ],
         ], FbtTransform::toArray());
     }
@@ -558,7 +612,7 @@ FBT;
 
     public function testSameParamThatDoesNotExist()
     {
-        self::expectExceptionMessage('Expected fbt sameParam construct with name="bar" to refer to a `name` or `param` construct using the same token name');
+        self::expectExceptionMessage('Expected fbt `sameParam` construct with name=`bar` to refer to a `name` or `param` construct using the same token name');
 
         self::transform(
             <<<FBT
@@ -572,7 +626,7 @@ FBT
 
     public function testSameParamWithPlural()
     {
-        self::expectExceptionMessage('Expected fbt sameParam construct with name="tokenName" to refer to a `name` or `param` construct using the same token name');
+        self::expectExceptionMessage('Expected fbt `sameParam` construct with name=`tokenName` to refer to a `name` or `param` construct using the same token name');
 
         self::transform(
             <<<FBT
@@ -605,7 +659,7 @@ FBT;
 
         $this->assertSame('Foo Bar', self::transform($fbt));
         $this->assertSame('two  spaces
-new line', FbtTransform::toArray()['phrases'][0]['desc']);
+new line', FbtTransform::toArray()['phrases'][0]['jsfbt']['t']['*']['desc']);
     }
 
     public function testTreatMultilineDescsAsASingleLine()
@@ -623,7 +677,7 @@ FBT;
 
         $this->assertSame('hi how are you today im doing well i guess'
             . ' how is your mother is she well yeah why not lets go'
-            . ' home and never come back.', $phrase['desc']);
+            . ' home and never come back.', $phrase['jsfbt']['t']['desc']);
     }
 
     public function testNotInsertExtraSpace()
@@ -640,8 +694,8 @@ FBT;
       Guest
     !', self::transform($fbt));
 
-        $this->assertSame(FbtTransform::$phrases[0]['hashToText'], [
-            "63e55792a2f4e8ad8c2ed391e0b82c4f" => "Hello, {guest}!",
+        $this->assertSame(self::hashToText(FbtTransform::$phrases[0]), [
+            "Y+VXkqL06K2MLtOR4LgsTw==" => "Hello, {guest}!",
         ]);
     }
 
@@ -671,7 +725,7 @@ FBT;
     {
         $fbt = (string)fbt('Pick an emoji…', 'placeholder text for emoji picker');
 
-        $hashKey = FbtRuntimeTransform::transform(FbtTransform::$phrases[0])['hk'];
+        $hashKey = FbtRuntimeTransform::transform(FbtTransform::$phrases[0])['options']['hk'];
 
         $this->assertSame('ZAVir', $hashKey);
         $this->assertSame('Pick an emoji…', $fbt);
@@ -722,7 +776,7 @@ FBT;
             $this->assertSame('Local business or place', self::transform($fbt));
 
             if (! $hash1) {
-                $hash1 = array_keys(current(FbtTransform::toArray()['phrases'])['hashToText'])[0];
+                $hash1 = array_keys(current(FbtTransform::toArray()['phrases'])['hashToLeaf'])[0];
             }
 
             $fbt = <<<FBT
@@ -734,7 +788,7 @@ FBT;
             $this->assertSame('By clicking "Order" you agree to the <a href="/terms">Terms of Use</a>.', self::transform($fbt));
 
             if (! $hash2) {
-                $hash2 = array_keys(current(FbtTransform::toArray()['phrases'])['hashToText'])[0];
+                $hash2 = array_keys(current(FbtTransform::toArray()['phrases'])['hashToLeaf'])[0];
             }
         }
 
@@ -744,11 +798,11 @@ FBT;
         $check2 = 0;
 
         foreach (FbtHooks::$sourceStrings['phrases'] as $phrase) {
-            if (array_key_exists($hash1, $phrase['hashToText'])) {
+            if (array_key_exists($hash1, $phrase['hashToLeaf'])) {
                 $check1++;
             }
 
-            if (array_key_exists($hash2, $phrase['hashToText'])) {
+            if (array_key_exists($hash2, $phrase['hashToLeaf'])) {
                 $check2++;
             }
         }

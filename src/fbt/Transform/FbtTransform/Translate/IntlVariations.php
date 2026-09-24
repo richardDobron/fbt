@@ -57,6 +57,10 @@ class IntlVariations
     // with a singular entry
     public const EXACTLY_ONE = '_1';
 
+    // Default candidate values of gender and number string variations
+    public const GENDER_ANY = '*';
+    public const NUMBER_ANY = '*';
+
     public const SUBJECT = '__subject__';
     public const VIEWING_USER = '__viewing_user__';
 

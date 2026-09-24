@@ -2,10 +2,13 @@
 
 namespace fbt\Services;
 
+use function fbt\invariant;
+
 use fbt\Runtime\Shared\FbtHooks;
 use fbt\Transform\FbtTransform\fbtHash;
 use fbt\Transform\FbtTransform\FbtUtils;
 use fbt\Transform\FbtTransform\Translate\FbtSite;
+use fbt\Transform\FbtTransform\Translate\FbtSiteMetaEntry;
 use fbt\Transform\FbtTransform\Translate\TranslationBuilder;
 use fbt\Transform\FbtTransform\Translate\TranslationConfig;
 use fbt\Transform\FbtTransform\Translate\TranslationData;
@@ -16,11 +19,11 @@ use fbt\Transform\FbtTransform\Translate\TranslationData;
  * {
  *  "phrases": [
  *    {
- *      "hashToText": {
- *        "40bd5bc10bd59fe020569068cfd7d814": "Your FBT Demo"
+ *      "hashToLeaf": {
+ *        "QKdbwQvVn+Ag+Qn/Wp+A/g==": {"text": "Your FBT Demo", "desc": "title"}
  *      },
  *      ...,
- *      "jsfbt": "Your FBT Demo"
+ *      "jsfbt": {"t": {"desc": "title", "text": "Your FBT Demo"}, "m": []}
  *    },
  *    ...
  *  ],
@@ -114,17 +117,37 @@ class TranslationsGeneratorService
     }
 
     /**
+     * Filters out missing (null) translations, and logs them to stderr
+     */
+    private static function checkAndFilterTranslations(string $locale, array $translations): array
+    {
+        $filteredTranslations = [];
+        foreach ($translations as $hash => $translation) {
+            if ($translation === null) {
+                if (defined('STDERR')) {
+                    fwrite(STDERR, "Missing $locale translation for string ($hash)" . PHP_EOL);
+                }
+
+                continue;
+            }
+            $filteredTranslations[$hash] = $translation;
+        }
+
+        return $filteredTranslations;
+    }
+
+    /**
      * @throws \fbt\Exceptions\FbtException
      */
     private function processTranslations(array $fbtSites, array $group, array $fbtTranslations = []): array
     {
         $config = TranslationConfig::fromFBLocale($group['fb-locale']);
         $fallback = FbtHooks::getFallback($group['fb-locale']);
-        $translations = FbtUtils::objMap($group['translations'], function (array $translation) {
+        $translations = FbtUtils::objMap(self::checkAndFilterTranslations($group['fb-locale'], $group['translations']), function (array $translation) {
             return TranslationData::fromJSON($translation);
         });
         // fbt diff: Adding fallback translations to the TranslationBuilder.
-        $fallbackTranslations = FbtUtils::objMap($fbtTranslations[$fallback]['translations'] ?? [], function (array $translation) {
+        $fallbackTranslations = FbtUtils::objMap(array_filter($fbtTranslations[$fallback]['translations'] ?? [], 'is_array'), function (array $translation) {
             return TranslationData::fromJSON($translation);
         });
         $translatedPhrases = array_map(function (FbtSite $fbtSite) use ($translations, $fallbackTranslations, $config) {
@@ -149,8 +172,12 @@ class TranslationsGeneratorService
             $localeToHashToFbt[$group['fb-locale']] = [];
             foreach ($phrases as $idx => $phrase) {
                 $translatedFbt = $group['translatedPhrases'][$idx];
-                $payload = $phrase['type'] === 'text' ? $phrase['jsfbt'] : $phrase['jsfbt']['t'];
-                $hash = fbtHash::fbtHashKey($payload, $phrase['desc']);
+                invariant(
+                    isset($phrase['jsfbt']),
+                    "Expect every phrase to have 'jsfbt' field. However, 'jsfbt' is missing in the phrase at index %s.",
+                    $idx
+                );
+                $hash = fbtHash::fbtHashKey($phrase['jsfbt']['t']);
                 $localeToHashToFbt[$group['fb-locale']][$hash] = $translatedFbt;
             }
         }
@@ -184,7 +211,7 @@ class TranslationsGeneratorService
 
             $tokens = array_column($metadata, "token");
             $types = array_column($metadata, "type");
-            foreach ($phrase['hashToText'] as $hash => $text) {
+            foreach (array_keys($phrase['hashToLeaf']) as $hash) {
                 $translations[$hash] = [
                     'translations' => [
                         [
@@ -193,7 +220,7 @@ class TranslationsGeneratorService
                         ],
                     ],
                     'tokens' => $tokens,
-                    'types' => array_map("fbt\Transform\FbtTransform\Translate\FbtSiteMetaEntry::getVariationMaskFromType", $types),
+                    'types' => array_map([FbtSiteMetaEntry::class, 'getVariationMaskFromType'], $types),
                 ];
             }
         }
@@ -206,7 +233,7 @@ class TranslationsGeneratorService
                     continue;
                 }
 
-                $localeTranslations = json_decode(FbtHooks::readLocked($file), true);
+                $localeTranslations = json_decode(file_get_contents($file), true);
 
                 if (! $localeTranslations) {
                     $localeTranslations = [
@@ -219,7 +246,7 @@ class TranslationsGeneratorService
                     $localeTranslations[$match[1]]['translations'] += $translations;
                 }
 
-                file_put_contents($file, json_encode($localeTranslations, $flags), LOCK_EX);
+                file_put_contents($file, json_encode($localeTranslations, $flags));
             }
         } else {
             if (! file_exists($inputPath)) {

@@ -38,7 +38,7 @@ function em($content, string $inlineMode, string $translation, ?string $hash)
     return new FbtResult($content);
 }
 
-class InlineFbtResult
+class InlineFbtResult extends FbtResult
 {
     public $contents;
     public $inlineMode;
@@ -49,16 +49,56 @@ class InlineFbtResult
         array $contents,
         string $inlineMode,
         string $translation,
-        ?string $hash
+        ?string $hash,
+        ?IFbtErrorListener $errorListener = null
     ) {
+        parent::__construct($contents, $errorListener);
+
         $this->hash = $hash;
         $this->translation = $translation;
         $this->inlineMode = $inlineMode;
         $this->contents = $contents;
     }
 
+    /**
+     * @param array{
+     *   contents: array,
+     *   errorListener?: IFbtErrorListener|null,
+     *   patternString: string,
+     *   patternHash: string|null
+     * } $input
+     *
+     * @return static
+     */
+    public static function get(array $input): FbtResult
+    {
+        return new static(
+            $input['contents'],
+            FbtHooks::inlineMode(),
+            $input['patternString'],
+            $input['patternHash'] ?? null,
+            $input['errorListener'] ?? null
+        );
+    }
+
+    /**
+     * Keep this result as a single item when nested in another result, so that
+     * its inline wrapper is not lost.
+     */
+    public function flattenToArray(): array
+    {
+        return [$this];
+    }
+
     public function __toString(): string
     {
-        return (string) em($this->contents, $this->inlineMode, $this->translation, $this->hash);
+        // Not memoized: inlining depends on the call site (see FbtHooks::canInline),
+        // which is why the call stack depth must stay as it is
+        return (string) em(
+            self::flattenContentsToArray($this->contents),
+            $this->inlineMode,
+            $this->translation,
+            $this->hash
+        );
     }
 }

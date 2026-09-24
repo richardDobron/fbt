@@ -53,9 +53,9 @@ class FbtConfig
 
         /*
          * Hash digest for md5 hash.
-         * hex / base64
+         * base64 (default, like upstream) / hex
          */
-        'md5_digest' => 'hex',
+        'md5_digest' => 'base64',
 
         /*
          * Cache storage path for generated translations & source strings.
@@ -86,6 +86,17 @@ class FbtConfig
          * Debug.
          */
         'debug' => false,
+
+        /*
+         * Extra options allowed on fbt callsites, e.g. ['myOption' => true].
+         * Their values are passed to the runtime (see FbtHooks::getFbtResult()).
+         */
+        'extraOptions' => [],
+
+        /*
+         * Add the outer token name of inner strings to the collected phrases.
+         */
+        'generateOuterTokenName' => false,
     ];
 
     /**

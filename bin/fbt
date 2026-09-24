@@ -46,4 +46,27 @@ $app->registerCommand('translate', function (Minicli\Command\CommandCall $app) {
     );
 });
 
+$app->registerCommand('migrate-v5', function (Minicli\Command\CommandCall $app) {
+    $translations = $app->getParam('--translations');
+    if (! $translations) {
+        echo 'Usage: fbt migrate-v5 --translations="path/to/translations/*.json" [--src=.source_strings.json]' . PHP_EOL;
+
+        return;
+    }
+
+    $migrateService = new \fbt\Services\MigrateV5Service($app->getParam('--src') ?: null);
+    $report = $migrateService->migrateFiles(glob($translations));
+
+    echo "Migrated translation keys: {$report['migrated']}" . PHP_EOL;
+
+    foreach ($report['unknown'] as $locale => $hashes) {
+        echo "\033[33m[$locale] " . count($hashes) . " translation(s) of strings that no longer exist (they have to be translated again):\033[0m" . PHP_EOL;
+        echo '  ' . implode(PHP_EOL . '  ', $hashes) . PHP_EOL;
+    }
+
+    foreach ($report['untranslated'] as $locale => $hashes) {
+        echo "[$locale] " . count($hashes) . ' string(s) without translation' . PHP_EOL;
+    }
+});
+
 $app->runCommand($argv);

@@ -24,7 +24,8 @@ module.exports = {
       "pronouns",
       "autoparam",
       "common",
-      "utilities"
+      "utilities",
+      "hooks"
     ],
     "Transforms": ["transform"],
     Collection: ["collection"],

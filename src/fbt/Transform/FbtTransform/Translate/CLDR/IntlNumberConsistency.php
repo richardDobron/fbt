@@ -10,5 +10,8 @@ interface IntlNumberConsistency
 
     public function getExample(int $variation): ?string;
 
-    public function getVariation(int $n): int;
+    /**
+     * @param int|float $n
+     */
+    public function getVariation($n): int;
 }

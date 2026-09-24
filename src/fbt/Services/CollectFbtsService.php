@@ -51,6 +51,7 @@ class CollectFbtsService
     public function __construct()
     {
         $parserFactory = new ParserFactory();
+        // nikic/php-parser 5 removed create(), 4.18+ has both
         $this->parser = method_exists($parserFactory, "createForNewestSupportedVersion")
             ? $parserFactory->createForNewestSupportedVersion()
             : $parserFactory->create(ParserFactory::PREFER_PHP7);
@@ -81,6 +82,7 @@ class CollectFbtsService
         FbtConfig::set('path', $path);
         FbtConfig::set('fbtCommonPath', $fbtCommonPath);
 
+        // Files are collected in a stable order, regardless of the file system
         $files = rsearch($src, '/.php$/');
         sort($files);
 
@@ -197,12 +199,12 @@ CODE
 
     public function __destruct()
     {
-        $hashToTexts = array_merge(...array_column(FbtHooks::$sourceStrings['phrases'], 'hashToText'));
+        $hashToLeaf = array_merge([], ...array_column(FbtHooks::$sourceStrings['phrases'], 'hashToLeaf'));
 
         echo PHP_EOL;
         echo "Fbt collection has been completed!" . PHP_EOL . PHP_EOL;
 
-        echo "Source strings: " . count($hashToTexts) . " in " . $this->files . " file(s)" . PHP_EOL;
+        echo "Source strings: " . count($hashToLeaf) . " in " . $this->files . " file(s)" . PHP_EOL;
 
         if ($this->errors) {
             echo "\033[33mErrors: " . $this->errors . "\033[0m" . PHP_EOL;

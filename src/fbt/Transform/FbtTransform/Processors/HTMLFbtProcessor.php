@@ -6,138 +6,123 @@ use dobron\DomForge\DomForge;
 use dobron\DomForge\Node;
 use fbt\Exceptions\FbtParserException;
 
-use function fbt\fbt;
 use function fbt\invariant;
 
-use fbt\Runtime\fbtNamespace;
-use fbt\Runtime\fbtNode;
-use fbt\Transform\FbtTransform\FbtAutoWrap;
 use fbt\Transform\FbtTransform\FbtCommon;
 use fbt\Transform\FbtTransform\FbtConstants;
 use fbt\Transform\FbtTransform\FbtNodeChecker;
 use fbt\Transform\FbtTransform\FbtUtils;
-use fbt\Transform\FbtTransform\Utils\GetNamespacedArgs;
 
+/**
+ * Port of JSXFbtProcessor: converts an <fbt> DOM node to an fbt() "function call".
+ */
 class HTMLFbtProcessor
 {
-    /* @var string */
-    private $moduleName;
-    /* @var Node */
-    private $node;
-    /* @var FbtNodeChecker */
-    private $nodeChecker;
+    private const CONSTRUCTS = ['enum', 'param', 'plural', 'pronoun', 'name', 'sameParam'];
 
-    public function __construct(FbtNodeChecker $nodeChecker, Node $node)
+    /** @var string */
+    private $moduleName;
+    /** @var Node */
+    private $node;
+    /** @var FbtNodeChecker */
+    private $nodeChecker;
+    /** @var array */
+    private $validFbtExtraOptions;
+
+    public function __construct(FbtNodeChecker $nodeChecker, Node $node, array $validFbtExtraOptions = [])
     {
         $this->moduleName = $nodeChecker->moduleName;
         $this->node = $node;
         $this->nodeChecker = $nodeChecker;
+        $this->validFbtExtraOptions = $validFbtExtraOptions;
     }
 
-    /**
-     * @param Node $node
-     * @return HTMLFbtProcessor|null
-     */
-    public static function create(Node $node): ?HTMLFbtProcessor
+    public static function create(Node $node, array $validFbtExtraOptions = []): ?HTMLFbtProcessor
     {
         $nodeChecker = FbtNodeChecker::forFbt($node);
 
-        return $nodeChecker !== null ?
-            new HTMLFbtProcessor($nodeChecker, $node) : null;
+        return $nodeChecker !== null
+            ? new HTMLFbtProcessor($nodeChecker, $node, $validFbtExtraOptions)
+            : null;
     }
 
     /**
-     * @throws \fbt\Exceptions\FbtException
+     * @return string|null the description of the <fbt>
+     * @throws FbtParserException
      */
-    private function _getText(array $childNodes)
-    {
-        return count($childNodes) > 1
-            ? $this->_createConcatFromExpressions($childNodes)
-            : ($childNodes[0] ?? null);
-    }
-
-    /**
-     * @throws \fbt\Exceptions\FbtParserException
-     */
-    private function _getDescription($text): string
+    private function _getDescription(array $texts): string
     {
         $moduleName = $this->moduleName;
         $node = $this->node;
-
         $commonAttributeValue = $this->_getCommonAttributeValue();
 
         if ($commonAttributeValue) {
-            $textValue = FbtUtils::normalizeSpaces(trim($text));
+            $rawTextValue = implode('', array_map(function ($stringNode) use ($node) {
+                if (! is_string($stringNode)) {
+                    throw FbtUtils::errorAt(
+                        $node,
+                        'Expected a StringLiteral but found `' . $stringNode->tag . '` instead'
+                    );
+                }
+
+                return $stringNode;
+            }, $texts));
+
+            $textValue = FbtUtils::jsTrim(FbtUtils::normalizeSpaces($rawTextValue));
             $descValue = FbtCommon::getDesc($textValue);
-
-            if (empty($descValue)) {
-                throw FbtUtils::errorAt($node, FbtCommon::getUnknownCommonStringErrorMessage($moduleName, $textValue));
+            if ($descValue === null || $descValue === '') {
+                throw FbtUtils::errorAt(
+                    $node,
+                    FbtCommon::getUnknownCommonStringErrorMessage($moduleName, $textValue)
+                );
+            }
+            if (FbtUtils::getAttributeByName($node, 'desc') !== null) {
+                throw FbtUtils::errorAt($node, "<$moduleName common=\"true\"> must not have \"desc\" attribute");
             }
 
-            if (FbtUtils::getAttributeByName($this->node, 'desc')) {
-                throw FbtUtils::errorAt($node, '<' . $moduleName . ' common="true"> must not have "desc" attribute');
-            }
-
-            $desc = $descValue;
-        } else {
-            $desc = $this->_getDescAttributeValue();
+            return $descValue;
         }
 
-        return $desc;
+        return $this->_getDescAttributeValue();
     }
 
     /**
-     * @return null|array
-     * @throws \fbt\Exceptions\FbtParserException
+     * @throws FbtParserException
      */
     private function _getOptions(): ?array
     {
         // Optional attributes to be passed as options.
-
         $this->_assertHasMandatoryAttributes();
+        $options = count($this->node->getAttributes()) > 0
+            ? FbtUtils::getOptionsFromAttributes(
+                $this->node,
+                array_merge($this->validFbtExtraOptions, FbtConstants::VALID_FBT_OPTIONS),
+                FbtConstants::FBT_REQUIRED_ATTRIBUTES
+            )
+            : [];
 
-        if (count($this->node->getAttributes()) > 1) {
-            $options = FbtUtils::getOptionsFromAttributes($this->node, FbtConstants::VALID_FBT_OPTIONS, FbtConstants::FBT_REQUIRED_ATTRIBUTES);
-            if ($this->node->context) {
-                $options['context'] = (array)$this->node->context;
-            }
-
-            return $options;
-        }
-
-        return null;
+        return count($options) > 0 ? $options : null;
     }
 
     /**
-     * @throws \fbt\Exceptions\FbtParserException
+     * @throws FbtParserException
      */
     private function _assertHasMandatoryAttributes(): void
     {
-        if (! count(array_intersect(array_keys($this->node->getAttributes()), FbtConstants::FBT_CALL_MUST_HAVE_AT_LEAST_ONE_OF_THESE_ATTRIBUTES))) {
-            throw FbtUtils::errorAt($this->node, "<$this->moduleName> must have at least one of these attributes: " . implode(', ', FbtConstants::FBT_CALL_MUST_HAVE_AT_LEAST_ONE_OF_THESE_ATTRIBUTES));
+        foreach (FbtConstants::FBT_CALL_MUST_HAVE_AT_LEAST_ONE_OF_THESE_ATTRIBUTES as $attribute) {
+            if ($this->node->hasAttribute($attribute)) {
+                return;
+            }
         }
+
+        throw FbtUtils::errorAt(
+            $this->node,
+            "<$this->moduleName> must have at least one of these attributes: " .
+            implode(', ', FbtConstants::FBT_CALL_MUST_HAVE_AT_LEAST_ONE_OF_THESE_ATTRIBUTES)
+        );
     }
 
     /**
-     * @throws \fbt\Exceptions\FbtException
-     * @throws \fbt\Exceptions\FbtParserException
-     */
-    private function _createFbtFunctionCallNode($text, ?string $desc, ?array $options): fbtNamespace
-    {
-        invariant($text !== null, 'text cannot be null');
-        invariant($desc !== null, 'desc cannot be null');
-
-        $args = [$text, $desc];
-
-        if ($options !== null) {
-            $args[] = $options;
-        }
-
-        return fbt(...$args);
-    }
-
-    /**
-     * @return void
      * @throws FbtParserException
      */
     private function _assertNoNestedFbts(): void
@@ -145,160 +130,161 @@ class HTMLFbtProcessor
         $this->nodeChecker->assertNoNestedFbts($this->node);
     }
 
-    private function _isImplicitFbt(): bool
-    {
-        return $this->node->context->implicitFbt ?? false;
-    }
-
     /**
-     * @throws \fbt\Exceptions\FbtParserException
+     * fbt constructs are not allowed to be direct children of fbt constructs.
+     * For example it is not okay to have
+     *    <fbt desc='desc'>
+     *      <fbt:param name="outer">
+     *        <fbt:param name="inner">
+     *          variable
+     *        </fbt:param>
+     *      </fbt:param>
+     *    </fbt>
+     * However, the next example is okay because the inner `fbt:param` sits inside
+     * an inner fbt.
+     *    <fbt desc='outer string'>
+     *      <fbt:param name="outer">
+     *        <fbt desc='inner string'>
+     *          <fbt:param name="inner">
+     *            variable
+     *          </fbt:param>
+     *        </fbt>
+     *      </fbt:param>
+     *    </fbt>
+     *
+     * @throws FbtParserException
      */
-    private function _addImplicitDescriptionsToChildrenRecursively(): void
+    private function throwIfExistsNestedFbtConstruct(Node $node, ?string $parentConstructName = null): void
     {
-        FbtAutoWrap::createImplicitDescriptions($this->moduleName, $this->node);
-    }
+        foreach ($node->children as $child) {
+            if (FbtNodeChecker::forFbt($child) !== null) {
+                continue;
+            }
 
-    /**
-     * Given a node, and its index location in phrases, any children of the given
-     * node that are implicit are given their parent's location. This can then
-     * be used to link the inner strings with their enclosing string.
-     */
-    private function _setPhraseIndexOnImplicitChildren(int $phraseIndex): self
-    {
-        $children = $this->node->children();
+            $constructName = FbtUtils::validateNamespacedFbtElement($this->moduleName, $child);
+            $isConstruct = in_array($constructName, self::CONSTRUCTS, true);
 
-        if (! $children) {
-            return $this;
+            if ($isConstruct && $parentConstructName !== null) {
+                throw FbtUtils::errorAt(
+                    $node,
+                    'Expected fbt constructs to not nest inside fbt constructs, but found ' .
+                    "{$this->moduleName}.$constructName nest inside {$this->moduleName}.$parentConstructName"
+                );
+            }
+
+            $this->throwIfExistsNestedFbtConstruct($child, $isConstruct ? $constructName : $parentConstructName);
         }
+    }
 
-        foreach ($children as $child) {
-            if (! empty($child->context->implicitDesc)) {
-                $child->context->parentIndex = $phraseIndex;
+    /**
+     * @param bool $functional - js~php diff: whether the <fbt> comes from the
+     *   functional form, i.e. fbt('text', 'desc'), which keeps its whitespace-only strings
+     *
+     * @return array<int, string|Node>
+     * @throws FbtParserException
+     */
+    private function _transformChildrenForFbtCallSyntax(bool $functional): array
+    {
+        $children = [];
+        foreach ($this->node->nodes as $node) {
+            switch ($node->nodetype) {
+                case DomForge::TYPE_ELEMENT:
+                    // Simple HTML elements and fbt constructs are converted later on
+                    $children[] = $node;
+
+                    break;
+                case DomForge::TYPE_TEXT:
+                    $text = $node->innerHtml();
+                    // js~php diff: whitespace-only texts are kept, because whitespace
+                    // between HTML tags is significant (JSX drops it, see FbtUtil.filterEmptyNodes)
+                    $children[] = $functional ? $text : FbtUtils::normalizeSpaces($text);
+
+                    break;
+                case DomForge::TYPE_COMMENT:
+                    break;
+                default:
+                    throw FbtUtils::errorAt($node, "Unsupported HTML element child type '{$node->nodetype}'");
             }
         }
 
-        return $this;
+        return $children;
     }
 
     /**
-     * @throws \fbt\Exceptions\FbtParserException
-     */
-    private function _transformChildrenToFbtCalls(array $nodes): array
-    {
-        return array_map(function (Node $node) {
-            return $this->_transformNamespacedFbtElement($node);
-        }, FbtUtils::filterEmptyNodes($nodes));
-    }
-
-    /**
-     * Transform a namespaced fbt JSXElement into a
-     * method call. E.g. `<fbt:param>` to `fbt::param()`
-     * @throws \fbt\Exceptions\FbtParserException
-     */
-    private function _transformNamespacedFbtElement(Node $node)
-    {
-        switch ($node->nodetype) {
-            case DomForge::TYPE_ELEMENT:
-                return $this->_toFbtNamespacedCall($node);
-            case DomForge::TYPE_TEXT:
-                return FbtUtils::normalizeSpaces($node->innerHtml);
-            default:
-                throw FbtUtils::errorAt($node, "Unknown namespace fbt type $node->nodetype ($node->tag)");
-        }
-    }
-
-    /**
-     * @throws \fbt\Exceptions\FbtParserException
-     */
-    // WARNING: this method has side-effects because it alters the given `node` object
-    // You shouldn't try to run this multiple times on the same `node`.
-    private function _toFbtNamespacedCall(Node $node): fbtNode
-    {
-        $moduleName = $this->moduleName;
-        $name = FbtUtils::validateNamespacedFbtElement($moduleName, $node);
-        $getNamespacedArgs = new GetNamespacedArgs($moduleName);
-
-        $args = [
-            $node,
-            $getNamespacedArgs->{$name}($node),
-        ];
-
-        if ($name === 'implicitParamMarker') {
-            $name = 'param';
-        }
-
-        return call_user_func_array([fbtNamespace::class, $name], $args);
-    }
-
-    /**
-     * Given an array of nodes, recursively construct a concatenation of all these nodes.
-     * @throws \fbt\Exceptions\FbtException
-     */
-    private function _createConcatFromExpressions(array $nodes): array
-    {
-        invariant(count($nodes) > 1, 'Cannot create HTML element without nodes.');
-
-        // js~php diff
-        return $nodes;
-    }
-
-    /**
-     * @throws \fbt\Exceptions\FbtParserException
+     * @throws FbtParserException
      */
     private function _getDescAttributeValue(): string
     {
-        $node = $this->node;
-        $descAttr = FbtUtils::getAttributeByNameOrThrow($node, 'desc');
+        $moduleName = $this->moduleName;
+        $descAttr = FbtUtils::getAttributeByName($this->node, 'desc');
 
-        if (! $descAttr) {
-            throw FbtUtils::errorAt($node, "<$this->moduleName> requires a \"desc\" attribute");
+        if ($descAttr === null) {
+            throw FbtUtils::errorAt($this->node, "<$moduleName> requires a \"desc\" attribute");
         }
 
         return $descAttr;
     }
 
     /**
-     * @return null|bool
-     * @throws \fbt\Exceptions\FbtParserException
+     * @throws FbtParserException
      */
     private function _getCommonAttributeValue(): ?bool
     {
-        $commonAttr = FbtUtils::getAttributeByName($this->node, 'common');
-
-        if (! $commonAttr) {
+        if (! $this->node->hasAttribute(FbtConstants::COMMON_OPTION)) {
             return null;
         }
 
-        if ($commonAttr === 'true' || $commonAttr === 'false') {
-            return $commonAttr === 'true';
+        $commonAttr = $this->node->getAttribute(FbtConstants::COMMON_OPTION);
+
+        // An HTML tag attribute without value is default to boolean value true.
+        // E.g. `<fbt common>Done</fbt>`
+        if ($commonAttr === null || $commonAttr === true || $commonAttr === 'true') {
+            return true;
+        }
+
+        if ($commonAttr === 'false') {
+            return false;
         }
 
         throw new FbtParserException("`common` attribute for <$this->moduleName> requires boolean literal");
     }
 
     /**
-     * @throws \fbt\Exceptions\FbtParserException|\fbt\Exceptions\FbtException
+     * Converts the <fbt> node to an fbt() call, and processes it.
+     *
+     * @param array $defaultFbtOptions
+     * @param array $pluginOptions
+     * @param bool $functional
+     *
+     * @return array{result: mixed, metaPhrases: array}
+     * @throws FbtParserException
+     * @throws \fbt\Exceptions\FbtException
      */
-    public function convertToFbtFunctionCallNode(int $phraseIndex): fbtNamespace
-    {
+    public function convertToFbtRuntimeCall(
+        array $defaultFbtOptions = [],
+        array $pluginOptions = [],
+        bool $functional = false
+    ): array {
         $this->_assertNoNestedFbts();
+        $this->throwIfExistsNestedFbtConstruct($this->node);
 
-        if (! $this->_isImplicitFbt()) {
-            $this->_addImplicitDescriptionsToChildrenRecursively();
+        $children = $this->_transformChildrenForFbtCallSyntax($functional);
+        $description = $this->_getDescription($children);
+        invariant($children !== [], 'text cannot be null');
+
+        $callArgs = [$children, $description];
+        $options = $this->_getOptions();
+        if ($options !== null) {
+            $callArgs[] = $options;
         }
 
-        $this->_setPhraseIndexOnImplicitChildren($phraseIndex);
-
-        $children = $this->_transformChildrenToFbtCalls($this->node->nodes);
-
-        $text = $this->_getText($children);
-
-        $description = $this->_getDescription($text);
-
-        return $this->_createFbtFunctionCallNode(
-            $text,
-            $description,
-            $this->_getOptions()
-        );
+        return (new FbtFunctionCallProcessor(
+            $this->moduleName,
+            $this->node,
+            $callArgs,
+            $defaultFbtOptions,
+            $this->validFbtExtraOptions,
+            $pluginOptions
+        ))->convertToFbtRuntimeCall();
     }
 }

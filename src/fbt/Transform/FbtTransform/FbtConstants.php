@@ -36,11 +36,28 @@ class FbtConstants
         'ifMany' => true,
     ];
 
+    public const SHOW_COUNT_KEYS = [
+        'yes' => 'yes',
+        'no' => 'no',
+        'ifMany' => 'ifMany',
+    ];
+
     public const PLURAL_OPTIONS = [
         'value' => true, // optional value to replace token (rather than count)
         'showCount' => self::SHOW_COUNT,
         'name' => true, // token
         'many' => true,
+        // js~php diff: identity of the `count` value; plurals with the same key share
+        // the same string variations (upstream: the same count expression)
+        'key' => true,
+    ];
+
+    /**
+     * js~php diff: identity of the enum `value`; enums with the same key share the
+     * same string variations (upstream: the same value expression)
+     */
+    public const VALID_ENUM_OPTIONS = [
+        'key' => true,
     ];
 
     public static function validPluralOptions(): array
@@ -55,6 +72,14 @@ class FbtConstants
     public const VALID_PRONOUN_OPTIONS = [
         'human' => ['true' => true, 'false' => true],
         'capitalize' => ['true' => true, 'false' => true],
+        // js~php diff: identity of the `gender` value; pronouns with the same key share
+        // the same string variations (upstream: the same gender expression)
+        'key' => true,
+    ];
+
+    public const VALID_PRONOUN_OPTIONS_BOOLEAN = [
+        'human' => true,
+        'capitalize' => true,
     ];
 
     /**
@@ -75,7 +100,9 @@ class FbtConstants
         'doNotExtract' => true,
     ];
 
-    public const FBT_CALL_MUST_HAVE_AT_LEAST_ONE_OF_THESE_ATTRIBUTES = ['desc', 'common'];
+    public const COMMON_OPTION = 'common';
+
+    public const FBT_CALL_MUST_HAVE_AT_LEAST_ONE_OF_THESE_ATTRIBUTES = ['desc', self::COMMON_OPTION];
 
     public const FBT_REQUIRED_ATTRIBUTES = [
         'desc' => true,

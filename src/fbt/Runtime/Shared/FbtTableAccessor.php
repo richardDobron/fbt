@@ -9,9 +9,12 @@ namespace fbt\Runtime\Shared;
 
 class FbtTableAccessor
 {
-    public static function getEnumResult(string $value): array
+    /**
+     * @param string|int $value
+     */
+    public static function getEnumResult($value): array
     {
-        return [$value, null];
+        return [[$value], null];
     }
 
     public static function getGenderResult(array $variation, ?array $substitution, int $_gender): array
@@ -21,7 +24,12 @@ class FbtTableAccessor
         return [$variation, $substitution];
     }
 
-    public static function getNumberResult(array $variation, array $substitution, string $value): array
+    /**
+     * @param array $variation
+     * @param array|null $substitution
+     * @param int|float $_numberValue
+     */
+    public static function getNumberResult(array $variation, ?array $substitution, $_numberValue): array
     {
         // value is ignored here which will be used in alternative implementation
         // for different platform

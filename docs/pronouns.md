@@ -54,27 +54,26 @@ The `IntlVariations` used in those cases only has `GENDER_MALE`, `GENDER_FEMALE`
 ### Optional attributes
 * **capitalize** `bool`: Whether to capitalize the pronoun in the source string.
 * **human** `bool`: Whether to elide the NOT_A_PERSON option in the text variations generated.
+* **key** `string`: Pronouns with the same `key` share the same gender, so that only the consistent
+  combinations of their variations are generated for translation (*Facebook's fbt detects that the
+  same variable is used*).
 
 The example above generates:
-```
+```json
 {
-  "hashToText": {
-    "23fa7e4d6a4686bb6ff609c00726cf33": "{name} shared her photo with you.",
-    "dd86ffccd845f2767c691f8d48f69e25": "{name} shared his photo with you.",
-    "2584ed80718ca4138cd95adcf492de53": "{name} shared their photo with you."
+  "hashToLeaf": {
+    "JYTtgHGMpBOM2Vrc9JLeUw==": {"text": "{name} shared their photo with you.", "desc": "pronoun example"},
+    "I/p+TWpGhrtv9gnABybPMw==": {"text": "{name} shared her photo with you.", "desc": "pronoun example"},
+    "3Yb/zNhF8nZ8aR+NSPaeJQ==": {"text": "{name} shared his photo with you.", "desc": "pronoun example"}
   },
-  ...,
-  "type": "table",
-  "desc": "pronoun example",
+  "project": "website app",
   "jsfbt": {
     "t": {
-      "1": "{name} shared her photo with you.",
-      "2": "{name} shared his photo with you.",
-      "*": "{name} shared their photo with you."
+      "1": {"desc": "pronoun example", "text": "{name} shared her photo with you."},
+      "2": {"desc": "pronoun example", "text": "{name} shared his photo with you."},
+      "*": {"desc": "pronoun example", "text": "{name} shared their photo with you."}
     },
-    "m": [
-      null
-    ]
+    "m": [null]
   }
 }
 ```

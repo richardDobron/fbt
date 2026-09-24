@@ -12,6 +12,7 @@ class fbt implements \JsonSerializable, HtmlStringable
     /* @var string */
     protected static $moduleName = 'fbt';
     protected static $cachedFbt = [];
+    /** @var array<string, true> */
     protected static $collectedFbt = [];
     /* @var bool */
     protected $transform;
@@ -59,14 +60,19 @@ class fbt implements \JsonSerializable, HtmlStringable
         ] + $options);
     }
 
-    public static function enum(string $value, array $range): string
+    /**
+     * @param string $value
+     * @param array $range
+     * @param array $options - e.g. ['key' => 'value identity'] (see docs/enums.md)
+     */
+    public static function enum(string $value, array $range, array $options = []): string
     {
         $range = json_encode($range);
 
         return createElement(static::$moduleName . ':enum', null, [
             'enum-range' => $range,
             'value' => $value,
-        ]);
+        ] + $options);
     }
 
     public static function name(string $tokenName, string $value, int $gender): string
@@ -153,31 +159,55 @@ class fbt implements \JsonSerializable, HtmlStringable
 
         $fbt = createElement(self::$moduleName, implode('', $text), $attributes);
         if ($this->transform) {
-            $hash = md5($fbt . "\0" . FbtHooks::locale() . "\0" . FbtHooks::getIntlViewerContext()->getGender() . "\0" . FbtHooks::inlineMode());
-            if (! isset(self::$cachedFbt[$hash])) {
-                self::$cachedFbt[$hash] = $this->_transformOnce($fbt);
-            }
-
-            return self::$cachedFbt[$hash];
+            return $this->_transform($fbt);
         }
 
         return $fbt;
     }
 
-    protected function _transformOnce(string $html): string
+    /**
+     * @throws \Throwable
+     */
+    protected function _transform(string $html): string
+    {
+        $inlineMode = FbtHooks::inlineMode();
+        if ($inlineMode && $inlineMode !== 'NO_INLINE') {
+            return $this->_transformOnce($html);
+        }
+
+        // The result depends on the viewer's locale and gender as well
+        $hash = md5(
+            $html . "\0" .
+            FbtHooks::locale() . "\0" .
+            FbtHooks::getIntlViewerContext()->getGender()
+        );
+
+        if (! isset(self::$cachedFbt[$hash])) {
+            self::$cachedFbt[$hash] = $this->_transformOnce($html);
+        }
+
+        return self::$cachedFbt[$hash];
+    }
+
+    /**
+     * Transforms the fbt, collecting its phrases only the first time.
+     *
+     * @throws \Throwable
+     */
+    private function _transformOnce(string $html): string
     {
         $key = md5($html);
         if (! isset(self::$collectedFbt[$key])) {
             self::$collectedFbt[$key] = true;
 
-            return FbtTransform::transform($html, $this->trace);
+            return FbtTransform::transform($html, $this->trace, true);
         }
 
         $collectPhrases = FbtTransform::$collectPhrases;
         FbtTransform::$collectPhrases = false;
 
         try {
-            return FbtTransform::transform($html, $this->trace);
+            return FbtTransform::transform($html, $this->trace, true);
         } finally {
             FbtTransform::$collectPhrases = $collectPhrases;
         }

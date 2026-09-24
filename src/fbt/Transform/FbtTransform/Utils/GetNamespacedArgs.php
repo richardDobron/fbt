@@ -3,7 +3,6 @@
 namespace fbt\Transform\FbtTransform\Utils;
 
 use dobron\DomForge\Node;
-use fbt\Transform\FbtTransform\FbtAutoWrap;
 use fbt\Transform\FbtTransform\FbtConstants;
 use fbt\Transform\FbtTransform\FbtUtils;
 
@@ -14,19 +13,6 @@ class GetNamespacedArgs
     public function __construct(string $moduleName)
     {
         $this->moduleName = $moduleName;
-    }
-
-    /**
-     * Node that is a child of a <fbt> node that should be handled as
-     * <fbt:param>
-     *
-     * @throws \fbt\Exceptions\FbtParserException
-     */
-    public function implicitParamMarker(Node $node): array
-    {
-        $newNode = FbtAutoWrap::wrapImplicitFBTParam($this->moduleName, $node);
-
-        return ['=' . $newNode->context->paramName, $newNode->outerHtml()];
     }
 
     /**
@@ -76,7 +62,7 @@ class GetNamespacedArgs
 
         $singularNode = $pluralChildren[0];
         $singularText = $singularNode->innerHtml;
-        $singularArg = rtrim(FbtUtils::normalizeSpaces($singularText));
+        $singularArg = FbtUtils::jsTrimRight(FbtUtils::normalizeSpaces($singularText));
 
         return [$singularArg, $countAttr, $options];
     }
@@ -175,6 +161,17 @@ class GetNamespacedArgs
 
         $valueAttr = FbtUtils::getAttributeByNameOrThrow($node, 'value');
 
-        return [$valueAttr, $rangeAttrValue];
+        // js~php diff: optional `key` (identity of the enum value)
+        $options = FbtUtils::getOptionsFromAttributes($node, FbtConstants::VALID_ENUM_OPTIONS, [
+            'enum-range' => true,
+            'value' => true,
+        ]);
+
+        $enumArgs = [$valueAttr, $rangeAttrValue];
+        if (count($options) > 0) {
+            $enumArgs[] = $options;
+        }
+
+        return $enumArgs;
     }
 }

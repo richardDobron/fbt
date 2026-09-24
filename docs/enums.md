@@ -54,14 +54,44 @@ All the above examples [extract](collection.md) the same 4 separate strings for 
 {
   "phrases": [
     {
-      "hashToText": {
-        "b463748f978f242787f5f225a7762aeb": "Buy a new car!",
-        "1255ecb7aa0a34b8755d4f068c9b9c41": "Buy a new house!",
-        "7c01d5d74f6e3c8eda0b166a366b937e": "Buy a new boat!",
-        "7a7776e292838b6fe8c4a7dfd58117cd": "Buy a new houseboat!"
+      "hashToLeaf": {
+        "tGN0j5ePJCeH9fIlp3Yq6w==": {"text": "Buy a new car!", "desc": "buy prompt"},
+        "ElXst6oKNLh1XU8GjJucQQ==": {"text": "Buy a new house!", "desc": "buy prompt"},
+        "fAHV109uPI7aCxZqNmuTfg==": {"text": "Buy a new boat!", "desc": "buy prompt"},
+        "end24pKDi2/oxKff1YEXzQ==": {"text": "Buy a new houseboat!", "desc": "buy prompt"}
       },
-      ...,
-      "desc": "buy prompt",
-      ...
-    },
+      "project": "website app",
+      "jsfbt": {
+        "t": {
+          "car": {"desc": "buy prompt", "text": "Buy a new car!"},
+          "house": {"desc": "buy prompt", "text": "Buy a new house!"},
+          "boat": {"desc": "buy prompt", "text": "Buy a new boat!"},
+          "houseboat": {"desc": "buy prompt", "text": "Buy a new houseboat!"}
+        },
+        "m": [null]
+      }
+    }
+  ]
+}
 ```
+
+### Reusing the same enum value
+
+When multiple enums depend on the same value, give them the same `key`, so that only the
+consistent combinations of their values are generated for translation:
+
+```
+<fbt desc="buy prompt">
+  Buy a new <fbt:enum enum-range="<?=json_encode($range1)?>" value="<?=$value?>" key="item" />
+  or a used <fbt:enum enum-range="<?=json_encode($range2)?>" value="<?=$value?>" key="item" />!
+</fbt>
+
+fbt(
+  'Buy a new ' . fbt::enum($value, $range1, ['key' => 'item']) .
+  ' or a used ' . fbt::enum($value, $range2, ['key' => 'item']) . '!',
+  'buy prompt'
+);
+```
+
+*Facebook's fbt detects that the same variable is used. In PHP, the source code of values isn't
+available, so the `key` option has to be used instead.*

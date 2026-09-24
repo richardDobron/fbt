@@ -88,9 +88,7 @@ namespace fbt {
     use dobron\DomForge\DomForge;
     use dobron\DomForge\Node;
     use fbt\Exceptions\FbtException;
-    use fbt\Runtime\fbtNamespace;
     use fbt\Runtime\Shared\IntlList;
-    use fbt\Transform\FbtTransform\FbtConstants;
 
     DomForge::registerSelfClosingTags([
         'fbt:enum',
@@ -113,32 +111,6 @@ namespace fbt {
 
             throw new FbtException($message ?? 'Invariant Violation');
         }
-    }
-
-    /**
-     * @param string|array $text
-     * @param string $desc
-     * @param array $options
-     * @return Runtime\fbtNamespace
-     *
-     * @throws Exceptions\FbtParserException
-     */
-    function fbt($text, string $desc, array $options = []): Runtime\fbtNamespace
-    {
-        return (new fbtNamespace($text, $desc, $options, FbtConstants::MODULE_NAME['FBT']));
-    }
-
-    /**
-     * @param string|array $text
-     * @param string $desc
-     * @param array $options
-     * @return Runtime\fbtNamespace
-     *
-     * @throws Exceptions\FbtParserException
-     */
-    function fbs($text, string $desc, array $options = []): Runtime\fbtNamespace
-    {
-        return (new fbtNamespace($text, $desc, $options, FbtConstants::MODULE_NAME['FBS']));
     }
 
     function checkParentTags(Node $node, array $tags): bool

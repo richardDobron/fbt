@@ -45,13 +45,13 @@ is a good reference on the "schema" used for the translations.
 
 ```json
 {
-  "phrases": [
-    "hashToText": {
-      <text_hash>: <text>,
+  "phrases": [{
+    "hashToLeaf": {
+      <text_hash>: {"text": <text>, "desc": <description>},
       ...
     },
-    "jsfbt": string|{t:<table>, m:<metadata>}
-  ],
+    "jsfbt": {"t": <leaf or table>, "m": <metadata>}
+  }],
   ...
   "translationGroups": [{
     "fb-locale": "xx_XX",
@@ -73,7 +73,9 @@ is a good reference on the "schema" used for the translations.
 
 The `<text_hash>` and `<translation_hash>` correspond in the above example.
 That is `translations[<hash>]` is the translation entry for
-`phrases.hashToText[<hash>]`.
+`phrases.hashToLeaf[<hash>]`.
+
+Translations of strings with inner strings (e.g. `{=Learn more}`) keep these tokens as they are.
 
 Here `tokens`, `types` and `variations` are all associative arrays.  That is, in
 the above example, `types[i]` represents the variation type (or mask) of

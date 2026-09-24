@@ -2,427 +2,452 @@
 
 namespace fbt\Transform\FbtTransform\Processors;
 
-use fbt\Exceptions\FbtParserException;
-use fbt\Runtime\fbtNode;
-use fbt\Runtime\Shared\fbt;
-use fbt\Transform\FbtTransform\FbtConstants;
-use fbt\Transform\FbtTransform\FbtUtils;
-use fbt\Transform\FbtTransform\JSFbtBuilder;
+use dobron\DomForge\Node;
 
+use function fbt\invariant;
+
+use fbt\Runtime\Shared\fbs;
+use fbt\Runtime\Shared\fbt;
+use fbt\Transform\FbtRuntime\FbtRuntimeTransform;
+use fbt\Transform\FbtTransform\FbtConstants;
+use fbt\Transform\FbtTransform\FbtNodes\FbtElementNode;
+use fbt\Transform\FbtTransform\FbtNodes\FbtImplicitParamNode;
+use fbt\Transform\FbtTransform\FbtNodes\FbtNode;
+use fbt\Transform\FbtTransform\FbtNodes\FbtNodeUtil;
+use fbt\Transform\FbtTransform\FbtNodes\FbtParamNode;
+use fbt\Transform\FbtTransform\FbtNodes\StringVariationArg;
+use fbt\Transform\FbtTransform\FbtNodes\StringVariationArgsMap;
+use fbt\Transform\FbtTransform\JSFbtBuilder;
+use fbt\Transform\FbtTransform\Utils\AddLeafToTree;
+
+/**
+ * This class provides utility methods to process the standard fbt function call
+ * (i.e. `fbt(...)`)
+ *
+ * js~php diff: instead of generating the code of the `fbt::_()` runtime call,
+ * the runtime call is executed right away.
+ *
+ * A meta-phrase is an array of the form:
+ *   [
+ *     'compactStringVariations' => ['array' => StringVariationArg[], 'indexMap' => int[]],
+ *     'fbtNode' => FbtElementNode|FbtImplicitParamNode,
+ *     'phrase' => array,
+ *     'parentIndex' => int|null,
+ *   ]
+ */
 class FbtFunctionCallProcessor
 {
-    /* @var string */
-    protected $moduleName;
-    /* @var string | array */
-    protected $text;
-    /* @var string */
-    protected $desc;
-
-    /* @var array */
-    protected $defaultFbtOptions = [];
-    /* @var array */
-    protected $options = [];
-    /* @var array */
-    private $paramSet = [];
-    /* @var array */
-    protected $variations = [];
-    /* @var bool */
-    private $hasTable = false;
-    /* @var array */
-    private $usedEnums = [];
-    /* @var array */
-    protected $runtimeArgs = [];
-
-    public const VARIATION = [
-        'number' => 0,
-        'gender' => 1,
-    ];
+    /** @var array */
+    private $defaultFbtOptions;
+    /** @var array */
+    private $validFbtExtraOptions;
+    /** @var string */
+    private $moduleName;
+    /** @var Node|null */
+    private $node;
+    /**
+     * [contents (list of strings or DOM nodes), description, options]
+     * @var array
+     */
+    private $callArgs;
+    /** @var array */
+    private $pluginOptions;
 
     /**
-     * @return void
-     * @throws \fbt\Exceptions\FbtParserException
+     * @param string $moduleName
+     * @param Node|null $node - the <fbt> DOM node
+     * @param array $callArgs - [contents (list of strings or DOM nodes), description, options]
+     * @param array $defaultFbtOptions - e.g. the file-level docblock options
+     * @param array $validFbtExtraOptions
+     * @param array $pluginOptions
      */
-    protected function _getOptions(array $options): void
-    {
-        $this->options = $options;
-
-        foreach (array_keys(FbtConstants::FBT_BOOLEAN_OPTIONS) as $key) {
-            if (isset($this->options[$key])) {
-                $this->options[$key] = FbtUtils::getOptionBooleanValue($this->options, $key);
-            }
-        }
-    }
-
-    public static function callFbt(string $name, array $args): array
-    {
-        return call_user_func_array([fbt::class, '_' . $name], $args);
-    }
-
-    /**
-     * @param fbtNode[] $texts
-     *
-     * @return void
-     * @throws \fbt\Exceptions\FbtParserException
-     */
-    protected function traverse(array $texts): void
-    {
-        $moduleName = $this->moduleName;
-
-        foreach ($texts as $construct) {
-            $node = $construct->node;
-            $constructName = $construct->name;
-            $args = $construct->args;
-            @[$arg0, $arg1, $arg2] = $args;
-
-            if ($constructName === 'param' || $constructName === 'sameParam') {
-                // Collect params only if it's original one (not "sameParam").
-                // Variation case. Replace:
-                // ['number' => true]     -> ['type' => "number", 'token' => <param-name>]
-                // ['gender' => <gender>] -> ['type' => "gender", 'token' => <param-name>]
-                if (count($construct->args) === 3) {
-                    $paramName = $arg0;
-                    // TODO(T69419475): detect variation type by property name instead
-                    // of expecting it to be the first object property
-                    $key = array_keys($arg2)[0];
-                    $variationInfo = $arg2[$key];
-                    $variationName = $key ?? $arg2[$key];
-                    $this->variations[$paramName] = [
-                        'type' => $variationName,
-                        'token' => $paramName,
-                    ];
-                    $variationValues = [self::VARIATION[$variationName]];
-                    $variationValue = FbtUtils::getVariationValue(
-                        $this->moduleName,
-                        $variationName,
-                        $variationInfo,
-                        $node
-                    );
-                    if ($variationValue !== null) {
-                        $variationValues[] = $variationValue;
-                    }
-
-                    $args[2] = $variationValues;
-                }
-
-                if ($constructName === 'param') {
-                    $this->runtimeArgs[] = self::callFbt('param', $args);
-
-                    FbtUtils::setUniqueToken($node, $this->moduleName, $arg0, $this->paramSet);
-                } elseif (! isset($this->paramSet[$arg0])) {
-                    throw FbtUtils::errorAt($node, 'Expected ' . $this->moduleName . ' sameParam construct with name="' . $arg0 . '" to refer to a `name` or `param` construct using the same token name');
-                }
-
-                if (count($construct->args) === 3) {
-                    continue;
-                }
-
-                $construct->value = '{' . $arg0 . '}';
-            } elseif ($constructName === 'enum') {
-                $this->hasTable = true; // `enum` is a reserved word, so it should be quoted.
-
-                $rawValue = $arg0;
-                $usedVal = $this->usedEnums[$rawValue] ?? null;
-
-                if (! $usedVal) {
-                    $this->usedEnums[$rawValue] = true;
-                    $this->runtimeArgs[] = self::callFbt('enum', $construct->args);
-                }
-            } elseif ($constructName === 'plural') {
-                $this->hasTable = true;
-                $count = $arg1;
-                $options = FbtUtils::collectOptions($this->moduleName, $arg2, FbtConstants::validPluralOptions());
-                $pluralArgs = [$count];
-
-                if (! empty($options['showCount']) && $options['showCount'] !== 'no') {
-                    $name = $options['name'] ?? FbtConstants::PLURAL_PARAM_TOKEN;
-                    FbtUtils::setUniqueToken($node, $this->moduleName, $name, $this->paramSet);
-                    $pluralArgs[] = $name;
-
-                    if (! empty($options['value'])) {
-                        $pluralArgs[] = $options['value'];
-                    }
-                }
-
-                $this->runtimeArgs[] = self::callFbt('plural', $pluralArgs);
-            } elseif ($constructName === 'pronoun') {
-                // Usage: fbt::pronoun(usage, gender [, options])
-                // - enum string usage
-                //    e.g. 'object', 'possessive', 'reflexive', 'subject'
-                // - enum int gender
-                //    e.g. Gender::GENDER_CONST['MALE_SINGULAR'], FEMALE_SINGULAR, etc.
-
-                $this->hasTable = true;
-
-                if (count($args) < 2 || 3 < count($args)) {
-                    throw FbtUtils::errorAt($node, "Expected '(usage, gender [, options])' arguments to $moduleName::pronoun");
-                }
-
-                $usageExpr = $arg0;
-
-                $validPronounUsages = FbtConstants::VALID_PRONOUN_USAGES;
-                if (! isset($validPronounUsages[$usageExpr])) {
-                    throw FbtUtils::errorAt($node, "First argument to " . $this->moduleName . ":pronoun must be one of [" . implode(', ', array_keys($validPronounUsages)) . '], got ' . $usageExpr);
-                }
-
-                $numericUsageExpr = FbtConstants::VALID_PRONOUN_USAGES[$usageExpr];
-                $genderExpr = $arg1;
-                $pronounArgs = [$numericUsageExpr, $genderExpr];
-                $optionsExpr = $arg2;
-                $options = FbtUtils::collectOptions($this->moduleName, $optionsExpr, FbtConstants::VALID_PRONOUN_OPTIONS);
-
-                if (FbtUtils::getOptionBooleanValue($options, 'human', $node)) {
-                    $pronounArgs[] = [
-                        'human' => 1,
-                    ];
-                }
-
-                $this->runtimeArgs[] = self::callFbt('pronoun', $pronounArgs);
-            } elseif ($constructName === 'name') {
-                if (count($args) < 3) {
-                    throw FbtUtils::errorAt($node, "Missing arguments. Must have three arguments: label, value, gender");
-                }
-
-                $paramName = $arg0;
-                $this->variations[$paramName] = [
-                    'type' => 'gender',
-                    'token' => $paramName,
-                ];
-                $this->runtimeArgs[] = self::callFbt('name', $args);
-            } else {
-                throw FbtUtils::errorAt($node, "Unknown $moduleName method $constructName");
-            }
-        }
-    }
-
-    /**
-     * @return void
-     * @throws \fbt\Exceptions\FbtParserException
-     */
-    protected function _collectFbtCalls(): void
-    {
-        if (! empty($this->options['subject'])) {
-            $this->hasTable = true;
-        }
-
-        if (is_array($this->text)) {
-            $this->traverse(array_filter($this->text, function ($text) {
-                return ($text instanceof fbtNode);
-            }));
-        }
-
-        if (! empty($this->options['subject'])) {
-            array_unshift($this->runtimeArgs, self::callFbt('subject', [$this->options['subject']]));
-        }
-    }
-
-    protected function _isTableNeeded(): bool
-    {
-        return count($this->variations) > 0 || $this->hasTable;
-    }
-
-    protected function _convertToStringArrayNodeIfNeeded($textNode): array
-    {
-        if (is_string($textNode)) {
-            return [$textNode];
-        }
-
-        return $textNode;
-    }
-
-    /**
-     * Extracts texts that contains variations or enums, concatenating
-     * literal parts.
-     * Example:
-     *
-     * [
-     *   'Hello, ', fbt::param('user', user, ['gender' => 'male']), '! ',
-     *   'Your score is ', fbt::param('score', $score), '!',
-     * ]
-     * =>
-     *   ["Hello, ", ['type' => 'gender', 'token' => 'user'], "! Your score is {score}!"]
-     *
-     * @throws \fbt\Exceptions\FbtParserException
-     */
-    private function _extractTableTextsFromStringArray(array $node, array $variations): array
-    {
-        return array_reduce($node, function (array $results, $element) use ($variations) {
-            return array_merge($results, $this->_extractTableTextsFromStringArrayItem($element, $variations));
-        }, []);
-    }
-
-    /**
-     * Extracts texts from each fbt text array item:
-     *
-     *   "Hello, " . fbt::param('user', $user, ['gender' => 'male']) . "! " .
-     *   "Your score is " . fbt::param('score', $score) . "!"
-     * =>
-     *   ["Hello, ", ['type' => 'gender', 'token' => 'user'], "! Your score is {score}!"]
-     *
-     * @throws \fbt\Exceptions\FbtParserException
-     */
-    private function _extractTableTextsFromStringArrayItem($node, array $variations, array $texts = []): array
-    {
-        if (is_string($node)) {
-            // If we already collected a literal part previously, and
-            // current part is a literal as well, just concatenate them.
-            $previousText = $texts[count($texts) - 1] ?? null;
-
-            if (is_string($previousText)) {
-                $texts[count($texts) - 1] = FbtUtils::normalizeSpaces($previousText . $node);
-            } else {
-                $texts[] = $node;
-            }
-
-            return $texts;
-        } elseif ($node instanceof fbtNode) {
-            $args = $node->args;
-            @[$arg0, $arg1, $arg2] = $args;
-
-            switch ($node->name) {
-                case 'param':
-                case 'sameParam':
-                    $texts[] = $variations[$arg0] ?? '{' . $arg0 . '}';
-
-                    break;
-                case 'enum':
-                    $texts[] = [
-                        'type' => 'enum',
-                        'range' => $args[1],
-                        'value' => $args[0],
-                    ];
-
-                    break;
-                case 'plural':
-                    $singular = $arg0;
-                    $opts = FbtUtils::collectOptions($this->moduleName, $arg2, FbtConstants::validPluralOptions());
-                    $defaultToken = isset($opts['showCount']) && $opts['showCount'] !== 'no' ? FbtConstants::PLURAL_PARAM_TOKEN : null;
-
-                    if (! empty($opts['showCount']) && $opts['showCount'] === 'ifMany' && empty($opts['many'])) {
-                        throw new FbtParserException(
-                            "The 'many' attribute must be set explicitly if showing count only "
-                            . "on 'ifMany', since the singular form presumably starts with an article"
-                        );
-                    }
-
-                    $data = array_merge($opts, [
-                        'type' => 'plural',
-                        // Set default value if `opts[optionName]` isn't defined
-                        'showCount' => $opts['showCount'] ?? 'no',
-                        'name' => $opts['name'] ?? $defaultToken,
-                        'singular' => $singular,
-                        'value' => $opts['value'] ?? $node->args[0],
-                        'many' => $opts['many'] ?? $singular . 's',
-                    ]);
-
-                    if (! empty($opts['showCount']) && $opts['showCount'] !== 'no') {
-                        if ($opts['showCount'] === 'yes') {
-                            $data['singular'] = '1 ' . $data['singular'];
-                        }
-
-                        $data['many'] = '{' . $data['name'] . '} ' . $data['many'];
-                    }
-
-                    $texts[] = $data;
-
-                    break;
-                case 'pronoun':
-                    // Usage: fbt::pronoun(usage, gender [, options])
-                    $options = FbtUtils::collectOptions($this->moduleName, $arg2, FbtConstants::VALID_PRONOUN_OPTIONS);
-
-                    foreach (array_keys($options) as $key) {
-                        $options[$key] = FbtUtils::getOptionBooleanValue($options, $key, $node->node);
-                    }
-
-                    $pronounData = array_merge($options, [
-                        'type' => 'pronoun',
-                        'usage' => $arg0,
-                        'gender' => $arg1,
-                    ]);
-
-                    $texts[] = $pronounData;
-
-                    break;
-                case 'name':
-                    $texts[] = $variations[$arg0];
-
-                    break;
-            }
-        }
-
-        return $texts;
+    public function __construct(
+        string $moduleName,
+        ?Node $node,
+        array $callArgs,
+        array $defaultFbtOptions = [],
+        array $validFbtExtraOptions = [],
+        array $pluginOptions = []
+    ) {
+        $this->moduleName = $moduleName;
+        $this->node = $node;
+        $this->callArgs = $callArgs;
+        $this->defaultFbtOptions = $defaultFbtOptions;
+        $this->validFbtExtraOptions = $validFbtExtraOptions;
+        $this->pluginOptions = $pluginOptions;
     }
 
     /**
      * @throws \fbt\Exceptions\FbtParserException
      */
-    protected function _getTexts(array $variations, bool $isTable): array
+    private function _assertHasEnoughArguments(): self
     {
-        $options = $this->options;
-
-        $arrayTextNode = $this->_convertToStringArrayNodeIfNeeded($this->text);
-
-        if ($isTable) {
-            $texts = $this->_normalizeTableTexts($this->_extractTableTextsFromStringArray($arrayTextNode, $variations));
-        } else {
-            $unnormalizedText = implode('', $arrayTextNode);
-            $texts = [trim(FbtUtils::normalizeSpaces($unnormalizedText, $options))];
+        if (count($this->callArgs) < 2) {
+            throw FbtNodeUtil::errorAt(
+                $this->node,
+                "Expected {$this->moduleName} calls to have at least two arguments. " .
+                'Only ' . count($this->callArgs) . ' was given.'
+            );
         }
 
-        if (isset($options['subject'])) {
-            array_unshift($texts, [
-                'type' => 'subject',
-            ]);
-        }
-
-        return $texts;
+        return $this;
     }
 
     /**
-     * Normalizes first and last elements in the
-     * table texts by trimming them left and right accordingly.
-     * [" Hello, ", {enum}, " world! "] -> ["Hello, ", {enum}, " world!"]
+     * @return mixed - result of the fbt runtime call
+     * @throws \fbt\Exceptions\FbtException
      */
-    protected function _normalizeTableTexts(array $texts): array
-    {
-        $firstText = $texts[0];
+    private function _createFbtRuntimeCallForMetaPhrase(
+        array $metaPhrases,
+        int $metaPhraseIndex,
+        array $stringVariationRuntimeArgs
+    ) {
+        $metaPhrase = $metaPhrases[$metaPhraseIndex];
+        /** @var FbtElementNode|FbtImplicitParamNode $fbtNode */
+        $fbtNode = $metaPhrase['fbtNode'];
 
-        if (is_string($firstText)) {
-            $texts[0] = ltrim($firstText);
-        }
+        $runtimeInput = FbtRuntimeTransform::transform($metaPhrase['phrase'], $fbtNode->getExtraOptions());
+        $fbtRuntimeArgs = $this->_createFbtRuntimeArgumentsForMetaPhrase(
+            $metaPhrases,
+            $metaPhraseIndex,
+            $stringVariationRuntimeArgs
+        );
 
-        $lastText = $texts[count($texts) - 1] ?? null;
+        $runtime = $this->moduleName === FbtConstants::MODULE_NAME['FBS'] ? new fbs() : new fbt();
 
-        if (is_string($lastText)) {
-            $texts[count($texts) - 1] = rtrim($lastText);
-        }
-
-        return $texts;
+        return $runtime->_(
+            $runtimeInput['table'],
+            count($fbtRuntimeArgs) > 0 ? $fbtRuntimeArgs : null,
+            $runtimeInput['options'],
+            // js~php diff: whether the result can be inlined
+            (bool)$this->_getFbtElement($metaPhrases)->options['reporting']
+        );
     }
 
-    protected function _getDescription(): string
+    /**
+     * @return mixed - result of the fbt runtime call
+     * @throws \fbt\Exceptions\FbtException
+     */
+    private function _createRootFbtRuntimeCall(array $metaPhrases)
     {
-        return trim(FbtUtils::normalizeSpaces($this->desc, $this->options));
+        $stringVariationRuntimeArgs = $this->_createRuntimeArgsFromStringVariantNodes($metaPhrases[0]);
+
+        return $this->_createFbtRuntimeCallForMetaPhrase(
+            $metaPhrases,
+            0,
+            $stringVariationRuntimeArgs
+        );
     }
 
     /**
      * @throws \fbt\Exceptions\FbtException
      */
-    protected function _getPhrase(array $texts, string $desc, bool $isTable): array
+    private function _getFbtElement(array $metaPhrases): FbtElementNode
     {
-        $phraseType = $isTable ? FbtConstants::FBT_TYPE['TABLE'] : FbtConstants::FBT_TYPE['TEXT'];
-        $jsfbt = JSFbtBuilder::build($phraseType, $texts);
-
-        return array_merge(
-            [
-                'desc' => $desc,
-            ],
-            // Merge with fbt callsite options
-            $this->defaultFbtOptions,
-            $this->options,
-            [
-                'type' => $phraseType,
-                'jsfbt' => $jsfbt,
-            ]
+        $fbtElement = $metaPhrases[0]['fbtNode'];
+        invariant(
+            $fbtElement instanceof FbtElementNode,
+            'Expected a FbtElementNode for top level string but received: %s',
+            get_class($fbtElement)
         );
+
+        return $fbtElement;
+    }
+
+    /**
+     * Consolidate a list of string variation arguments under the following conditions:
+     *
+     * Enum variation arguments are consolidated to avoid creating duplicates of string variations
+     * (from a candidate values POV)
+     *
+     * Other types of variation arguments are accepted as-is.
+     *
+     * @param StringVariationArg[] $args
+     *
+     * @return array{array: StringVariationArg[], indexMap: int[]}
+     */
+    private function _compactStringVariationArgs(array $args): array
+    {
+        $indexMap = [];
+        $array = [];
+        foreach (array_values($args) as $i => $arg) {
+            if ($arg->isCollapsible) {
+                continue;
+            }
+            $indexMap[] = $i;
+            $array[] = $arg;
+        }
+
+        return [
+            'array' => $array,
+            'indexMap' => $indexMap,
+        ];
+    }
+
+    /**
+     * @param FbtNode $fbtNode
+     * @param FbtNode[] $list
+     *
+     * @throws \fbt\Exceptions\FbtException
+     */
+    private function _getPhraseParentIndex(FbtNode $fbtNode, array $list): ?int
+    {
+        if ($fbtNode->parent === null) {
+            return null;
+        }
+
+        $parentIndex = array_search($fbtNode->parent, $list, true);
+        invariant(
+            $parentIndex !== false,
+            'Unable to find parent fbt node: node=%s',
+            get_class($fbtNode)
+        );
+
+        return $parentIndex;
+    }
+
+    /**
+     * Generates a list of meta-phrases from a given FbtElement node
+     *
+     * @throws \fbt\Exceptions\FbtParserException
+     */
+    private function _metaPhrases(FbtElementNode $fbtElement): array
+    {
+        $stringVariationArgs = $fbtElement->getArgsForStringVariationCalc();
+        $jsfbtBuilder = new JSFbtBuilder(
+            $stringVariationArgs,
+            ! empty($this->pluginOptions['reactNativeMode'])
+        );
+        $argsCombinations = $jsfbtBuilder->getStringVariationCombinations();
+        $compactStringVariations = $this->_compactStringVariationArgs($argsCombinations[0] ?? []);
+        $jsfbtMetadata = $jsfbtBuilder->buildMetadata($compactStringVariations['array']);
+        $sharedPhraseOptions = $this->_getSharedPhraseOptions($fbtElement);
+
+        $list = array_merge([$fbtElement], $fbtElement->getImplicitParamNodes());
+
+        return array_map(function (FbtNode $fbtNode) use (
+            $list,
+            $argsCombinations,
+            $compactStringVariations,
+            $jsfbtMetadata,
+            $sharedPhraseOptions
+        ) {
+            try {
+                $phrase = $sharedPhraseOptions + [
+                    'jsfbt' => [
+                        // the order of JSFBT props matter for unit tests
+                        't' => [],
+                        'm' => $jsfbtMetadata,
+                    ],
+                ];
+                $svArgsMapList = [];
+
+                foreach (count($argsCombinations) ? $argsCombinations : [[]] as $argsCombination) {
+                    // collect text/description pairs
+                    $svArgsMap = new StringVariationArgsMap($argsCombination);
+                    $argValues = array_map(function (int $originIndex) use ($argsCombination) {
+                        $value = $argsCombination[$originIndex]->value ?? null;
+                        invariant($value !== null, 'Expected string variation value');
+
+                        return $value;
+                    }, $compactStringVariations['indexMap']);
+
+                    $leaf = [
+                        'desc' => $fbtNode->getDescription($svArgsMap),
+                        'text' => $fbtNode->getText($svArgsMap),
+                    ];
+
+                    $tokenAliases = $fbtNode->getTokenAliases($svArgsMap);
+                    if ($tokenAliases !== null) {
+                        $leaf['tokenAliases'] = $tokenAliases;
+                    }
+
+                    if ($fbtNode instanceof FbtElementNode) {
+                        // gather list of svArgsMap for all args combination for later sanity checks
+                        $svArgsMapList[] = $svArgsMap;
+                    } elseif (($this->pluginOptions['generateOuterTokenName'] ?? false) === true) {
+                        $leaf['outerTokenName'] = $fbtNode->getTokenName($svArgsMap);
+                    }
+
+                    if (count($argValues)) {
+                        AddLeafToTree::addLeafToTree($phrase['jsfbt']['t'], $argValues, $leaf);
+                    } else {
+                        // jsfbt only contains one leaf
+                        $phrase['jsfbt']['t'] = $leaf;
+                    }
+                }
+
+                if ($fbtNode instanceof FbtElementNode) {
+                    $fbtNode->assertNoOverallTokenNameCollision($svArgsMapList);
+                }
+
+                return [
+                    'compactStringVariations' => $compactStringVariations,
+                    'fbtNode' => $fbtNode,
+                    'parentIndex' => $this->_getPhraseParentIndex($fbtNode, $list),
+                    'phrase' => $phrase,
+                ];
+            } catch (\Throwable $error) {
+                throw FbtNodeUtil::errorAt($fbtNode->node, $error);
+            }
+        }, $list);
+    }
+
+    /**
+     * Process current `fbt()` callsite to generate:
+     * - the result of the `fbt::_()` runtime call
+     * - a list of meta-phrases describing the collected text strings from this fbt() callsite
+     *
+     * @return array{result: mixed, metaPhrases: array}
+     * @throws \fbt\Exceptions\FbtParserException
+     * @throws \fbt\Exceptions\FbtException
+     */
+    public function convertToFbtRuntimeCall(): array
+    {
+        $fbtElement = $this->_convertToFbtNode();
+        $metaPhrases = $this->_metaPhrases($fbtElement);
+        $result = $this->_createRootFbtRuntimeCall($metaPhrases);
+
+        return [
+            'result' => $result,
+            'metaPhrases' => $metaPhrases,
+        ];
+    }
+
+    /**
+     * Converts current fbt() call to an FbtNode equivalent
+     *
+     * @throws \fbt\Exceptions\FbtParserException
+     */
+    private function _convertToFbtNode(): FbtElementNode
+    {
+        $this->_assertHasEnoughArguments();
+
+        return FbtElementNode::fromNode(
+            $this->moduleName,
+            $this->node,
+            $this->callArgs,
+            $this->validFbtExtraOptions
+        );
+    }
+
+    /**
+     * @throws \fbt\Exceptions\FbtException
+     */
+    private function _createFbtRuntimeArgumentsForMetaPhrase(
+        array $metaPhrases,
+        int $metaPhraseIndex,
+        array $stringVariationRuntimeArgs
+    ): array {
+        $metaPhrase = $metaPhrases[$metaPhraseIndex];
+
+        // Runtime arguments of a string fall into 3 categories:
+        // 1. Each string variation argument must correspond to a runtime argument
+        // 2. Non string variation arguments(i.e. those fbt::param() calls that do not
+        // have gender or number option) should also be counted as runtime arguments.
+        // 3. Each inner string of current string should be associated with a
+        // runtime argument
+        return array_merge(
+            $stringVariationRuntimeArgs,
+            $this->_createRuntimeArgsFromNonStringVariantNodes($metaPhrase['fbtNode']),
+            $this->_createRuntimeArgsFromImplicitParamNodes(
+                $metaPhrases,
+                $metaPhraseIndex,
+                $stringVariationRuntimeArgs
+            )
+        );
+    }
+
+    private function _createRuntimeArgsFromStringVariantNodes(array $metaPhrase): array
+    {
+        $fbtRuntimeArgs = [];
+        foreach ($metaPhrase['compactStringVariations']['array'] as $stringVariation) {
+            $fbtRuntimeArg = $stringVariation->fbtNode->getFbtRuntimeArg();
+            if ($fbtRuntimeArg) {
+                $fbtRuntimeArgs[] = $fbtRuntimeArg;
+            }
+        }
+
+        return $fbtRuntimeArgs;
+    }
+
+    /**
+     * @param FbtImplicitParamNode|FbtElementNode $fbtNode
+     */
+    private function _createRuntimeArgsFromNonStringVariantNodes(FbtNode $fbtNode): array
+    {
+        $fbtRuntimeArgs = [];
+        foreach ($fbtNode->children as $child) {
+            if (
+                $child instanceof FbtParamNode &&
+                $child->options['gender'] === null &&
+                $child->options['number'] === null
+            ) {
+                $fbtRuntimeArgs[] = $child->getFbtRuntimeArg();
+            }
+        }
+
+        return $fbtRuntimeArgs;
+    }
+
+    /**
+     * @throws \fbt\Exceptions\FbtException
+     */
+    private function _createRuntimeArgsFromImplicitParamNodes(
+        array $metaPhrases,
+        int $metaPhraseIndex,
+        array $runtimeArgsFromStringVariationNodes
+    ): array {
+        $fbtRuntimeArgs = [];
+        foreach ($metaPhrases as $innerMetaPhraseIndex => $innerMetaPhrase) {
+            if ($innerMetaPhrase['parentIndex'] !== $metaPhraseIndex) {
+                continue;
+            }
+            $innerMetaPhraseFbtNode = $innerMetaPhrase['fbtNode'];
+            invariant(
+                $innerMetaPhraseFbtNode instanceof FbtImplicitParamNode,
+                'Expected the inner meta phrase to be associated with a FbtImplicitParamNode instead of %s',
+                get_class($innerMetaPhraseFbtNode)
+            );
+
+            $innerResult = $this->_createFbtRuntimeCallForMetaPhrase(
+                $metaPhrases,
+                $innerMetaPhraseIndex,
+                $runtimeArgsFromStringVariationNodes
+            );
+
+            $fbtRuntimeArgs[] = $innerMetaPhraseFbtNode->createFbtRuntimeArgCallExpression([
+                $innerMetaPhraseFbtNode->getOuterTokenAlias(),
+                // js~php diff: the equivalent of cloning the JSX element with the inner result as children
+                $innerMetaPhraseFbtNode->wrapContents((string)$innerResult),
+            ]);
+        }
+
+        return $fbtRuntimeArgs;
+    }
+
+    /**
+     * Combine options of the fbt element level with default options
+     * @return array only options that are considered "defined".
+     * I.e. Options whose value is `false` or nullish will be skipped.
+     */
+    private function _getSharedPhraseOptions(FbtElementNode $fbtElement): array
+    {
+        $fbtElementOptions = $fbtElement->options;
+        $defaultFbtOptions = $this->defaultFbtOptions;
+
+        $ret = [
+            'author' => ($fbtElementOptions['author'] ?? $defaultFbtOptions['author'] ?? null) ?: null,
+            'common' => ($fbtElementOptions['common'] ?? $defaultFbtOptions['common'] ?? null) ?: null,
+            'doNotExtract' => ($fbtElementOptions['doNotExtract'] ?? $defaultFbtOptions['doNotExtract'] ?? null) ?: null,
+            'preserveWhitespace' => ($fbtElementOptions['preserveWhitespace'] ?? $defaultFbtOptions['preserveWhitespace'] ?? null) ?: null,
+            // js~php diff: the subject is a runtime value, so it's not a part of the phrase
+            'project' => $fbtElementOptions['project'] ?: (string)($defaultFbtOptions['project'] ?? ''),
+        ];
+
+        // delete nullish options
+        return array_filter($ret, function ($value) {
+            return $value !== null;
+        });
     }
 }

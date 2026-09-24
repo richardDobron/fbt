@@ -5,7 +5,9 @@ namespace fbt\Runtime\Shared;
 use fbt\FbtConfig;
 use fbt\Lib\IntlViewerContext;
 use fbt\Lib\IntlViewerContextInterface;
+use fbt\Runtime\FbtTranslations;
 use fbt\Transform\FbtTransform\FbtTransform;
+use fbt\Util\JsJson;
 
 class FbtHooks
 {
@@ -23,8 +25,6 @@ class FbtHooks
     public static $sourceHashes = [];
     /* @var array */
     public static $storedHashes = [];
-    /* @var array<string, int|null> index of the stored phrase of each hash */
-    private static $storedPhraseIds = [];
     /* @var array */
     public static $impression = [];
 
@@ -35,6 +35,10 @@ class FbtHooks
      */
     public static function logImpression(string $hash): void
     {
+        if (isset(self::$actions[__FUNCTION__])) {
+            self::$actions[__FUNCTION__](...func_get_args());
+        }
+
         if (! FbtConfig::get('logger')) {
             return;
         }
@@ -78,6 +82,96 @@ class FbtHooks
         }
 
         return $viewerContext ?? new IntlViewerContext();
+    }
+
+    /**
+     * @param array{hash: string|null, translation: string} $context
+     */
+    public static function getErrorListener(array $context): ?IFbtErrorListener
+    {
+        if (isset(self::$actions['errorListener'])) {
+            return self::$actions['errorListener'](...func_get_args());
+        }
+
+        return null;
+    }
+
+    /**
+     * @param array{
+     *   contents: array,
+     *   errorListener: IFbtErrorListener|null,
+     *   extraOptions: array|null,
+     *   patternString: string,
+     *   patternHash: string|null,
+     *   reporting: bool
+     * } $input
+     *
+     * @return mixed
+     */
+    public static function getFbtResult(array $input)
+    {
+        if (isset(self::$actions[__FUNCTION__])) {
+            return self::$actions[__FUNCTION__](...func_get_args());
+        }
+
+        $inlineMode = self::inlineMode();
+
+        if ($input['reporting'] && $inlineMode && $inlineMode !== 'NO_INLINE') {
+            return new InlineFbtResult(
+                $input['contents'],
+                $inlineMode,
+                $input['patternString'],
+                $input['patternHash'],
+                $input['errorListener']
+            );
+        }
+
+        return FbtResult::get($input);
+    }
+
+    /**
+     * @param array{
+     *   contents: array,
+     *   errorListener: IFbtErrorListener|null,
+     *   extraOptions: array|null,
+     *   patternString: string,
+     *   patternHash: string|null,
+     *   reporting: bool
+     * } $input
+     *
+     * @return mixed
+     */
+    public static function getFbsResult(array $input)
+    {
+        if (isset(self::$actions[__FUNCTION__])) {
+            return self::$actions[__FUNCTION__](...func_get_args());
+        }
+
+        return FbtPureStringResult::get($input);
+    }
+
+    /**
+     * @param array{table: string|array, args: array|null, options: array} $input
+     *
+     * @return array{table: string|array, args: array|null}
+     * @throws \fbt\Exceptions\FbtInvalidConfigurationException
+     */
+    public static function getTranslatedInput(array $input): array
+    {
+        if (isset(self::$actions[__FUNCTION__])) {
+            return self::$actions[__FUNCTION__](...func_get_args()) ?? $input;
+        }
+
+        $translatedInput = FbtTranslations::getTranslatedInput($input['table'], $input['args'] ?? [], $input['options']);
+
+        if ($translatedInput === null) {
+            return $input;
+        }
+
+        return [
+            'table' => $translatedInput[0],
+            'args' => $translatedInput[1],
+        ];
     }
 
     public static function getFallback(string $locale): ?string
@@ -136,16 +230,11 @@ class FbtHooks
             return self::$actions[__FUNCTION__](...func_get_args());
         }
 
-        foreach ($phrase['hashToText'] as $hash => $text) {
+        foreach (array_keys($phrase['hashToLeaf']) as $hash) {
             FbtHooks::$storedHashes[$hash] = true;
         }
 
-        $phraseSource = [
-            'type' => $phrase['type'],
-            'jsfbt' => $phrase['jsfbt'],
-        ];
-
-        $hash = md5(json_encode($phraseSource) . $phrase['desc']);
+        $hash = self::getPhraseKey($phrase);
 
         self::$sourceStrings['phrases'][] = $phrase;
         self::$sourceHashes[$hash] = count(self::$sourceStrings['phrases']) - 1;
@@ -158,6 +247,62 @@ class FbtHooks
     }
 
     /**
+     * Identity of a collected phrase
+     *
+     * @throws \fbt\Exceptions\FbtException
+     */
+    private static function getPhraseKey(array $phrase): string
+    {
+        return md5(JsJson::stringify($phrase['jsfbt']['t']) . json_encode($phrase['jsfbt']['m']));
+    }
+
+    /**
+     * Drops phrases collected by fbt v4 (without `hashToLeaf`), which can't be
+     * used anymore, and remaps the child to parent mappings accordingly.
+     */
+    private static function withoutLegacyPhrases(array $sourceStrings): array
+    {
+        $phrases = [];
+        $indexMap = [];
+        foreach ($sourceStrings['phrases'] ?? [] as $index => $phrase) {
+            if (isset($phrase['hashToLeaf'], $phrase['jsfbt']['t'])) {
+                $indexMap[$index] = count($phrases);
+                $phrases[] = $phrase;
+            }
+        }
+
+        $childParentMappings = [];
+        foreach ($sourceStrings['childParentMappings'] ?? [] as $child => $parent) {
+            if (isset($indexMap[$child], $indexMap[$parent])) {
+                $childParentMappings[$indexMap[$child]] = $indexMap[$parent];
+            }
+        }
+
+        $sourceStrings['phrases'] = $phrases;
+        $sourceStrings['childParentMappings'] = $childParentMappings;
+
+        return $sourceStrings;
+    }
+
+    /**
+     * JSFBT trees are serialized as JS objects (never as lists).
+     */
+    private static function toSerializableSourceStrings(array $sourceStrings): array
+    {
+        foreach ($sourceStrings['phrases'] ?? [] as $index => $phrase) {
+            if (isset($phrase['jsfbt']['t'])) {
+                $sourceStrings['phrases'][$index]['jsfbt']['t'] = JsJson::toJsObject($phrase['jsfbt']['t']);
+            }
+        }
+
+        if (isset($sourceStrings['childParentMappings'])) {
+            $sourceStrings['childParentMappings'] = JsJson::toJsObject($sourceStrings['childParentMappings']);
+        }
+
+        return $sourceStrings;
+    }
+
+    /**
      * @throws \Throwable
      */
     public static function storePhrases(): void
@@ -167,7 +312,6 @@ class FbtHooks
 
         self::$sourceHashes = [];
         self::$sourceStrings = ['phrases' => []];
-        self::$storedPhraseIds = [];
 
         if (! is_dir($fbtDir)) {
             mkdir($fbtDir, 0777, true);
@@ -195,15 +339,14 @@ class FbtHooks
             self::loadSourceStrings((string)stream_get_contents($handle));
             self::mergeCollectedPhrases();
 
-            $flags = 0;
-
+            $flags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
             if (FbtConfig::get('prettyPrint')) {
                 $flags |= JSON_PRETTY_PRINT;
             }
 
             ftruncate($handle, 0);
             rewind($handle);
-            fwrite($handle, json_encode(self::$sourceStrings, $flags));
+            fwrite($handle, json_encode(self::toSerializableSourceStrings(self::$sourceStrings), $flags));
             fflush($handle);
         } finally {
             flock($handle, LOCK_UN);
@@ -237,14 +380,14 @@ class FbtHooks
 
     private static function loadSourceStrings(string $contents): void
     {
-        self::$sourceStrings = json_decode($contents, true) ?: [];
-        self::$sourceStrings['phrases'] = self::$sourceStrings['phrases'] ?? [];
+        self::$sourceStrings = self::withoutLegacyPhrases(json_decode($contents, true) ?: []);
 
         foreach (self::$sourceStrings['phrases'] as $index => $phrase) {
-            foreach (array_keys($phrase['hashToText'] ?? []) as $hash) {
+            foreach (array_keys($phrase['hashToLeaf']) as $hash) {
                 self::$storedHashes[$hash] = true;
-                self::$storedPhraseIds[$hash] = $index;
             }
+
+            self::$sourceHashes[self::getPhraseKey($phrase)] = $index;
         }
     }
 
@@ -254,25 +397,21 @@ class FbtHooks
     private static function mergeCollectedPhrases(): void
     {
         $sourceStrings = FbtTransform::toArray();
-        $parentIds = [];
+        $phraseIds = [];
 
         foreach ($sourceStrings['phrases'] as $index => $phrase) {
-            $hash = array_keys($phrase['hashToText'])[0];
+            $parentKey = $sourceStrings['childParentMappings'][$index] ?? null;
+            $parentId = $parentKey !== null ? ($phraseIds[$parentKey] ?? null) : null;
 
-            if (array_key_exists($hash, self::$storedPhraseIds)) {
-                // already stored, its inner strings still refer to it
-                $parentIds[$index] = self::$storedPhraseIds[$hash];
+            $phraseKey = self::getPhraseKey($phrase);
+            if (isset(self::$sourceHashes[$phraseKey])) {
+                // already stored
+                $phraseIds[$index] = self::$sourceHashes[$phraseKey];
 
                 continue;
             }
 
-            $parentKey = $sourceStrings['childParentMappings'][$index] ?? null;
-
-            $parentIds[$index] = self::savePhrase($phrase, $parentIds[$parentKey] ?? null);
-
-            foreach (array_keys($phrase['hashToText']) as $phraseHash) {
-                self::$storedPhraseIds[$phraseHash] = $parentIds[$index];
-            }
+            $phraseIds[$index] = self::savePhrase($phrase, $parentId);
         }
     }
 

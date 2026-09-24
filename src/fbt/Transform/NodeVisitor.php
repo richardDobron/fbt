@@ -41,6 +41,7 @@ class NodeVisitor extends NodeVisitorAbstract
 
                     break;
                 case "enum":
+                    // The value only selects a string variation, so any key of the range works
                     if (! ($node->args[0]->value instanceof String_)
                         && isset($node->args[1])
                         && $node->args[1]->value instanceof Node\Expr\Array_

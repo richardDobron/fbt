@@ -39,6 +39,11 @@ class FBLocaleToLang
         "qe_US" => "esu",
         "bv_DE" => "bar",
         "qt_US" => "tli",
+        "fbt_AC" => "en",
+        "fn_IT" => "fur",
+        "lr_IT" => "lij",
+        "nh_MX" => "nah",
+        "tq_AR" => "tob",
     ];
 
     public static function get(string $locale): string

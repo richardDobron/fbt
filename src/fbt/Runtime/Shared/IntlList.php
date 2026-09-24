@@ -21,15 +21,31 @@ class IntlList
     ];
 
     public const DELIMITERS = [
+        'BULLET' => 'BULLET',
         'COMMA' => 'COMMA',
         'SEMICOLON' => 'SEMICOLON',
     ];
 
     public function __construct(array $items, ?string $conjunction = null, ?string $delimiter = null)
     {
-        $this->items = array_values($items);
+        // js~php diff: support arrays that are not 0-indexed
+        $this->items = array_values(array_filter($items, [self::class, 'isTruthy']));
         $this->conjunction = $conjunction;
         $this->delimiter = $delimiter;
+    }
+
+    /**
+     * Equivalent of JS `items.filter(Boolean)`, e.g. the string "0" is kept
+     *
+     * @param mixed $item
+     */
+    private static function isTruthy($item): bool
+    {
+        if (is_float($item)) {
+            return $item != 0 && ! is_nan($item);
+        }
+
+        return $item !== null && $item !== false && $item !== '' && $item !== 0;
     }
 
     /**
@@ -61,6 +77,17 @@ class IntlList
                         'lists that contain one or more items.');
 
                     break;
+                case self::DELIMITERS['BULLET']:
+                    $output = fbt([
+                        fbt::param('previous items', $output),
+                        " \u{2022} ",
+                        fbt::param('following items', $this->items[$i]),
+                    ], 'A list of items of various types separated by bullets, for example: ' .
+                        "\"Menlo Park, CA \u{2022} Seattle, WA \u{2022} New York City, NY\". " .
+                        '{previous items} and {following items} are themselves ' .
+                        'lists that contain one or more items.');
+
+                    break;
                 default:
                     $output = fbt([
                         fbt::param('previous items', $output),
@@ -75,8 +102,8 @@ class IntlList
         return self::_getConjunction(
             $output,
             $lastItem,
-            $this->conjunction ?? self::CONJUNCTIONS['AND'],
-            $this->delimiter ?? self::DELIMITERS['COMMA']
+            $this->conjunction ?: self::CONJUNCTIONS['AND'],
+            $this->delimiter ?: self::DELIMITERS['COMMA']
         );
     }
 
@@ -112,6 +139,14 @@ class IntlList
                         ], 'A list of items of various types, for example:' .
                             ' "Menlo Park, CA; Seattle, WA; New York City, NY". ' .
                             '{previous items} itself contains one or more items.');
+                    case self::DELIMITERS['BULLET']:
+                        return fbt([
+                            fbt::param('list of items', $list),
+                            " \u{2022} ",
+                            fbt::param('last item', $lastItem),
+                        ], 'A list of items of various types separated by bullets, for example: ' .
+                            "\"Menlo Park, CA \u{2022} Seattle, WA \u{2022} New York City, NY\". " .
+                            '{previous items} contains one or more items.');
                     default:
                         return fbt(
                             [

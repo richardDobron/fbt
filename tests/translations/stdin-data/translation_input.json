@@ -1,16 +1,20 @@
 {
     "phrases": [
         {
-            "hashToText": {
-                "4a709aa92b186ddab2026e89affdb34b": "{name1} commented on a photo that you're tagged in"
+            "hashToLeaf": {
+                "SnCaqSsYbdqyAm6Jr/2zSw==": {
+                    "text": "{name1} commented on a photo that you're tagged in",
+                    "desc": "Notification about commenting on a photo."
+                }
             },
-            "desc": "Notification about commenting on a photo.",
-            "project": "website app",
             "author": "richard",
-            "type": "table",
+            "project": "website app",
             "jsfbt": {
                 "t": {
-                    "*": "{name1} commented on a photo that you're tagged in"
+                    "*": {
+                        "desc": "Notification about commenting on a photo.",
+                        "text": "{name1} commented on a photo that you're tagged in"
+                    }
                 },
                 "m": [
                     {
@@ -21,40 +25,54 @@
             }
         },
         {
-            "hashToText": {
-                "83adaa7f54994a8618db798bff8ae330": "Followed by {=[number of followers] person}"
+            "hashToLeaf": {
+                "5hkhDUOPEkrhAfbdfXYHGw==": {
+                    "text": "{name1} added {number} new photos.",
+                    "desc": "Notification about adding a photos."
+                }
             },
-            "desc": "Text indicating the number of followers of a user",
-            "subject": "1",
-            "project": "website app",
             "author": "richard",
-            "type": "table",
+            "project": "website app",
             "jsfbt": {
                 "t": {
-                    "*": "Followed by {=[number of followers] person}"
+                    "*": {
+                        "*": {
+                            "desc": "Notification about adding a photos.",
+                            "text": "{name1} added {number} new photos."
+                        }
+                    }
                 },
                 "m": [
                     {
-                        "token": "__subject__",
+                        "token": "name1",
                         "type": 1
+                    },
+                    {
+                        "token": "number",
+                        "type": 2
                     }
                 ]
             }
         },
         {
-            "hashToText": {
-                "6d9c05aee1cb13cef24cc12d4a96fcfd": "{number of followers} person"
+            "hashToLeaf": {
+                "g62qf1SZSoYY23mL/4rjMA==": {
+                    "text": "Followed by {=[number of followers] person}",
+                    "desc": "Text indicating the number of followers of a user"
+                }
             },
-            "desc": "In the phrase: \"Followed by {=[number of followers] person}\"",
-            "implicitFbt": true,
-            "subject": "1",
-            "project": "website app",
             "author": "richard",
-            "type": "table",
+            "project": "website app",
             "jsfbt": {
                 "t": {
                     "*": {
-                        "*": "{number of followers} person"
+                        "*": {
+                            "desc": "Text indicating the number of followers of a user",
+                            "text": "Followed by {=[number of followers] person}",
+                            "tokenAliases": {
+                                "=[number of followers] person": "=m1"
+                            }
+                        }
                     }
                 },
                 "m": [
@@ -70,17 +88,53 @@
             }
         },
         {
-            "hashToText": {
-                "148292f3d1dae83c3f973f80d331923b": "{name1} {=poked you}."
+            "hashToLeaf": {
+                "bZwFruHLE87yTMEtSpb8/Q==": {
+                    "text": "{number of followers} person",
+                    "desc": "In the phrase: \"Followed by {=[number of followers] person}\""
+                }
             },
-            "desc": "User(s) have poked the viewer",
-            "subject": "1",
-            "project": "website app",
             "author": "richard",
-            "type": "table",
+            "project": "website app",
             "jsfbt": {
                 "t": {
-                    "*": "{name1} {=poked you}."
+                    "*": {
+                        "*": {
+                            "desc": "In the phrase: \"Followed by {=[number of followers] person}\"",
+                            "text": "{number of followers} person"
+                        }
+                    }
+                },
+                "m": [
+                    {
+                        "token": "__subject__",
+                        "type": 1
+                    },
+                    {
+                        "token": "number of followers",
+                        "type": 2
+                    }
+                ]
+            }
+        },
+        {
+            "hashToLeaf": {
+                "FIKS89Ha6Dw/lz+A0zGSOw==": {
+                    "text": "{name1} {=poked you}.",
+                    "desc": "User(s) have poked the viewer"
+                }
+            },
+            "author": "richard",
+            "project": "website app",
+            "jsfbt": {
+                "t": {
+                    "*": {
+                        "desc": "User(s) have poked the viewer",
+                        "text": "{name1} {=poked you}.",
+                        "tokenAliases": {
+                            "=poked you": "=m3"
+                        }
+                    }
                 },
                 "m": [
                     {
@@ -91,18 +145,20 @@
             }
         },
         {
-            "hashToText": {
-                "e8e4d19a2eb0896533722debfca881d9": "poked you"
+            "hashToLeaf": {
+                "BlU9+9VAPRRxp4LSSwp5mg==": {
+                    "text": "poked you",
+                    "desc": "In the phrase: \"{name1} {=poked you}.\""
+                }
             },
-            "desc": "In the phrase: \"{=} {=poked you}.\"",
-            "implicitFbt": true,
-            "subject": "1",
-            "project": "website app",
             "author": "richard",
-            "type": "table",
+            "project": "website app",
             "jsfbt": {
                 "t": {
-                    "*": "poked you"
+                    "*": {
+                        "desc": "In the phrase: \"{name1} {=poked you}.\"",
+                        "text": "poked you"
+                    }
                 },
                 "m": [
                     {
@@ -117,7 +173,7 @@
         {
             "fb-locale": "cs_CZ",
             "translations": {
-                "4a709aa92b186ddab2026e89affdb34b": {
+                "SnCaqSsYbdqyAm6Jr/2zSw==": {
                     "translations": [
                         {
                             "translation": "{name1} okomentoval fotku, ve které jste označeni",
@@ -145,7 +201,7 @@
                         3
                     ]
                 },
-                "83adaa7f54994a8618db798bff8ae330": {
+                "g62qf1SZSoYY23mL/4rjMA==": {
                     "translations": [
                         {
                             "translation": "Sledovaný {=[number of followers] person}",
@@ -173,7 +229,7 @@
                         3
                     ]
                 },
-                "6d9c05aee1cb13cef24cc12d4a96fcfd": {
+                "bZwFruHLE87yTMEtSpb8/Q==": {
                     "translations": [
                         {
                             "translation": "{number of followers} osobou",
@@ -201,7 +257,7 @@
                         28
                     ]
                 },
-                "e8e4d19a2eb0896533722debfca881d9": {
+                "BlU9+9VAPRRxp4LSSwp5mg==": {
                     "translations": [
                         {
                             "translation": "vás šťouchl(a)",
@@ -216,7 +272,7 @@
         {
             "fb-locale": "de_DE",
             "translations": {
-                "e8e4d19a2eb0896533722debfca881d9": {
+                "BlU9+9VAPRRxp4LSSwp5mg==": {
                     "translations": [
                         {
                             "translation": "hat dich angestupst",
@@ -231,71 +287,82 @@
         {
             "fb-locale": "sk_SK",
             "translations": {
-                "4a709aa92b186ddab2026e89affdb34b": {
+                "SnCaqSsYbdqyAm6Jr/2zSw==": {
                     "translations": [
                         {
                             "translation": "{name1} komentoval fotku, kde ste označený",
                             "variations": [
-                                1, 1
+                                1,
+                                1
                             ]
                         },
                         {
                             "translation": "{name1} komentovala fotku, kde ste označený",
                             "variations": [
-                                2, 1
+                                2,
+                                1
                             ]
                         },
                         {
                             "translation": "Používateľ {name1} komentoval fotku, kde ste označený",
                             "variations": [
-                                3, 1
+                                3,
+                                1
                             ]
                         },
                         {
                             "translation": "{name1} komentoval fotku, kde ste označená",
                             "variations": [
-                                1, 2
+                                1,
+                                2
                             ]
                         },
                         {
                             "translation": "{name1} komentovala fotku, kde ste označená",
                             "variations": [
-                                2, 2
+                                2,
+                                2
                             ]
                         },
                         {
                             "translation": "Používateľ {name1} komentoval fotku, kde ste označená",
                             "variations": [
-                                3, 2
+                                3,
+                                2
                             ]
                         },
                         {
                             "translation": "{name1} komentoval fotku, kde ste označený/á",
                             "variations": [
-                                1, 3
+                                1,
+                                3
                             ]
                         },
                         {
                             "translation": "{name1} komentovala fotku, kde ste označený/á",
                             "variations": [
-                                2, 3
+                                2,
+                                3
                             ]
                         },
                         {
                             "translation": "Používateľ {name1} komentoval fotku, kde ste označený/á",
                             "variations": [
-                                3, 3
+                                3,
+                                3
                             ]
                         }
                     ],
                     "tokens": [
-                        "name1", "__viewing_user__"
+                        "name1",
+                        "__viewing_user__"
                     ],
                     "types": [
-                        3, 3
+                        3,
+                        3
                     ]
                 },
-                "83adaa7f54994a8618db798bff8ae330": {
+                "g62qf1SZSoYY23mL/4rjMA==": {
                     "translations": [
                         {
                             "translation": "Sledovaný {=[number of followers] person}",
@@ -323,7 +390,7 @@
                         3
                     ]
                 },
-                "6d9c05aee1cb13cef24cc12d4a96fcfd": {
+                "bZwFruHLE87yTMEtSpb8/Q==": {
                     "translations": [
                         {
                             "translation": "{number of followers} osobou",
@@ -351,7 +418,7 @@
                         28
                     ]
                 },
-                "e8e4d19a2eb0896533722debfca881d9": {
+                "BlU9+9VAPRRxp4LSSwp5mg==": {
                     "translations": [
                         {
                             "translation": "vás štuchol",

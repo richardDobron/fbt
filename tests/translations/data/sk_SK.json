@@ -2,7 +2,7 @@
     "sk_SK": {
         "fb-locale": "sk_SK",
         "translations": {
-            "35dff4c3b4983537013cf63fb03c9fea": {
+            "Nd/0w7SYNTcBPPY/sDyf6g==": {
                 "translations": [
                     {
                         "translation": "+{count} ďalšia",
@@ -30,71 +30,82 @@
                     28
                 ]
             },
-            "4a709aa92b186ddab2026e89affdb34b": {
+            "SnCaqSsYbdqyAm6Jr/2zSw==": {
                 "translations": [
                     {
                         "translation": "{name1} komentoval fotku, kde ste označený",
                         "variations": [
-                            1, 1
+                            1,
+                            1
                         ]
                     },
                     {
                         "translation": "{name1} komentovala fotku, kde ste označený",
                         "variations": [
-                            2, 1
+                            2,
+                            1
                         ]
                     },
                     {
                         "translation": "Používateľ {name1} komentoval fotku, kde ste označený",
                         "variations": [
-                            3, 1
+                            3,
+                            1
                         ]
                     },
                     {
                         "translation": "{name1} komentoval fotku, kde ste označená",
                         "variations": [
-                            1, 2
+                            1,
+                            2
                         ]
                     },
                     {
                         "translation": "{name1} komentovala fotku, kde ste označená",
                         "variations": [
-                            2, 2
+                            2,
+                            2
                         ]
                     },
                     {
                         "translation": "Používateľ {name1} komentoval fotku, kde ste označená",
                         "variations": [
-                            3, 2
+                            3,
+                            2
                         ]
                     },
                     {
                         "translation": "{name1} komentoval fotku, kde ste označený/á",
                         "variations": [
-                            1, 3
+                            1,
+                            3
                         ]
                     },
                     {
                         "translation": "{name1} komentovala fotku, kde ste označený/á",
                         "variations": [
-                            2, 3
+                            2,
+                            3
                         ]
                     },
                     {
                         "translation": "Používateľ {name1} komentoval fotku, kde ste označený/á",
                         "variations": [
-                            3, 3
+                            3,
+                            3
                         ]
                     }
                 ],
                 "tokens": [
-                    "name1", "__viewing_user__"
+                    "name1",
+                    "__viewing_user__"
                 ],
                 "types": [
-                    3, 3
+                    3,
+                    3
                 ]
             },
-            "83adaa7f54994a8618db798bff8ae330": {
+            "g62qf1SZSoYY23mL/4rjMA==": {
                 "translations": [
                     {
                         "translation": "Sledovaný {=[number of followers] person}",
@@ -122,7 +133,7 @@
                     3
                 ]
             },
-            "6d9c05aee1cb13cef24cc12d4a96fcfd": {
+            "bZwFruHLE87yTMEtSpb8/Q==": {
                 "translations": [
                     {
                         "translation": "{number of followers} osobou",
@@ -150,7 +161,7 @@
                     28
                 ]
             },
-            "e8e4d19a2eb0896533722debfca881d9": {
+            "BlU9+9VAPRRxp4LSSwp5mg==": {
                 "translations": [
                     {
                         "translation": "vás štuchol",
@@ -178,68 +189,79 @@
                     3
                 ]
             },
-            "e619210d438f124ae101f6dd7d76071b": {
+            "5hkhDUOPEkrhAfbdfXYHGw==": {
                 "translations": [
                     {
                         "translation": "{name1} pridal {number} novú fotku.",
                         "variations": [
-                            1, 4
+                            1,
+                            4
                         ]
                     },
                     {
                         "translation": "{name1} pridal {number} nové fotky.",
                         "variations": [
-                            1, 20
+                            1,
+                            20
                         ]
                     },
                     {
                         "translation": "{name1} pridal {number} nových fotiek.",
                         "variations": [
-                            1, 24
+                            1,
+                            24
                         ]
                     },
                     {
                         "translation": "{name1} pridala {number} novú fotku.",
                         "variations": [
-                            2, 4
+                            2,
+                            4
                         ]
                     },
                     {
                         "translation": "{name1} pridala {number} nové fotky.",
                         "variations": [
-                            2, 20
+                            2,
+                            20
                         ]
                     },
                     {
                         "translation": "{name1} pridala {number} nových fotiek.",
                         "variations": [
-                            2, 24
+                            2,
+                            24
                         ]
                     },
                     {
                         "translation": "Používateľ {name1} pridal 1 novú fotku.",
                         "variations": [
-                            3, 4
+                            3,
+                            4
                         ]
                     },
                     {
                         "translation": "Používateľ {name1} pridal {number} nové fotky.",
                         "variations": [
-                            3, 20
+                            3,
+                            20
                         ]
                     },
                     {
                         "translation": "Používateľ {name1} pridal {number} nových fotiek.",
                         "variations": [
-                            3, 24
+                            3,
+                            24
                         ]
                     }
                 ],
                 "tokens": [
-                    "name1", "number"
+                    "name1",
+                    "number"
                 ],
                 "types": [
-                    3, 28
+                    3,
+                    28
                 ]
             }
         }

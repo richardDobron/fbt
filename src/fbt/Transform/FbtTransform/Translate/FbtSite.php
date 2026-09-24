@@ -4,155 +4,133 @@ namespace fbt\Transform\FbtTransform\Translate;
 
 use function fbt\invariant;
 
-use fbt\Transform\FbtTransform\FbtConstants;
-use fbt\Transform\FbtTransform\FbtUtils;
+use fbt\Transform\FbtTransform\JSFbtUtil;
 
 /**
- * Represents a fbt() or <fbt /> source data from a callsite and all
- * the information necessary to produce the translated payload.  It is
- * used primarily by TranslationBuilder for this process.
+ * Represents an <fbt>'s data source in the format of `SourceDataJSON`.
+ *
+ * E.g
+ * [
+ *  'hashToLeaf' => [
+ *    hash => ['text' => '', 'desc' => ''],
+ *    ...
+ *  ],
+ *  'jsfbt' => [
+ *    't' => [
+ *      '*' => [
+ *        'text' => '',
+ *        'desc' => '',
+ *        'tokenAliases' => [...]
+ *      ],
+ *      ....
+ *    ],
+ *    'm' => [levelMetadata,...],
+ *  ]
+ * ]
  */
-class FbtSite
+class FbtSite extends FbtSiteBase
 {
-    /* @var mixed */
-    private $_type;
-    private $_hashToText;
-    /* @var mixed */
-    private $_tableOrHash;
-    /* @var null|array */
-    private $_metadata = null;
-    /* @var string */
-    private $_project;
+    /** @var array<string, array|null> */
+    private $_hashToTokenAliases;
 
-    public function __construct(
-        $type,
-        $hashToText,
-        $tableData, // source table & metadata
-        $project
-    ) {
-        $hasTableData = is_array($tableData);
-        invariant(
-            $type === FbtConstants::FBT_TYPE['TEXT'] || $hasTableData,
-            'TEXT types should have no table data and TABLE require it'
+    /**
+     * @param array $hashToTextAndDesc
+     * @param array{m: array, t: string|array} $tableData
+     * @param string $project
+     * @param array $hashToTokenAliases
+     *
+     * @throws \fbt\Exceptions\FbtException
+     */
+    public function __construct(array $hashToTextAndDesc, array $tableData, string $project, array $hashToTokenAliases)
+    {
+        parent::__construct(
+            $hashToTextAndDesc,
+            $tableData['t'],
+            FbtSiteMetadata::wrap($tableData['m']),
+            $project
         );
-        if ($type === FbtConstants::FBT_TYPE['TEXT']) {
-            invariant(
-                count(array_keys($hashToText)) === 1,
-                'TEXT types should be a singleton entry'
-            );
-            $this->_tableOrHash = array_keys($hashToText)[0];
-        }
-        $this->_type = $type;
-        $this->_hashToText = $hashToText;
-        if ($hasTableData) {
-            $this->_tableOrHash = $tableData['t'];
-            $this->_metadata = FbtSiteMetadata::wrap($tableData['m']);
-        }
-        $this->_project = $project;
+        $this->_hashToTokenAliases = $hashToTokenAliases;
     }
 
-    public function getHashToText()
+    public function getHashToTokenAliases(): array
     {
-        return $this->_hashToText;
-    }
-
-    public function getMetadata(): array
-    {
-        return $this->_metadata ?? [];
-    }
-
-    public function getProject(): string
-    {
-        return $this->_project;
-    }
-
-    public function getType()
-    {
-        return $this->_type;
-    }
-
-    // In a type of TABLE, this looks something like:
-    //
-    // ["*" =>
-    //   [... [ "*" => <HASH>] ] ]
-    //
-    // In a type of TEXT, this is simply the HASH
-    public function getTableOrHash()
-    {
-        return $this->_tableOrHash;
-    }
-
-    // Replaces leaves in our table with corresponding hashes
-    public static function _hashifyLeaves(
-        $entry, // Represents a recursive descent into the table
-        array $textToHash // Reverse mapping of hashToText for leaf lookups
-    ) {
-        return is_string($entry)
-            ? $textToHash[$entry]
-            : FbtUtils::objMap($entry, function ($branch, string $key) use ($textToHash) {
-                return self::_hashifyLeaves($branch, $textToHash);
-            });
+        return $this->_hashToTokenAliases;
     }
 
     /**
-     * From a run of collectFbt using TextPackager.  NOTE: this is NOT
-     * the output of serialize
-     *
-     * Relevant keys processed:
-     * {
-     *  hashToText: {hash: text},
-     *  type: TABLE|TEXT
-     *  jsfbt: {
-     *    m: [levelMetadata,...]
-     *    t: {...}
-     *  } | text
-     * }
+     * @throws \fbt\Exceptions\FbtException
      */
     public static function fromScan(array $json): FbtSite
     {
-        $tableData = $json['jsfbt'];
-        if ($json['type'] === FbtConstants::FBT_TYPE['TABLE']) {
-            $textToHash = [];
-            foreach ($json['hashToText'] as $k => $text) {
-                invariant(
-                    ! isset($textToHash[$text]), // undefined
-                    "Duplicate texts pointing to different hashes shouldn't be possible"
-                );
-                $textToHash[$text] = $k;
-            }
-            $tableData = [
-                't' => FbtSite::_hashifyLeaves($json['jsfbt']['t'], $textToHash),
-                'm' => $json['jsfbt']['m'],
-            ];
+        $textAndDescToHash = [];
+        $hashToLeaf = $json['hashToLeaf'] ?? null;
+        $jsfbt = $json['jsfbt'] ?? null;
+        invariant($hashToLeaf !== null, 'Expected hashToLeaf to be defined');
+        invariant($jsfbt !== null, 'Expect a non-void jsfbt table');
+
+        foreach ($hashToLeaf as $hash => $leaf) {
+            $textAndDesc = self::_serializeTextAndDesc($leaf['text'], $leaf['desc']);
+            invariant(
+                ! isset($textAndDescToHash[$textAndDesc]),
+                "Duplicate text+desc pairs pointing to different hashes shouldn't be possible"
+            );
+            $textAndDescToHash[$textAndDesc] = (string)$hash;
         }
 
-        return new FbtSite(
-            $json['type'],
-            $json['hashToText'],
-            $tableData,
-            $json['project']
-        );
-    }
-
-    public function serialize(): array
-    {
-        $json = [
-            '_t' => $this->getType(),
-            'h2t' => $this->getHashToText(),
-            'p' => $this->getProject(),
+        $tableData = [
+            't' => self::_hashifyLeaves($jsfbt['t'], $textAndDescToHash),
+            'm' => $jsfbt['m'],
         ];
-        if ($this->_type === FbtConstants::FBT_TYPE['TABLE']) {
-            $json['_d'] = [
-                't' => $this->_tableOrHash,
-                'm' => FbtSiteMetadata::unwrap($this->_metadata),
-            ];
-        }
 
-        return $json;
+        $hashToTokenAliases = [];
+        JSFbtUtil::onEachLeaf(['jsfbt' => $jsfbt], function (array $leaf) use ($textAndDescToHash, &$hashToTokenAliases) {
+            $hash = $textAndDescToHash[self::_serializeTextAndDesc($leaf['text'], $leaf['desc'])];
+            if (isset($leaf['tokenAliases'])) {
+                $hashToTokenAliases[$hash] = $leaf['tokenAliases'];
+            }
+        });
+
+        return new FbtSite($hashToLeaf, $tableData, $json['project'] ?? '', $hashToTokenAliases);
     }
 
-    public static function deserialize(array $json): FbtSite
+    /**
+     * Replaces leaves in our table with corresponding hashes
+     *
+     * @param array $entry Represents a recursive descent into the table
+     * @param array $textAndDescToHash Reverse mapping of hashToLeaf for leaf lookups
+     *
+     * @return string|array
+     */
+    public static function _hashifyLeaves(array $entry, array $textAndDescToHash)
     {
-        return new FbtSite($json['_t'], $json['h2t'], $json['_d'], $json['p']);
+        $leaf = JSFbtUtil::coerceToTableJSFBTTreeLeaf($entry);
+        if ($leaf !== null) {
+            return $textAndDescToHash[self::_serializeTextAndDesc($leaf['text'], $leaf['desc'])];
+        }
+
+        $table = [];
+        foreach ($entry as $key => $branch) {
+            $table[$key] = self::_hashifyLeaves($branch, $textAndDescToHash);
+        }
+
+        return $table;
+    }
+
+    /**
+     * Strings with different hashes might have the same text, so we need to use
+     * description to uniquely identify a string.
+     * For example, in
+     *  <fbt>
+     *   <fbt:pronoun gender="..." type="subject" human="true" />
+     *   has shared <a href="...">a photo</a>.
+     *  </fbt>
+     * `<a href="...">a photo</a>` generates multiple strings with the same text:
+     * {text: 'a photo', desc: 'In the phrase: She has shared {a photo}.'}
+     * {text: 'a photo', desc: 'In the phrase: He has shared {a photo}.'}
+     * ....
+     */
+    public static function _serializeTextAndDesc(string $text, string $desc): string
+    {
+        return json_encode(['text' => $text, 'desc' => $desc], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 }
