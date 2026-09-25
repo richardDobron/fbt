@@ -4,9 +4,38 @@ All notable changes to `fbt` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
-## v4.3.4 - 2026-06-04
+## v4.4.0 - 2026-09-24
+### Changed
+- `Gender::GENDER_CONST['MIXED_SINGULAR']` and `Gender::GENDER_CONST['MIXED_PLURAL']` are replaced with `Gender::GENDER_CONST['MIXED_UNKNOWN']`
+- `IntlNumberType::getLocale()` is renamed to `IntlNumberType::forLocale()`
+- Numbers are no longer formatted in scientific notation (e.g. `1.0E+15` / `1.99E-7`)
+- Plural rules (CLDR) support fractional numbers (e.g. `1.5 apples`), Hebrew rules are updated
+- Locales with merged unknown gender (`ps`, `sq`, `ti`, `kab`, `dsb`, `vec`; `ht` removed)
+- Source strings and translation files are read and written under a file lock, so concurrent processes do not overwrite each other's phrases
+- Plurals are deduplicated during collecting by their value instead of their count
+- A phrase rendered more than once is collected only once
+- `fbt::sameParam` referring to an unknown token name throws an error while collecting
+### Added
+- Kirundi (`rn`) plural rules
+- Support for `nikic/php-parser` v5
+### Fixed
+- Rendered strings are no longer cached across locales and viewer genders (a process switching locales could return the previously rendered translation)
+- Pronouns `object` / `reflexive` with `NOT_A_PERSON`, `NEUTER_SINGULAR` or `UNKNOWN_SINGULAR` genders resolved to the wrong form
+- Repeated pronouns in a phrase were not deduplicated
+- Fractional plural counts were truncated (`1.5` was treated as `1`)
+- `fbt::param` with an explicit `number` value of `0` or a fractional value
+- `intlNumUtils`: dropped `.0` decimals, infinite loop with a group size of `0`, unescaped currency patterns, `parseNumber()` returning `0` instead of `null` for invalid input, lost precision of large numbers
+- `intlList()` with arrays that are not 0-indexed
+- Translations equal to `''` or `'0'` were treated as missing
+- Parent mappings of already stored inner strings (including a parent phrase with id `0`)
+- Accessing a pattern string with a table index returned a single character
+
+## v4.3.4 - 2026-06-14
 ### Changed
 - Replace `SimpleHtmlDom` with `DOMForge`
+### Added
+- `FbtConfig::clearListeners()` method
+- PHP 8.2, 8.3 and 8.4 to the test matrix
 
 ## v4.3.3 - 2025-04-15
 ### Changed
@@ -53,6 +82,8 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 ## v4.2.4 - 2024-01-12
 ### Fixed
 - Collecting of fbt::param values
+### Changed
+- `nikic/php-parser` is limited to `^4.1` (version 5 is not supported)
 
 ## v4.2.3 - 2023-12-09
 ### Changed
@@ -62,8 +93,12 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - Redundant file scanning for docblock with the `@fbt` pragma
 - `tiger128,3` now generates the same hash as the original implementation
 
+## v4.2.2 - 2023-06-28
+### Changed
+- Reduced the number of fbt namespaces during collecting
+
 ### Added
-- Detailed information of collecting for fbt collect command
+- Detailed information of collecting for fbt collect command (processed files are printed)
 
 ## v4.2.1 - 2023-06-21
 ### Added
@@ -80,6 +115,9 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 ### Changed
 - The `rsearch` function now returns an `array` instead of a `Generator` (files are now sorted alphabetically).
 
+### Fixed
+- Error on PHP 7.2 when the source strings file contains no phrases
+
 ## v4.0.11 - 2023-02-03
 ### Fixed
 - Rendering of text mixed with elements
@@ -92,6 +130,12 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 ### Fixed
 - Pronoun attribute `type` when using fbt::pronoun
 - Disable cache for phrase when using reporting
+
+### Changed
+- `fbs()` helper returns an `fbt\fbs` object instead of a `string`
+
+### Added
+- Collecting of `fbt::c()` calls (common strings) and `--fbt-common-path` option for the `collect-fbts` command
 
 ## v4.0.8 - 2022-09-13
 ### Changed
@@ -122,6 +166,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ### Added
 - Command to generate missing translation hashes
+- Tokens and types of phrases are filled in generated translations
 
 ## v4.0.3 - 2022-06-25
 ### Fixed
