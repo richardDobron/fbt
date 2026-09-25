@@ -5,7 +5,7 @@
 # FBT for PHP
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/richardDobron/fbt.svg?style=flat-square)](https://packagist.org/packages/richardDobron/fbt)
-[![MIT Licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
+[![MIT Licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
 ![Test Status](https://github.com/richardDobron/fbt/actions/workflows/run-tests.yml/badge.svg)
 [![Total Downloads](https://img.shields.io/packagist/dt/richardDobron/fbt.svg?style=flat-square)](https://packagist.org/packages/richardDobron/fbt)
 
@@ -60,12 +60,16 @@ The following integrations are fully supported and maintained:
 
 - [Laravel](https://github.com/richardDobron/laravel-fbt)
 
+Built-in support:
+
+- [Latte](https://latte.nette.org): `{fbt(...)}` is rendered without escaping, and `collect-fbts` collects the
+  strings of `.latte` templates (requires `latte/latte`)
+
 ## ⚙️ How FBT works
-FBT works by transforming your `<fbt>` and `fbt(...)` constructs via
-[DOM Forge][dom-forge].  It serves to extract strings from source and
-lookup translated payloads generated during execution.  FBT creates tables
-of all possible variations for each fbt phrase and accesses them
-at runtime.
+Like Facebook's fbt, FBT creates tables of all possible variations for each fbt phrase and
+accesses them at runtime. `fbt(...)` callsites are compiled from their constructs (e.g. `fbt::param()`),
+and `<fbt>` constructs are parsed via [DOM Forge][dom-forge]. Each callsite is compiled once, its strings
+are extracted for translation, and the translated payloads are looked up during execution.
 
 ## ⬆️ Upgrading
 
