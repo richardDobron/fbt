@@ -938,10 +938,9 @@ FBT;
 
         $this->assertSame('Play Chess!', $fbt);
 
-        // todo: Don't strip punctuation that isn't redundant
-        // $fbt = (string)fbt("What's on your mind " . \fbt\fbt::param('name', 'T.J.') . '?', 'test');
+        $fbt = (string)fbt("What's on your mind " . \fbt\fbt::param('name', 'T.J.') . '?', 'test');
 
-        // $this->assertSame('What\'s on your mind T.J.?', $fbt);
+        $this->assertSame('What\'s on your mind T.J.?', $fbt);
     }
 
     public function testMultipleTagsInParameter()

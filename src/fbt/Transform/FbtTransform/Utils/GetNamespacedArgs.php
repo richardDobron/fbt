@@ -47,7 +47,7 @@ class GetNamespacedArgs
         // js~php diff: a text is the equivalent of an {expression} (a single space
         // is kept, like in upstream fbt)
         if (count($paramChildren) > 1 || ($children === [] && $node->innerHtml !== ' ')) {
-            throw FbtUtils::errorAt($node, "$this->moduleName:param expects an {expression} or JSX element, and only one");
+            throw FbtUtils::errorAt($node, "$this->moduleName:param expects an {expression} or HTML element, and only one");
         }
 
         // js~php diff: an HTML element is a rich content, which the fbs runtime doesn't accept
