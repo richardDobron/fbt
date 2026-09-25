@@ -35,7 +35,7 @@ The following options can be defined:
 * **preserveWhitespace** `bool`: (Default: `false`)
   - FBT normally consolidates whitespace down to one space (`' '`).
   - Turn this off by setting this to `true`
-* **viewerContext** `string`: (Default: `\fbt\Runtime\Shared\IntlViewerContext::class`)
+* **viewerContext** `string`: (Default: `\fbt\Lib\IntlViewerContext::class`)
 * **locale** `string`: (Default: `en_US`) User locale.
 * **fbtCommon** `string`: (Default: `[]`) common strings, e.g. `[['text' => 'desc'], ...]`
 * **fbtCommonPath** `string`: (Default: `null`) Path to the common strings module.
@@ -47,8 +47,12 @@ Below are the less important parameters.
 * **collectFbt** `bool`: (Default: `true`) Collect fbt instances from the source and store them to a JSON file.
 * **prettyPrint** `bool`: (Default: `true`) Pretty print source strings in a JSON file.
 * **hash_module** `string`: (Default: `md5`) Hash module. You can choose `md5` or `tiger` hash module.
-* **md5_digest** `string`: (Default: `hex`) MD5 digest.
+* **md5_digest** `string`: (Default: `base64`) MD5 digest. You can choose `base64` (like upstream) or `hex` (default in v4).
 * **driver** `string`: (Default: `json`) Currently, only JSON storage is supported.
+* **extraOptions** `array`: (Default: `[]`) Extra options allowed on fbt callsites, e.g. `['myOption' => true]`. Their values are passed to the runtime (see the [`getFbtResult` hook](hooks.md#getfbtresult--getfbsresult)).
+* **generateOuterTokenName** `bool`: (Default: `false`) Add the outer token name of inner strings to the collected phrases.
+* **debug** `bool`: (Default: `false`) Debug mode, e.g. a missing parameter throws an exception.
+* **logger** `bool`: (Default: `false`) Log impressions of displayed strings.
 
 
 ## 	🙋 IntlInterface
@@ -72,7 +76,7 @@ class UserDTO implements IntlViewerContextInterface
         return $this->locale;
     }
 
-    public static function getGender(): int
+    public function getGender(): int
     {
         if ($this->gender === 'male') {
             return IntlVariations::GENDER_MALE;
@@ -105,13 +109,19 @@ Read more about [FBTs extracting](collection.md).
 
 2. This command generates the missing translation hashes from collected source strings.
 ```shell
-php ./vendor/bin/fbt generate-translations --source=./path/to/fbt/.source_strings.json --translations=./path/to/fbt/*.json
+php ./vendor/bin/fbt generate-translations --src=./path/to/fbt/.source_strings.json --translations=./path/to/fbt/*.json
 ```
 3. This command creates translation payloads stored in JSON file.
 ```shell
 php ./vendor/bin/fbt translate --path=./path/to/fbt/ --translations=./path/to/fbt/*.json
 ```
 Read more about [translating](translating.md).
+
+4. This command migrates translation files from v4 to v5.
+```shell
+php ./vendor/bin/fbt migrate-v5 --translations="./path/to/translations/*.json" --src=./path/to/fbt/.source_strings.json
+```
+Read more about [upgrading to 5.0](https://github.com/richardDobron/fbt/blob/main/UPGRADE-5.0.md).
 
 ## 📘 API
 

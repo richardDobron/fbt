@@ -7,15 +7,15 @@ sidebar_label: Runtime Utilities
 Bundled with fbt come a few useful utilities for constructing strings.
 
 ### intlList(...)
-[`intlList`](https://github.com/richardDobron/fbt/blob/master/src/fbt/Runtime/Shared/intlList.php) creates `fbt` instances with selectable conjunctions given an array.
+[`\fbt\intlList()`](https://github.com/richardDobron/fbt/blob/main/src/fbt/Runtime/Shared/IntlList.php) creates `fbt` instances with selectable conjunctions given an array.
 
 As an example
 
 ```php
-$CONJUNCTIONS = \fbt\Runtime\Shared\intlList::CONJUNCTIONS;
-$DELIMITERS = \fbt\Runtime\Shared\intlList::DELIMITERS;
+$CONJUNCTIONS = \fbt\Runtime\Shared\IntlList::CONJUNCTIONS;
+$DELIMITERS = \fbt\Runtime\Shared\IntlList::DELIMITERS;
 $people = ['Adam', 'Becky', fbt('4 others', 'last item')];
-intlList($people, $CONJUNCTIONS['AND'], $DELIMITERS['COMMA']);
+\fbt\intlList($people, $CONJUNCTIONS['AND'], $DELIMITERS['COMMA']);
 ```
 produces the fbt
 ```
@@ -31,12 +31,12 @@ recursively combining fbts.
 Available delimiters are `COMMA` (default), `SEMICOLON` and `BULLET`:
 
 ```php
-intlList(['Menlo Park, CA', 'Seattle, WA', 'New York City, NY'], $CONJUNCTIONS['NONE'], $DELIMITERS['BULLET']);
+\fbt\intlList(['Menlo Park, CA', 'Seattle, WA', 'New York City, NY'], $CONJUNCTIONS['NONE'], $DELIMITERS['BULLET']);
 // Menlo Park, CA • Seattle, WA • New York City, NY
 ```
 
 ### formatNumber
-[`formatNumber`](https://github.com/richardDobron/fbt/blob/master/src/fbt/Runtime/Shared/formatNumber.php)
+[`formatNumber`](https://github.com/richardDobron/fbt/blob/main/src/fbt/Runtime/Shared/formatNumber.php)
 formats numbers according to the viewer's locale:
 
 ```php
@@ -45,11 +45,11 @@ use fbt\Runtime\Shared\formatNumber;
 formatNumber::formatNumber(1234.5, 2);          // "1234.50"
 formatNumber::withThousandDelimiters(1234.5);   // "1,234.5"
 formatNumber::withMaxLimit(1500, 1000);         // fbs "1,000+"
-formatNumber::withMinLimit(3, 10);              // fbs "<10"
+formatNumber::withMinLimit(3, 10);              // fbs "&lt;10" (HTML-escaped when rendered)
 ```
 
 ### IntlGender
-[`IntlGender`](https://github.com/richardDobron/fbt/blob/master/src/fbt/Runtime/Shared/IntlGender.php)
+[`IntlGender`](https://github.com/richardDobron/fbt/blob/main/src/fbt/Runtime/Shared/IntlGender.php)
 maps genders to `Gender::GENDER_CONST` values usable by fbt:
 
 ```php
