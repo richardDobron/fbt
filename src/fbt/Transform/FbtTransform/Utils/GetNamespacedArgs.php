@@ -3,11 +3,25 @@
 namespace fbt\Transform\FbtTransform\Utils;
 
 use dobron\DomForge\Node;
+use fbt\Exceptions\FbtParserException;
 use fbt\Transform\FbtTransform\FbtConstants;
+use fbt\Transform\FbtTransform\FbtNodeChecker;
 use fbt\Transform\FbtTransform\FbtUtils;
 
 class GetNamespacedArgs
 {
+    /**
+     * @throws \fbt\Exceptions\FbtParserException
+     */
+    private static function getAttributeOrThrow(Node $node, string $name): string
+    {
+        try {
+            return (string)FbtUtils::getAttributeByNameOrThrow($node, $name);
+        } catch (FbtParserException $error) {
+            throw FbtUtils::errorAt($node, $error->getMessage());
+        }
+    }
+
     private $moduleName;
 
     public function __construct(string $moduleName)
@@ -22,18 +36,39 @@ class GetNamespacedArgs
      */
     public function param(Node $node): array
     {
-        $nameAttr = FbtUtils::normalizeSpaces(FbtUtils::getAttributeByNameOrThrow($node, 'name'));
+        $nameAttr = self::getAttributeOrThrow($node, 'name');
         $options = FbtUtils::getOptionsFromAttributes($node, FbtConstants::validParamOptions(), FbtConstants::REQUIRED_PARAM_OPTIONS);
 
-        $paramChildren = array_filter(FbtUtils::filterEmptyNodes($node->nodes), function (Node $node) {
+        $children = FbtUtils::filterEmptyNodes($node->nodes);
+        $paramChildren = array_filter($children, function (Node $node) {
             return $node->isElement();
         });
 
-        if (count($paramChildren) > 1) {
-            throw FbtUtils::errorAt($node, "$this->moduleName:param expects an string or HTML element, and only one");
+        // js~php diff: a text is the equivalent of an {expression} (a single space
+        // is kept, like in upstream fbt)
+        if (count($paramChildren) > 1 || ($children === [] && $node->innerHtml !== ' ')) {
+            throw FbtUtils::errorAt($node, "$this->moduleName:param expects an {expression} or JSX element, and only one");
         }
 
-        $paramArgs = [$nameAttr, $node->innerHtml];
+        // js~php diff: an HTML element is a rich content, which the fbs runtime doesn't accept
+        if ($this->moduleName === FbtConstants::MODULE_NAME['FBS']) {
+            foreach ($paramChildren as $child) {
+                if (FbtNodeChecker::forFbt($child) === null) {
+                    throw FbtUtils::errorAt($node, FbtConstants::FBS_RICH_CONTENT_ERROR);
+                }
+            }
+        }
+
+        if (strpos($nameAttr, "\n") !== false) {
+            $nameAttr = FbtUtils::normalizeSpaces($nameAttr);
+        }
+
+        $value = $node->innerHtml;
+        if (array_key_exists('number', $options)) {
+            $value = self::toNumberIfNumeric($value);
+        }
+
+        $paramArgs = [$nameAttr, $value];
 
         if (count($options) > 0) {
             $paramArgs[] = $options;
@@ -57,14 +92,31 @@ class GetNamespacedArgs
         }));
 
         if (count($pluralChildren) !== 1) {
-            throw FbtUtils::errorAt($node, "$this->moduleName:plural expects text or HTML element, and only one");
+            throw FbtUtils::errorAt($node, "$this->moduleName:plural expects text or an expression, and only one");
         }
 
         $singularNode = $pluralChildren[0];
         $singularText = $singularNode->innerHtml;
         $singularArg = FbtUtils::jsTrimRight(FbtUtils::normalizeSpaces($singularText));
 
+        if (isset($options['value'])) {
+            $options['value'] = self::toNumberIfNumeric($options['value']);
+        }
+
         return [$singularArg, $countAttr, $options];
+    }
+
+    /**
+     * js~php diff: HTML values are strings, so a numeric value is the equivalent of
+     * a JSX number expression (e.g. `{1234}`), which the runtime formats
+     * (see fbt::_param() and fbt::_plural())
+     *
+     * @param mixed $value
+     * @return mixed
+     */
+    private static function toNumberIfNumeric($value)
+    {
+        return is_string($value) && is_numeric($value) ? +$value : $value;
     }
 
     /**
@@ -82,7 +134,7 @@ class GetNamespacedArgs
 
         $validPronounUsages = FbtConstants::VALID_PRONOUN_USAGES;
         if (! isset($validPronounUsages[$typeAttr])) {
-            throw FbtUtils::errorAt($node, "$this->moduleName:pronoun attribute \"type\" must be one of [" . implode(', ', array_keys($validPronounUsages)) . ']');
+            throw FbtUtils::errorAt($node, "$this->moduleName:pronoun attribute \"type\" must be one of [" . implode(',', array_keys($validPronounUsages)) . ']');
         }
 
         $result = [$typeAttr];
@@ -111,14 +163,10 @@ class GetNamespacedArgs
         }));
 
         if (count($nameChildren) !== 1) {
-            throw FbtUtils::errorAt($node, "$this->moduleName:name expects text or HTML element, and only one");
+            throw FbtUtils::errorAt($node, "$this->moduleName:name expects text or an expression, and only one");
         }
 
-        $singularArg = $nameChildren[0];
-
-        if ($singularArg->isText()) {
-            $singularArg = FbtUtils::normalizeSpaces($singularArg->innerHtml);
-        }
+        $singularArg = FbtUtils::normalizeSpaces($nameChildren[0]->innerHtml);
 
         return [$nameAttribute, $singularArg, $genderAttribute];
     }
@@ -131,10 +179,10 @@ class GetNamespacedArgs
     public function sameParam(Node $node): array
     {
         if (! $node->isSelfClosing()) {
-            throw FbtUtils::errorAt($node, "$this->moduleName:same-param must be a self-closing element");
+            throw FbtUtils::errorAt($node, "Expected $this->moduleName:same-param to be selfClosing.");
         }
 
-        $nameAttr = FbtUtils::getAttributeByNameOrThrow($node, 'name');
+        $nameAttr = self::getAttributeOrThrow($node, 'name');
 
         return [$nameAttr];
     }
@@ -147,29 +195,27 @@ class GetNamespacedArgs
     public function enum(Node $node): array
     {
         if (! $node->isSelfClosing()) {
-            throw FbtUtils::errorAt($node, "$this->moduleName:enum must be a self-closing element");
+            throw FbtUtils::errorAt($node, "Expected $this->moduleName:enum to be selfClosing.");
         }
 
-        $rangeAttr = null;
+        $rangeAttr = self::getAttributeOrThrow($node, 'enum-range');
 
         try {
-            $rangeAttr = FbtUtils::getAttributeByNameOrThrow($node, 'enum-range');
             $rangeAttrValue = FbtUtils::extractEnumRange($rangeAttr);
         } catch (\Exception $ex) {
-            throw FbtUtils::errorAt($node, 'Expected JSON for enum-range attribute but got ' . $rangeAttr); // js~php diff
+            // js~php diff: the range is JSON (a JSX expression in upstream fbt)
+            throw FbtUtils::errorAt($node, 'Expected JSON for enum-range attribute but got ' . $rangeAttr);
         }
 
-        $valueAttr = FbtUtils::getAttributeByNameOrThrow($node, 'value');
-
-        // js~php diff: optional `key` (identity of the enum value)
-        $options = FbtUtils::getOptionsFromAttributes($node, FbtConstants::VALID_ENUM_OPTIONS, [
-            'enum-range' => true,
-            'value' => true,
-        ]);
+        $valueAttr = self::getAttributeOrThrow($node, 'value');
 
         $enumArgs = [$valueAttr, $rangeAttrValue];
-        if (count($options) > 0) {
-            $enumArgs[] = $options;
+
+        // js~php diff: optional `key` (identity of the enum value), other attributes
+        // are ignored (like in upstream fbt)
+        $key = FbtUtils::getAttributeByName($node, 'key');
+        if ($key !== null) {
+            $enumArgs[] = ['key' => $key];
         }
 
         return $enumArgs;

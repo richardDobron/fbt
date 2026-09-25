@@ -99,7 +99,7 @@ class intlNumUtils
             $replaced = preg_replace(self::_buildRegex($primaryPattern), $replaceWith, $wholeNumber, 1);
             if ($replaced !== $wholeNumber) {
                 $wholeNumber = $replaced;
-                $secondaryPatternString = '(\\d)(\\d{' . ($secondaryGroupingSize - 0) . '})(' . self::escapeRegex($thousandDelimiter) . ')';
+                $secondaryPatternString = '(\\d)(\\d{' . ($secondaryGroupingSize - 0) . '})(' . escapeRegex::escapeRegex($thousandDelimiter) . ')';
                 $secondaryPattern = self::_buildRegex($secondaryPatternString);
                 while (($replaced = preg_replace($secondaryPattern, $replaceWith, $wholeNumber, 1)) !== $wholeNumber) {
                     $wholeNumber = $replaced;
@@ -326,8 +326,8 @@ class intlNumUtils
         $_text = preg_replace('/^[^\d]*\-/u', "\u{0002}", $_text); // preserve negative sign
         $_text = preg_replace(self::matchCurrenciesWithDots(), '', $_text, 1); // remove some currencies
 
-        $decimalExp = self::escapeRegex($decimalDelimiter);
-        $numberExp = self::escapeRegex($numberDelimiter);
+        $decimalExp = escapeRegex::escapeRegex($decimalDelimiter);
+        $numberExp = escapeRegex::escapeRegex($numberDelimiter);
 
         $isThereADecimalSeparatorInBetween = self::_buildRegex('^[^\\d]*\\d.*' . $decimalExp . '.*\\d[^\\d]*$');
         if (! preg_match($isThereADecimalSeparatorInBetween, $_text)) {
@@ -337,7 +337,7 @@ class intlNumUtils
 
                 return self::_parseCodifiedNumber($_text);
             }
-            $isValidWithoutDecimal = self::_buildRegex('^[^\\d]*[\\d ' . self::escapeRegex($numberExp) . ']*[^\\d]*$');
+            $isValidWithoutDecimal = self::_buildRegex('^[^\\d]*[\\d ' . escapeRegex::escapeRegex($numberExp) . ']*[^\\d]*$');
             if (! preg_match($isValidWithoutDecimal, $_text)) {
                 $_text = '';
             }
@@ -449,17 +449,18 @@ class intlNumUtils
     public static function matchCurrenciesWithDots(): string
     {
         return self::_buildRegex(array_reduce(self::CURRENCIES_WITH_DOTS, function (string $regex, string $representation) {
-            return $regex . ($regex ? '|' : '') . '(' . self::escapeRegex($representation) . ')';
+            return $regex . ($regex ? '|' : '') . '(' . escapeRegex::escapeRegex($representation) . ')';
         }, ''));
     }
 
     /**
-     * Escapes regex special characters from a string, so it can be
-     * used as a raw search term inside an actual regex.
+     * js~php diff: equivalent of the JS `String(value)` conversion of a number
+     *
+     * @param mixed $value
      */
-    public static function escapeRegex(string $str): string
+    public static function toJsString($value): string
     {
-        return preg_quote($str, '/');
+        return self::_toString($value);
     }
 
     protected static function _buildRegex(string $pattern): string
@@ -468,7 +469,8 @@ class intlNumUtils
 
         if (! isset($_regexCache[$pattern])) {
             // js~php diff: JS RegExp `$` only matches at the very end (D modifier)
-            $_regexCache[$pattern] = '/' . $pattern . '/iuD';
+            // (a control character is the delimiter, so that "/" doesn't have to be escaped)
+            $_regexCache[$pattern] = "\x01" . $pattern . "\x01iuD";
         }
 
         return $_regexCache[$pattern];

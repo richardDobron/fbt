@@ -67,7 +67,8 @@ Both the above examples generate the following during [collection](collection.md
     }
   }
 ]
-```#### Required arguments:
+```
+#### Required arguments:
 * **singular phrase** `string`: HTML child in `<fbt:plural>` and argument 1 in `fbt::plural`
 * **count** `number`: `count` in `<fbt:plural>` and argument 2 in `fbt::plural`
 

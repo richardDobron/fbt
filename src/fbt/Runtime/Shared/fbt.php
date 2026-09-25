@@ -10,7 +10,7 @@ use function fbt\invariant;
 use fbt\Lib\FbtQTOverrides;
 use fbt\Runtime\FbtRuntimeTypes;
 use fbt\Runtime\FbtTable;
-use fbt\Runtime\Gender;
+use fbt\Runtime\GenderConst;
 
 class fbt
 {
@@ -40,11 +40,9 @@ class fbt
      * @param array|null $inputArgs - arguments from which to pull substitutions
      *    Example: [["singular", null], [null, ['title' => "felines!"]]]
      *
-     * @param array $options - options for runtime
-     * translation dictionary access. hk stands for hash key which is used to look
-     * up translated payload in React Native. ehk stands for enum hash key which
-     * contains a structured enums to hash keys map which will later be traversed
-     * to look up enum-less translated payload. eo stands for extra options.
+     * @param array $options - options for runtime translation dictionary access.
+     * hk stands for hash key which is used to look up the translated payload in
+     * FbtTranslations. eo stands for extra options.
      *
      * @param bool $reporting - js~php diff: whether the result can be inlined
      *
@@ -52,19 +50,13 @@ class fbt
      * @throws FbtException
      * @throws \fbt\Exceptions\FbtInvalidConfigurationException
      */
-    public function _($inputTable, ?array $inputArgs, array $options = [], bool $reporting = true)
+    public function _($inputTable, ?array $inputArgs, ?array $options = [], bool $reporting = true)
     {
-        // Adapt the input payload to the translated table and arguments we expect
-        //
-        // WWW: The payload is ready, as-is, and is pre-translated UNLESS we detect
-        //      the magic BINAST string which needs to be stripped if it exists.
-        //
-        // RN: we look up our translated table via the hash key (options.hk) and
-        //     flattened enum hash key (options.ehk), which partially resolves the
-        //     translation for the enums (should they exist).
-        //
-        // OSS: The table is the English payload, and, by default, we lookup the
-        //      translated payload via FbtTranslations
+        $options = $options ?? [];
+
+        // Adapt the input payload to the translated table and arguments we expect:
+        // the table is the English payload, and, by default, we look up the
+        // translated payload via FbtTranslations
         $translatedInput = FbtHooks::getTranslatedInput([
             'table' => $inputTable,
             'args' => $inputArgs,
@@ -86,15 +78,13 @@ class fbt
 
         if (is_array($pattern) && isset($pattern['__vcg'])) {
             $args = $args ?? [];
-            $gender = FbtHooks::getIntlViewerContext()->getGender();
+            $gender = FbtHooks::getViewerContext()->getGender();
             $variation = IntlVariationResolverImpl::getGenderVariations($gender);
             array_unshift($args, FbtTableAccessor::getGenderResult($variation, null, $gender));
         }
 
         if ($args) {
             if (! is_string($pattern)) {
-                // On mobile, table can be accessed at the native layer when fetching
-                // translations. If pattern is not a string here, table has not been accessed
                 $pattern = FbtTable::access($pattern, $args, 0, $tokens);
             }
 
@@ -103,7 +93,8 @@ class fbt
         }
 
         $patternHash = null;
-        if (is_array($pattern)) {
+        // js~php diff: a [pattern, hash] leaf is a list of two strings (other arrays are tables)
+        if (self::isPatternWithHash($pattern)) {
             // [fbt_impressions]
             // When logging of string impressions is enabled, the string and its hash
             // are packaged in an array. We want to log the hash
@@ -126,7 +117,7 @@ class fbt
         } else {
             throw new FbtException(
                 'Table access did not result in string: ' .
-                ($pattern === null ? 'null' : json_encode($pattern)) .
+                ($pattern === null ? 'undefined' : json_encode($pattern)) .
                 ', Type: ' .
                 gettype($pattern)
             );
@@ -134,10 +125,14 @@ class fbt
 
         // js~php diff: cached results are separated per runtime (fbt/fbs) and locale
         $cacheKey = static::class . "\0" . FbtHooks::locale() . "\0" . $patternString;
+        // js~php diff: results that can be inlined depend on the inline mode (and the
+        // callsite), so they are never cached
+        $inlineMode = FbtHooks::inlineMode();
+        $cacheable = ! $reporting || ! $inlineMode || $inlineMode === 'NO_INLINE';
         $cachedFbt = self::$_cachedFbtResults[$cacheKey] ?? null;
         $hasSubstitutions = self::_hasKeys($allSubstitutions);
 
-        if ($cachedFbt && ! $hasSubstitutions) {
+        if ($cachedFbt && ! $hasSubstitutions && $cacheable) {
             return $cachedFbt;
         } else {
             $fbtContent = substituteTokens::substitute(
@@ -155,14 +150,33 @@ class fbt
                 $options['eo'] ?? null,
                 $reporting
             );
-            // js~php diff: results that can be inlined depend on the inline mode,
-            // so they are never cached
-            if (! $hasSubstitutions && ! $reporting) {
+            if (! $hasSubstitutions && $cacheable) {
                 self::$_cachedFbtResults[$cacheKey] = $result;
             }
 
             return $result;
         }
+    }
+
+    /**
+     * Cached result of a pattern (upstream `fbt._getCachedFbt()`, for tests)
+     *
+     * @return FbtResultBase|mixed|null
+     */
+    public static function _getCachedFbt(string $patternString)
+    {
+        return self::$_cachedFbtResults[static::class . "\0" . FbtHooks::locale() . "\0" . $patternString] ?? null;
+    }
+
+    /**
+     * @param mixed $pattern
+     */
+    private static function isPatternWithHash($pattern): bool
+    {
+        return is_array($pattern)
+            && count($pattern) === 2
+            && is_string($pattern[0] ?? null)
+            && is_string($pattern[1] ?? null);
     }
 
     /**
@@ -262,9 +276,9 @@ class fbt
                 $number = +$number;
 
                 $variation = IntlVariationResolverImpl::getNumberVariations($number); // this will throw if `number` is invalid
-                if (is_numeric($value)) {
+                if (is_int($value) || is_float($value)) {
                     $substitution[$label] =
-                        intlNumUtils::formatNumberWithThousandDelimiters(+$value);
+                        intlNumUtils::formatNumberWithThousandDelimiters($value);
                 }
 
                 return FbtTableAccessor::getNumberResult($variation, $substitution, $number);
@@ -321,11 +335,12 @@ class fbt
 
         $variation = IntlVariationResolverImpl::getNumberVariations($count);
         $substitution = [];
-        if ($label) {
-            if (is_numeric($value)) {
-                $substitution[$label] = intlNumUtils::formatNumberWithThousandDelimiters(+$value);
+        // js~php diff: JS truthiness ("0" is truthy)
+        if ($label !== null && $label !== '') {
+            if (is_int($value) || is_float($value)) {
+                $substitution[$label] = intlNumUtils::formatNumberWithThousandDelimiters($value);
             } else {
-                $substitution[$label] = $value !== null && $value !== ''
+                $substitution[$label] = $value !== null && $value !== '' && $value !== false
                     ? $value
                     : intlNumUtils::formatNumberWithThousandDelimiters($count);
             }
@@ -335,10 +350,10 @@ class fbt
     }
 
     /**
-     * fbt::pronoun() takes a 'usage' string and a Gender::GENDER_CONST value and returns a tuple in the format:
+     * fbt::pronoun() takes a 'usage' string and a GenderConst value and returns a tuple in the format:
      * [variations, null]
      * @param int|string $usage - Example: FbtRuntimeTypes::VALID_PRONOUN_USAGES_TYPE['object'].
-     * @param int $gender - Example: Gender::GENDER_CONST['MALE_SINGULAR']
+     * @param int $gender - Example: GenderConst::MALE_SINGULAR
      * @param array|null $options - Example: [ 'human' => 1 ]
      *
      * @throws \fbt\Exceptions\FbtException
@@ -346,8 +361,8 @@ class fbt
     public static function _pronoun($usage, int $gender, ?array $options = null): array
     {
         invariant(
-            $gender !== Gender::GENDER_CONST['NOT_A_PERSON'] || ! $options || empty($options['human']),
-            'Gender cannot be Gender::GENDER_CONST[\'NOT_A_PERSON\'] if you set "human" to true'
+            $gender !== GenderConst::NOT_A_PERSON || ! $options || empty($options['human']),
+            'Gender cannot be GenderConst::NOT_A_PERSON if you set "human" to true'
         );
 
         // js~php diff: usage names are accepted too
@@ -368,36 +383,36 @@ class fbt
         $validPronounUsages = FbtRuntimeTypes::VALID_PRONOUN_USAGES_TYPE;
 
         switch ($gender) {
-            case Gender::GENDER_CONST['NOT_A_PERSON']:
+            case GenderConst::NOT_A_PERSON:
                 return $usage === $validPronounUsages['object'] ||
                     $usage === $validPronounUsages['reflexive']
-                    ? Gender::GENDER_CONST['NOT_A_PERSON']
-                    : Gender::GENDER_CONST['UNKNOWN_PLURAL'];
+                    ? GenderConst::NOT_A_PERSON
+                    : GenderConst::UNKNOWN_PLURAL;
 
-            case Gender::GENDER_CONST['FEMALE_SINGULAR']:
-            case Gender::GENDER_CONST['FEMALE_SINGULAR_GUESS']:
-                return Gender::GENDER_CONST['FEMALE_SINGULAR'];
+            case GenderConst::FEMALE_SINGULAR:
+            case GenderConst::FEMALE_SINGULAR_GUESS:
+                return GenderConst::FEMALE_SINGULAR;
 
-            case Gender::GENDER_CONST['MALE_SINGULAR']:
-            case Gender::GENDER_CONST['MALE_SINGULAR_GUESS']:
-                return Gender::GENDER_CONST['MALE_SINGULAR'];
+            case GenderConst::MALE_SINGULAR:
+            case GenderConst::MALE_SINGULAR_GUESS:
+                return GenderConst::MALE_SINGULAR;
 
-            case Gender::GENDER_CONST['MIXED_UNKNOWN']:
-            case Gender::GENDER_CONST['FEMALE_PLURAL']:
-            case Gender::GENDER_CONST['MALE_PLURAL']:
-            case Gender::GENDER_CONST['NEUTER_PLURAL']:
-            case Gender::GENDER_CONST['UNKNOWN_PLURAL']:
-                return Gender::GENDER_CONST['UNKNOWN_PLURAL'];
+            case GenderConst::MIXED_UNKNOWN:
+            case GenderConst::FEMALE_PLURAL:
+            case GenderConst::MALE_PLURAL:
+            case GenderConst::NEUTER_PLURAL:
+            case GenderConst::UNKNOWN_PLURAL:
+                return GenderConst::UNKNOWN_PLURAL;
 
-            case Gender::GENDER_CONST['NEUTER_SINGULAR']:
-            case Gender::GENDER_CONST['UNKNOWN_SINGULAR']:
+            case GenderConst::NEUTER_SINGULAR:
+            case GenderConst::UNKNOWN_SINGULAR:
                 return $usage === $validPronounUsages['reflexive']
-                    ? Gender::GENDER_CONST['NOT_A_PERSON']
-                    : Gender::GENDER_CONST['UNKNOWN_PLURAL'];
+                    ? GenderConst::NOT_A_PERSON
+                    : GenderConst::UNKNOWN_PLURAL;
         }
 
         // Mirrors the behavior of :fbt:pronoun when an unknown gender value is given.
-        return Gender::GENDER_CONST['NOT_A_PERSON'];
+        return GenderConst::NOT_A_PERSON;
     }
 
     /**

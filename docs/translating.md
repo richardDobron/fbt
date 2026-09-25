@@ -22,6 +22,10 @@ php ./vendor/bin/fbt generate-translations --src=./path/to/fbt/.source_strings.j
 | --translation-input     | ./translation_input.json | Path to translation input file                                                                          |
 | --translations=`[path]` | *none*                   | The translation files containing translations.<br />E.g. `--translations=./path/to/translations/*.json` |
 
+Translation files have to be named by their locale (e.g. `de_DE.json`), other files are skipped.
+Each file contains a translation group (`{"fb-locale": "de_DE", "translations": {...}}`), so it can be passed to `translate --translations`.
+Without `--translations`, the missing translations are written to the `--translation-input` file.
+
 ## Command to convert provided translations to jenkins:
 ```shell
 php ./vendor/bin/fbt translate --path=./path/to/fbt/ --stdin < translation_input.json
@@ -36,6 +40,27 @@ php ./vendor/bin/fbt translate --path=./path/to/fbt/ --translations=./path/to/tr
 | --pretty                         | no      | Pretty print the translation output                                                                    |
 | --translations=`[path]`          | *none*  | The translation files containing translations.<br />E.g. `--translations=/path/to/translations/*.json` |
 | --stdin < translation_input.json | *none*  | Instead of reading translation files and source file separately, read monolithic JSON file from STDIN  |
+
+### Writing to the standard output
+
+Without `--path`, the translations are written as JSON to the standard output instead of
+`translatedFbts.json`:
+
+```shell
+php ./vendor/bin/fbt translate --source-strings=./path/to/fbt/.source_strings.json --translations=./path/to/translations/*.json --jenkins
+php ./vendor/bin/fbt translate --stdin --jenkins -o=./path/to/output/ < translation_input.json
+```
+
+| name                         | default                | description                                                                                                  |
+|------------------------------|------------------------|--------------------------------------------------------------------------------------------------------------|
+| --source-strings=`[path]`    | `.source_strings.json` | The file containing source strings                                                                           |
+| --translations=`[paths]`     | *none*                 | The translation files (comma separated or globs), a translation group per file                              |
+| --stdin                      | no                     | Read a monolithic JSON payload (`{phrases, translationGroups}`) from STDIN                                   |
+| --jenkins                    | no                     | Output the translations by locale and callsite hash (`{"cs_CZ": {"<hash>": <payload>}}`), like `translatedFbts.json`. Without it, the output is a list of translation groups (`[{"fb-locale": ..., "translatedPhrases": [...]}]`) |
+| --fbt-hash-module=`[path]`   | *none*                 | Like `--jenkins`, with the hashes computed by a PHP file returning a callable                                |
+| --output-dir=`[dir]`, -o=`[dir]` | *none*             | Write one `<locale>.json` file per locale into the directory instead of the standard output                 |
+| --strict                     | no                     | Stop on missing translations                                                                                 |
+| --pretty                     | no                     | Pretty print the translation output                                                                          |
 
 ## JSON schema:
 

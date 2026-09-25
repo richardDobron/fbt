@@ -1,8 +1,7 @@
 <?php
 
 /**
- * Provides return values for fbt constructs calls. Here lives the platform
- * specific implementation.
+ * Provides return values for fbt constructs calls.
  */
 
 namespace fbt\Runtime\Shared;
@@ -17,7 +16,12 @@ class FbtTableAccessor
         return [[$value], null];
     }
 
-    public static function getGenderResult(array $variation, ?array $substitution, int $_gender): array
+    /**
+     * @param array $variation
+     * @param array|null $substitution
+     * @param int|null $gender
+     */
+    public static function getGenderResult(array $variation, ?array $substitution, $gender = null): array
     {
         // value is ignored here which will be used in alternative implementation
         // for different platform
@@ -27,9 +31,9 @@ class FbtTableAccessor
     /**
      * @param array $variation
      * @param array|null $substitution
-     * @param int|float $_numberValue
+     * @param int|float|null $numberValue
      */
-    public static function getNumberResult(array $variation, ?array $substitution, $_numberValue): array
+    public static function getNumberResult(array $variation, ?array $substitution, $numberValue = null): array
     {
         // value is ignored here which will be used in alternative implementation
         // for different platform

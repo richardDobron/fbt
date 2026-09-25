@@ -3,8 +3,12 @@
 namespace fbt\Transform\FbtTransform;
 
 use dobron\DomForge\Node;
+use fbt\Exceptions\FbtException;
 use fbt\Exceptions\FbtParserException;
-use fbt\Runtime\Shared\substituteTokens;
+
+use function fbt\invariant;
+
+use fbt\Transform\FbtTransform\FbtNodes\FbtNode;
 use fbt\Transform\FbtTransform\FbtNodes\FbtNodeUtil;
 
 class FbtUtils
@@ -72,8 +76,7 @@ class FbtUtils
      * If a child is not valid, it is flagged as an Implicit Parameter and is
      * automatically wrapped with <fbt:param>
      *
-     * @param $node - The node that contains the name of any parent node. For
-     * example, for a JSXElement, the containing name is the openingElement's name.
+     * @param $node - The node that contains the name of any parent node.
      */
     public static function validateNamespacedFbtElement(string $moduleName, Node $node): string
     {
@@ -110,7 +113,7 @@ class FbtUtils
         'doNotExtract' => 'doNotExtract',
         'number' => 'number',
         'preserveWhitespace' => 'preserveWhitespace',
-        'reporting' => 'reporting', // fbt diff
+        'reporting' => 'reporting', // js~php diff: whether the result can be inlined
     ];
 
     private static function canBeShortBoolAttr(string $name): bool
@@ -118,13 +121,33 @@ class FbtUtils
         return in_array($name, self::SHORT_BOOL_CANDIDATES);
     }
 
+    public static function isBooleanOption(string $name): bool
+    {
+        return self::canBeShortBoolAttr($name) || isset(FbtConstants::VALID_PRONOUN_OPTIONS_BOOLEAN[$name]);
+    }
+
     /**
-     * @return void
+     * js~php diff: attribute values are decoded like JSX attribute strings (e.g.
+     * `desc="Tom &amp; Jerry"` is "Tom & Jerry"), which also restores the values
+     * escaped by createElement().
+     */
+    public static function decodeAttributeValue(string $value): string
+    {
+        return html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    }
+
+    /**
+     * @param FbtCallExpression|Node $node
+     * @param string $moduleName
+     * @param string $name
+     * @param array<string, FbtCallExpression|Node> $paramSet
+     *
      * @throws FbtParserException
      */
-    public static function setUniqueToken(Node $node, string $moduleName, string $name, array &$paramSet): void
+    public static function setUniqueToken($node, string $moduleName, string $name, array &$paramSet): void
     {
-        if (isset($paramSet[$name])) {
+        $cachedNode = $paramSet[$name] ?? null;
+        if ($cachedNode && $cachedNode !== $node) {
             throw self::errorAt(
                 $node,
                 "There's already a token called \"$name\" in this $moduleName call. " .
@@ -132,8 +155,7 @@ class FbtUtils
                 "give this token a different name"
             );
         }
-
-        $paramSet[$name] = true;
+        $paramSet[$name] = $node;
     }
 
     /**
@@ -152,25 +174,95 @@ class FbtUtils
         $validValues = $validOptions[$option] ?? null;
 
         if (! array_key_exists($option, $validOptions) || empty($validValues)) {
-            throw new FbtParserException(
+            throw self::errorAt(
+                null,
                 "Invalid option \"$option\". " .
                 "Only allowed: " . implode(', ', array_keys($validOptions)) . " "
             );
         } elseif ($validValues !== true) {
-            if (is_bool($value)) { // js~php diff
+            if (is_bool($value)) {
                 $valueStr = $value ? 'true' : 'false';
-            } else {
+            } elseif (is_string($value)) {
                 $valueStr = $value;
+            } else {
+                throw self::errorAt(
+                    null,
+                    "Option \"$option\" has an invalid value. " .
+                    'Expected a string literal but value is ' . self::describe($value)
+                );
             }
             if (! isset($validValues[$valueStr])) {
-                throw new FbtParserException(
-                    "Invalid value, \"$valueStr\" for \"$option\". " .
+                throw self::errorAt(
+                    null,
+                    "Option \"$option\" has an invalid value: \"$valueStr\". " .
                     "Only allowed: " . implode(', ', array_keys($validValues))
                 );
             }
         }
 
         return $option;
+    }
+
+    /**
+     * Type name of a value for error messages (like `get_debug_type()` of PHP 8)
+     *
+     * @param mixed $value
+     */
+    public static function typeOf($value): string
+    {
+        if ($value === null) {
+            return 'null';
+        } elseif (is_bool($value)) {
+            return 'bool';
+        } elseif (is_int($value)) {
+            return 'int';
+        } elseif (is_float($value)) {
+            return 'float';
+        } elseif (is_string($value)) {
+            return 'string';
+        } elseif (is_array($value)) {
+            return 'array';
+        } elseif (is_object($value)) {
+            return get_class($value);
+        }
+
+        return gettype($value);
+    }
+
+    /**
+     * @param mixed $value
+     */
+    public static function varDump($value): string
+    {
+        if (is_string($value)) {
+            return $value;
+        } elseif ($value === null) {
+            return 'null';
+        } elseif (is_scalar($value)) {
+            return var_export($value, true);
+        } elseif (is_object($value) && ! $value instanceof \JsonSerializable) {
+            return get_class($value);
+        }
+
+        return (string)json_encode($value);
+    }
+
+    /**
+     * Value and type of a value for error messages, e.g. `'abc'` (string) or `null`
+     *
+     * @param mixed $value
+     */
+    public static function describe($value): string
+    {
+        if ($value === null) {
+            return '`null`';
+        } elseif (is_object($value)) {
+            return 'an instance of `' . get_class($value) . '`';
+        } elseif (is_string($value)) {
+            return '`' . var_export($value, true) . '` (string)';
+        }
+
+        return '`' . self::varDump($value) . '` (' . self::typeOf($value) . ')';
     }
 
     public static function checkOptions(array $options, array $validOptions): array
@@ -250,8 +342,7 @@ class FbtUtils
             // call, because they're required. They're not passed as options.
             // Ignored attributes are simply stripped from the function call entirely
             // and ignored.  By default, we ignore all "private" attributes with a
-            // leading '__' like '__source' and '__self' as added by certain
-            // babel/react plugins
+            // leading '__' (e.g. '__source')
             if (isset($ignoredAttrs[$name]) || strpos($name, '__') === 0) {
                 continue;
             }
@@ -259,8 +350,13 @@ class FbtUtils
             if (self::canBeShortBoolAttr($name) && ($value === null || $value === true)) {
                 // A tag attribute without value is default to boolean value true
                 $value = true;
-            } elseif ($value === 'true' || $value === 'false') {
-                $value = $value === 'true';
+            } elseif (is_string($value)) {
+                $value = self::decodeAttributeValue($value);
+                // js~php diff: HTML attributes are strings, so boolean options can
+                // be written as "true" / "false" (JSX uses {true} / {false})
+                if (($value === 'true' || $value === 'false') && self::isBooleanOption($name)) {
+                    $value = $value === 'true';
+                }
             }
 
             $options[self::checkOption($name, $validOptions, $value)] = $value;
@@ -269,14 +365,162 @@ class FbtUtils
         return $options;
     }
 
-    public static function errorAt(Node $node, string $msg): FbtParserException
+    /**
+     * @throws FbtException
+     */
+    public static function assertModuleName(string $moduleName): string
     {
-        $_node = clone $node;
-        $_node->dom()->removeCallback();
+        if ($moduleName === FbtConstants::MODULE_NAME['FBT'] || $moduleName === FbtConstants::MODULE_NAME['FBS']) {
+            return $moduleName;
+        }
 
-        $errorMsg = "$msg\n---\n" . $_node->outerHtml() . "\n---";
+        throw new FbtException("Unsupported module name: \"$moduleName\"");
+    }
 
-        return new FbtParserException($errorMsg);
+    /**
+     * @param mixed $value
+     * @throws FbtException
+     */
+    public static function enforceString($value, ?string $valueDesc = null): string
+    {
+        invariant(
+            is_string($value),
+            '%sExpected string value instead of %s (%s)',
+            $valueDesc ? $valueDesc . ' - ' : '',
+            self::varDump($value),
+            self::typeOf($value)
+        );
+
+        return $value;
+    }
+
+    /**
+     * @param mixed $value
+     * @throws FbtException
+     */
+    public static function enforceBoolean($value, ?string $valueDesc = null): bool
+    {
+        invariant(
+            is_bool($value),
+            '%sExpected boolean value instead of %s (%s)',
+            $valueDesc ? $valueDesc . ' - ' : '',
+            self::varDump($value),
+            self::typeOf($value)
+        );
+
+        return $value;
+    }
+
+    /**
+     * @param mixed $value
+     * @param array<string, mixed> $keys
+     * @throws FbtException
+     */
+    public static function enforceStringEnum($value, array $keys, ?string $valueDesc = null): string
+    {
+        invariant(
+            is_string($value) && array_key_exists($value, $keys),
+            '%sExpected value to be one of [%s] but we got %s (%s) instead',
+            $valueDesc ? $valueDesc . ' - ' : '',
+            implode(', ', array_keys($keys)),
+            self::varDump($value),
+            self::typeOf($value)
+        );
+
+        return $value;
+    }
+
+    /**
+     * @param mixed $value
+     * @throws FbtException
+     */
+    public static function enforceStringOrNull($value, ?string $valueDesc = null): ?string
+    {
+        return $value === null ? null : self::enforceString($value, $valueDesc);
+    }
+
+    /**
+     * @param mixed $value
+     * @throws FbtException
+     */
+    public static function enforceBooleanOrNull($value, ?string $valueDesc = null): ?bool
+    {
+        return $value === null ? null : self::enforceBoolean($value, $valueDesc);
+    }
+
+    /**
+     * @param mixed $value
+     * @param array<string, mixed> $keys
+     * @throws FbtException
+     */
+    public static function enforceStringEnumOrNull($value, array $keys, ?string $valueDesc = null): ?string
+    {
+        return $value === null ? null : self::enforceStringEnum($value, $keys, $valueDesc);
+    }
+
+    /**
+     * Creates an `fbt::_<<methodName>>(args)` runtime function call.
+     * <<methodName>> is inferred from the given fbt node.
+     *
+     * @param FbtNode $fbtNode
+     * @param array $args Arguments of the function call
+     * @param string|null $overrideMethodName Use this method name instead of the one from the fbtNode
+     */
+    public static function createFbtRuntimeArgCallExpression(
+        FbtNode $fbtNode,
+        array $args,
+        ?string $overrideMethodName = null
+    ): FbtCallExpression {
+        return new FbtCallExpression($fbtNode->moduleName, '_' . ($overrideMethodName ?? $fbtNode::TYPE), $args);
+    }
+
+    /**
+     * @param Node|FbtCallExpression|null $astNode
+     * @param string|\Throwable $msgOrError
+     */
+    public static function errorAt($astNode, $msgOrError = ''): FbtParserException
+    {
+        // js~php diff: the source code of an fbt call is its DOM node (if any)
+        if ($astNode instanceof FbtCallExpression) {
+            $astNode = $astNode->node;
+        }
+
+        // js~php diff: the location is the line of the fbt() callsite, or the DOM node
+        // (the equivalent of `astNode?.loc != null`)
+        if (is_string($msgOrError)) {
+            $error = new FbtParserException(self::createErrorMessageAtNode($astNode, $msgOrError));
+            $error->_hasBabelNodeLocation = $astNode !== null || FbtTransform::getCallsiteLine() !== null;
+        } else {
+            $error = $msgOrError;
+            // js~php diff: the message of an exception can't be changed, so an exception
+            // without location (or of another type) is replaced by an FbtParserException
+            if (! $error instanceof FbtParserException || $error->_hasBabelNodeLocation !== true) {
+                $error = new FbtParserException(
+                    self::createErrorMessageAtNode($astNode, $msgOrError->getMessage()),
+                    0,
+                    $msgOrError
+                );
+                $error->_hasBabelNodeLocation = $astNode !== null || FbtTransform::getCallsiteLine() !== null;
+            }
+        }
+
+        return $error;
+    }
+
+    private static function createErrorMessageAtNode(?Node $astNode, string $msg = ''): string
+    {
+        // js~php diff: the location is the line of the fbt() callsite (columns are not available)
+        $location = FbtTransform::getCallsiteLine();
+
+        $code = null;
+        if ($astNode !== null) {
+            $code = clone $astNode;
+            $code->dom()->removeCallback();
+        }
+
+        return ($location !== null ? "Line $location: " : '') .
+            $msg .
+            ($code !== null ? "\n---\n" . $code->outerHtml() . "\n---" : '');
     }
 
     /**
@@ -314,36 +558,6 @@ class FbtUtils
     }
 
     /**
-     * @param string $moduleName
-     * @param string $variationName
-     * @param $variationInfo
-     * @param Node $node
-     *
-     * @return int|float|string|null
-     * @throws FbtParserException
-     */
-    public static function getVariationValue(string $moduleName, string $variationName, $variationInfo, Node $node)
-    {
-        // Numbers allow only `true` or expression.
-        if (
-            $variationName === 'number' &&
-            is_bool($variationInfo)
-        ) {
-            if ($variationInfo !== true) {
-                throw self::errorAt(
-                    $node,
-                    "$moduleName::param's number option should be HTML element or 'true'"
-                );
-            }
-
-            // For number="true" we don't pass additional value.
-            return null;
-        }
-
-        return $variationInfo;
-    }
-
-    /**
      * Utility for getting the first attribute by name from a list of attributes.
      *
      * @param Node $node
@@ -358,7 +572,7 @@ class FbtUtils
             throw new FbtParserException("Unable to find attribute \"$name\".");
         }
 
-        return $node->getAttribute($name);
+        return self::getAttributeByName($node, $name);
     }
 
     /**
@@ -372,7 +586,11 @@ class FbtUtils
         $value = $node->getAttribute($name);
 
         // An attribute without value
-        return $value === true ? '' : $value;
+        if ($value === true) {
+            return '';
+        }
+
+        return is_string($value) ? self::decodeAttributeValue($value) : $value;
     }
 
     /**
@@ -388,7 +606,7 @@ class FbtUtils
             throw new FbtParserException("fbt enum range values must be string, got " . getType($range));
         }
 
-        $rangeArg = json_decode(html_entity_decode(html_entity_decode($range)));
+        $rangeArg = json_decode($range);
 
         $rangeProps = [];
         if (is_array($rangeArg)) {
@@ -439,11 +657,10 @@ class FbtUtils
      */
     public static function filterEmptyNodes(array $nodes): array
     {
-        // js~php diff
-
+        // Filter whitespace and comment block
         $filteredNodes = array_filter($nodes, function (Node $node) {
             if ($node->isText() && preg_match("/^\s+$/", $node->innerHtml)) {
-                return $node->innerHtml;
+                return false;
             }
 
             return ! $node->isComment();
@@ -476,20 +693,5 @@ class FbtUtils
         }
 
         return $mangledText;
-    }
-
-    /**
-     * Does the token substitution fbt() but without the string lookup.
-     * Used for in-place substitutions in translation mode.
-     *
-     * @deprecated Use \fbt\Runtime\Shared\substituteTokens::substitute()
-     *
-     * @return string|array
-     * @throws \fbt\Exceptions\FbtException
-     * @throws \fbt\Exceptions\FbtInvalidConfigurationException
-     */
-    public static function substituteTokens(string $template, array $args)
-    {
-        return substituteTokens::substitute($template, $args);
     }
 }

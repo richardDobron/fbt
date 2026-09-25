@@ -2,11 +2,10 @@
 
 namespace fbt\Transform\FbtTransform\FbtNodes;
 
-use dobron\DomForge\Node;
-
 use function fbt\invariant;
 
 use fbt\Runtime\Gender;
+use fbt\Transform\FbtTransform\FbtCallExpression;
 use fbt\Transform\FbtTransform\FbtConstants;
 use fbt\Transform\FbtTransform\FbtUtils;
 use fbt\Transform\FbtTransform\Translate\IntlVariations;
@@ -25,15 +24,11 @@ class FbtPronounNode extends FbtNode
     private static $candidatePronounGenders = null;
 
     /**
-     * Create a new class instance given the construct's DOM node and arguments.
+     * @param mixed $node
      */
-    public static function fromNode(string $moduleName, ?Node $node, array $callArgs): self
+    public static function fromNode(string $moduleName, $node): ?self
     {
-        return new self([
-            'moduleName' => $moduleName,
-            'node' => $node,
-            'callArgs' => $callArgs,
-        ]);
+        return FbtNodeUtil::createInstanceFromFbtConstructCallsite($moduleName, $node, self::class);
     }
 
     public function getOptions(array $validExtraOptions = []): ?array
@@ -76,7 +71,7 @@ class FbtPronounNode extends FbtNode
                 'key' => $rawOptions['key'] ?? null,
             ];
         } catch (\Throwable $error) {
-            throw FbtNodeUtil::errorAt($this->node, $error);
+            throw FbtUtils::errorAt($this->node, $error);
         }
     }
 
@@ -112,7 +107,7 @@ class FbtPronounNode extends FbtNode
                 ? mb_strtoupper(mb_substr($word, 0, 1)) . mb_substr($word, 1)
                 : $word;
         } catch (\Throwable $error) {
-            throw FbtNodeUtil::errorAt($this->node, $error);
+            throw FbtUtils::errorAt($this->node, $error);
         }
     }
 
@@ -139,7 +134,7 @@ class FbtPronounNode extends FbtNode
         ];
     }
 
-    public function getFbtRuntimeArg(): ?array
+    public function getFbtRuntimeArg(): ?FbtCallExpression
     {
         $pronounArgs = [
             FbtConstants::VALID_PRONOUN_USAGES[$this->options['type']],
@@ -149,7 +144,7 @@ class FbtPronounNode extends FbtNode
             $pronounArgs[] = [self::HUMAN_OPTION => 1];
         }
 
-        return $this->createFbtRuntimeArgCallExpression($pronounArgs);
+        return FbtUtils::createFbtRuntimeArgCallExpression($this, $pronounArgs);
     }
 
     /**
@@ -161,7 +156,8 @@ class FbtPronounNode extends FbtNode
     {
         switch ($gender) {
             case Gender::GENDER_CONST['NOT_A_PERSON']:
-                return $usage === 'object' || $usage === 'reflexive'
+                return $usage === FbtConstants::VALID_PRONOUN_USAGES_KEYS['object'] ||
+                    $usage === FbtConstants::VALID_PRONOUN_USAGES_KEYS['reflexive']
                     ? Gender::GENDER_CONST['NOT_A_PERSON']
                     : Gender::GENDER_CONST['UNKNOWN_PLURAL'];
 
@@ -182,7 +178,7 @@ class FbtPronounNode extends FbtNode
 
             case Gender::GENDER_CONST['NEUTER_SINGULAR']:
             case Gender::GENDER_CONST['UNKNOWN_SINGULAR']:
-                return $usage === 'reflexive'
+                return $usage === FbtConstants::VALID_PRONOUN_USAGES_KEYS['reflexive']
                     ? Gender::GENDER_CONST['NOT_A_PERSON']
                     : Gender::GENDER_CONST['UNKNOWN_PLURAL'];
         }
@@ -198,7 +194,7 @@ class FbtPronounNode extends FbtNode
         if (self::$candidatePronounGenders === null) {
             $set = [];
             foreach (Gender::GENDER_CONST as $gender) {
-                foreach (array_keys(FbtConstants::VALID_PRONOUN_USAGES) as $usage) {
+                foreach (FbtConstants::VALID_PRONOUN_USAGES_KEYS as $usage) {
                     $set[self::getPronounGenderKey($usage, $gender)] = true;
                 }
             }

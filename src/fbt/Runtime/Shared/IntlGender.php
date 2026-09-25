@@ -5,7 +5,7 @@ namespace fbt\Runtime\Shared;
 use function fbt\invariant;
 
 use fbt\Lib\DisplayGenderConst;
-use fbt\Runtime\Gender;
+use fbt\Runtime\GenderConst;
 
 class IntlGender
 {
@@ -21,23 +21,23 @@ class IntlGender
     {
         invariant(0 < count($genders), 'Cannot have pronoun for zero people');
 
-        return count($genders) === 1 ? reset($genders) : Gender::GENDER_CONST['UNKNOWN_PLURAL'];
+        return count($genders) === 1 ? reset($genders) : GenderConst::UNKNOWN_PLURAL;
     }
 
     /**
-     * Maps a DisplayGenderConst value to a Gender::GENDER_CONST value usable by Fbt.
+     * Maps a DisplayGenderConst value to a GenderConst value usable by Fbt.
      */
     public static function fromDisplayGender(string $gender): int
     {
         switch ($gender) {
             case DisplayGenderConst::MALE:
-                return Gender::GENDER_CONST['MALE_SINGULAR'];
+                return GenderConst::MALE_SINGULAR;
             case DisplayGenderConst::FEMALE:
-                return Gender::GENDER_CONST['FEMALE_SINGULAR'];
+                return GenderConst::FEMALE_SINGULAR;
             case DisplayGenderConst::NEUTER:
-                return Gender::GENDER_CONST['NEUTER_SINGULAR'];
+                return GenderConst::NEUTER_SINGULAR;
             default:
-                return Gender::GENDER_CONST['NOT_A_PERSON'];
+                return GenderConst::NOT_A_PERSON;
         }
     }
 }

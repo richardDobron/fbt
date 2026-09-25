@@ -2,11 +2,10 @@
 
 namespace fbt\Transform\FbtTransform\FbtNodes;
 
-use dobron\DomForge\Node;
-
 use function fbt\invariant;
 
 use fbt\Runtime\FbtRuntimeTypes;
+use fbt\Transform\FbtTransform\FbtCallExpression;
 use fbt\Transform\FbtTransform\FbtConstants;
 use fbt\Transform\FbtTransform\FbtUtils;
 use fbt\Transform\FbtTransform\Translate\IntlVariations;
@@ -20,15 +19,11 @@ class FbtParamNode extends FbtNode
     public const TYPE = FbtNodeType::PARAM;
 
     /**
-     * Create a new class instance given the construct's DOM node and arguments.
+     * @param mixed $node
      */
-    public static function fromNode(string $moduleName, ?Node $node, array $callArgs): self
+    public static function fromNode(string $moduleName, $node): ?self
     {
-        return new self([
-            'moduleName' => $moduleName,
-            'node' => $node,
-            'callArgs' => $callArgs,
-        ]);
+        return FbtNodeUtil::createInstanceFromFbtConstructCallsite($moduleName, $node, self::class);
     }
 
     public function getOptions(array $validExtraOptions = []): ?array
@@ -74,7 +69,7 @@ class FbtParamNode extends FbtNode
                 'value' => $args[1],
             ];
         } catch (\Throwable $error) {
-            throw FbtNodeUtil::errorAt($this->node, $error);
+            throw FbtUtils::errorAt($this->node, $error);
         }
     }
 
@@ -121,11 +116,11 @@ class FbtParamNode extends FbtNode
 
             return FbtNodeUtil::tokenNameToTextPattern($this->getTokenName($argsMap));
         } catch (\Throwable $error) {
-            throw FbtNodeUtil::errorAt($this->node, $error);
+            throw FbtUtils::errorAt($this->node, $error);
         }
     }
 
-    public function getFbtRuntimeArg(): ?array
+    public function getFbtRuntimeArg(): ?FbtCallExpression
     {
         $gender = $this->options['gender'];
         $number = $this->options['number'];
@@ -145,6 +140,6 @@ class FbtParamNode extends FbtNode
             $args[] = $variationValues;
         }
 
-        return $this->createFbtRuntimeArgCallExpression($args);
+        return FbtUtils::createFbtRuntimeArgCallExpression($this, $args);
     }
 }

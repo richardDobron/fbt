@@ -19,11 +19,11 @@ class FbtConstants
         "subject" => 3,
     ];
 
-    public const PRONOUN_USAGE = [
-        "OBJECT" => 0,
-        "POSSESSIVE" => 1,
-        "REFLEXIVE" => 2,
-        "SUBJECT" => 3,
+    public const VALID_PRONOUN_USAGES_KEYS = [
+        "object" => "object",
+        "possessive" => "possessive",
+        "reflexive" => "reflexive",
+        "subject" => "subject",
     ];
 
     public const PLURAL_REQUIRED_ATTRIBUTES = [
@@ -77,6 +77,12 @@ class FbtConstants
         'key' => true,
     ];
 
+    /**
+     * js~php diff: error for rich contents (e.g. HTML elements) in fbs
+     */
+    public const FBS_RICH_CONTENT_ERROR = 'Expected fbs parameter value to be the result of fbs(), <fbs/>, or a string; ' .
+        'instead we got an HTML element';
+
     public const VALID_PRONOUN_OPTIONS_BOOLEAN = [
         'human' => true,
         'capitalize' => true,
@@ -86,13 +92,13 @@ class FbtConstants
      * Valid options allowed in the fbt(...) calls.
      */
     public const VALID_FBT_OPTIONS = [
-        'project' => true,
         'author' => true,
-        'preserveWhitespace' => true,
-        'subject' => true,
         'common' => true,
         'doNotExtract' => true,
-        'reporting' => true, // fbt diff
+        'preserveWhitespace' => true,
+        'project' => true,
+        'subject' => true,
+        'reporting' => true, // js~php diff: whether the result can be inlined
     ];
 
     public const FBT_BOOLEAN_OPTIONS = [

@@ -5,7 +5,7 @@ namespace fbt\Runtime\Shared;
 use function fbt\invariant;
 
 use fbt\Lib\IntlNumberType;
-use fbt\Transform\FbtTransform\Translate\IntlVariations;
+use fbt\Lib\IntlVariations;
 
 class IntlVariationResolverImpl
 {
@@ -25,7 +25,7 @@ class IntlVariationResolverImpl
         $numType = IntlNumberType::get(FbtHooks::locale())->getVariation($number);
 
         invariant(
-            $numType & IntlVariations::INTL_VARIATION_MASK['NUMBER'],
+            $numType & IntlVariations::BITMASK_NUMBER,
             'Invalid number provided: %s (%s)',
             $numType,
             gettype($numType)
@@ -43,7 +43,7 @@ class IntlVariationResolverImpl
     public static function getGenderVariations(int $gender): array
     {
         invariant(
-            $gender & IntlVariations::INTL_VARIATION_MASK['GENDER'],
+            $gender & IntlVariations::BITMASK_GENDER,
             'Invalid gender provided: %s (%s)',
             $gender,
             gettype($gender)

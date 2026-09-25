@@ -2,10 +2,9 @@
 
 namespace fbt\Transform\FbtTransform\FbtNodes;
 
-use dobron\DomForge\Node;
-
 use function fbt\invariant;
 
+use fbt\Transform\FbtTransform\FbtCallExpression;
 use fbt\Transform\FbtTransform\FbtConstants;
 use fbt\Transform\FbtTransform\FbtUtils;
 use fbt\Transform\FbtTransform\Translate\IntlVariations;
@@ -19,15 +18,11 @@ class FbtPluralNode extends FbtNode
     public const TYPE = FbtNodeType::PLURAL;
 
     /**
-     * Create a new class instance given the construct's DOM node and arguments.
+     * @param mixed $node
      */
-    public static function fromNode(string $moduleName, ?Node $node, array $callArgs): self
+    public static function fromNode(string $moduleName, $node): ?self
     {
-        return new self([
-            'moduleName' => $moduleName,
-            'node' => $node,
-            'callArgs' => $callArgs,
-        ]);
+        return FbtNodeUtil::createInstanceFromFbtConstructCallsite($moduleName, $node, self::class);
     }
 
     public function getOptions(array $validExtraOptions = []): ?array
@@ -44,51 +39,25 @@ class FbtPluralNode extends FbtNode
                 isset($args[1]),
                 '`count`, the second function argument - Expected value'
             );
-            $showCount = $rawOptions['showCount'] ?? null;
-            if ($showCount !== null) {
-                invariant(
-                    is_string($showCount) && isset(FbtConstants::SHOW_COUNT[$showCount]),
-                    '`showCount` option - Expected value to be one of [%s] but we got %s instead',
-                    implode(', ', array_keys(FbtConstants::SHOW_COUNT)),
-                    is_scalar($showCount) ? (string)$showCount : gettype($showCount)
-                );
-            } else {
-                $showCount = FbtConstants::SHOW_COUNT_KEYS['no'];
-            }
-
-            $name = self::enforceStringOrNull($rawOptions['name'] ?? null, '`name` option');
-            if ($name === null || $name === '') {
-                $name = $showCount !== FbtConstants::SHOW_COUNT_KEYS['no'] ? FbtConstants::PLURAL_PARAM_TOKEN : null;
-            }
+            $showCount = FbtUtils::enforceStringEnumOrNull(
+                $rawOptions['showCount'] ?? null,
+                FbtConstants::SHOW_COUNT,
+                '`showCount` option'
+            ) ?: FbtConstants::SHOW_COUNT_KEYS['no'];
+            $name = FbtUtils::enforceStringOrNull($rawOptions['name'] ?? null, '`name` option') ?:
+                ($showCount !== FbtConstants::SHOW_COUNT_KEYS['no'] ? FbtConstants::PLURAL_PARAM_TOKEN : null);
 
             return [
                 'count' => $args[1],
-                'many' => self::enforceStringOrNull($rawOptions['many'] ?? null, '`many` option'),
+                'many' => FbtUtils::enforceStringOrNull($rawOptions['many'] ?? null, '`many` option'),
                 'name' => $name,
                 'showCount' => $showCount,
                 'value' => $rawOptions['value'] ?? null,
                 'key' => $rawOptions['key'] ?? null,
             ];
         } catch (\Throwable $error) {
-            throw FbtNodeUtil::errorAt($this->node, $error);
+            throw FbtUtils::errorAt($this->node, $error);
         }
-    }
-
-    /**
-     * @param mixed $value
-     *
-     * @throws \fbt\Exceptions\FbtException
-     */
-    private static function enforceStringOrNull($value, string $valueDesc): ?string
-    {
-        invariant(
-            $value === null || is_string($value),
-            '%s - Expected string value instead of %s',
-            $valueDesc,
-            gettype($value)
-        );
-
-        return $value;
     }
 
     /**
@@ -157,7 +126,7 @@ class FbtPluralNode extends FbtNode
                 }
             );
         } catch (\Throwable $error) {
-            throw FbtNodeUtil::errorAt($this->node, $error);
+            throw FbtUtils::errorAt($this->node, $error);
         }
     }
 
@@ -183,7 +152,7 @@ class FbtPluralNode extends FbtNode
         ];
     }
 
-    public function getFbtRuntimeArg(): ?array
+    public function getFbtRuntimeArg(): ?FbtCallExpression
     {
         $showCount = $this->options['showCount'];
         $name = $this->options['name'];
@@ -201,6 +170,6 @@ class FbtPluralNode extends FbtNode
             }
         }
 
-        return $this->createFbtRuntimeArgCallExpression($pluralArgs);
+        return FbtUtils::createFbtRuntimeArgCallExpression($this, $pluralArgs);
     }
 }

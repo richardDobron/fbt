@@ -2,7 +2,7 @@
 
 namespace fbt\Transform\FbtRuntime;
 
-use fbt\Transform\FbtTransform\fbtHash;
+use fbt\Services\TranslationsGeneratorService;
 use fbt\Transform\FbtTransform\FbtUtils;
 use fbt\Transform\FbtTransform\JSFbtUtil;
 
@@ -27,7 +27,7 @@ class FbtRuntimeTransform
         if ($extraOptions) {
             $options['eo'] = $extraOptions;
         }
-        $options['hk'] = fbtHash::fbtHashKey($jsfbt['t']);
+        $options['hk'] = call_user_func(TranslationsGeneratorService::getFbtHashKey(), $jsfbt['t']);
 
         return [
             'table' => self::getRuntimeTable($jsfbt['t']),
@@ -36,9 +36,6 @@ class FbtRuntimeTransform
     }
 
     /**
-     * Replaces the leaves of the JSFBT tree with their texts, where clear token
-     * names are replaced by their aliases. A single leaf becomes a string.
-     *
      * @return string|array
      */
     public static function getRuntimeTable(array $jsfbtTree)

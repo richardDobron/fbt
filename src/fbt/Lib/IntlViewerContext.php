@@ -3,7 +3,7 @@
 namespace fbt\Lib;
 
 use fbt\FbtConfig;
-use fbt\Transform\FbtTransform\Translate\IntlVariations;
+use fbt\Lib\IntlVariations;
 
 class IntlViewerContext implements IntlViewerContextInterface
 {

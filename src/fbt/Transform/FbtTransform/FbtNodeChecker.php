@@ -3,25 +3,44 @@
 namespace fbt\Transform\FbtTransform;
 
 use dobron\DomForge\Node;
+use fbt\Transform\FbtTransform\FbtNodes\FbtNodeType;
 
 class FbtNodeChecker
 {
     /** @var string */
     public $moduleName;
 
+    /** @var FbtNodeChecker|null */
+    private static $fbsChecker = null;
+    /** @var FbtNodeChecker|null */
+    private static $fbtChecker = null;
+
     public function __construct(string $moduleName)
     {
-        $this->moduleName = $moduleName;
+        $this->moduleName = FbtUtils::assertModuleName($moduleName);
     }
 
+    /**
+     * js~php diff: the equivalent of the module constant `fbtChecker`
+     */
     public static function fbtChecker(): self
     {
-        return new FbtNodeChecker(FbtConstants::MODULE_NAME['FBT']);
+        return self::$fbtChecker ?? (self::$fbtChecker = new FbtNodeChecker(FbtConstants::MODULE_NAME['FBT']));
     }
 
+    /**
+     * js~php diff: the equivalent of the module constant `fbsChecker`
+     */
     public static function fbsChecker(): self
     {
-        return new FbtNodeChecker(FbtConstants::MODULE_NAME['FBS']);
+        return self::$fbsChecker ?? (self::$fbsChecker = new FbtNodeChecker(FbtConstants::MODULE_NAME['FBS']));
+    }
+
+    public static function forModule(string $moduleName): FbtNodeChecker
+    {
+        return FbtUtils::assertModuleName($moduleName) === FbtConstants::MODULE_NAME['FBT']
+            ? self::fbtChecker()
+            : self::fbsChecker();
     }
 
     public function isNameOfModule(string $name): bool
@@ -41,6 +60,52 @@ class FbtNodeChecker
             return self::fbtChecker();
         } elseif (self::fbsChecker()->isElement($node)) {
             return self::fbsChecker();
+        }
+
+        return null;
+    }
+
+    /**
+     * @param mixed $node
+     */
+    public static function forFbtFunctionCall($node): ?FbtNodeChecker
+    {
+        if (self::fbtChecker()->isModuleCall($node)) {
+            return self::fbtChecker();
+        } elseif (self::fbsChecker()->isModuleCall($node)) {
+            return self::fbsChecker();
+        }
+
+        return null;
+    }
+
+    /**
+     * Whether the node is an fbt() call, i.e. `fbt(contents, description, options)`
+     *
+     * @param mixed $node
+     */
+    public function isModuleCall($node): bool
+    {
+        return $node instanceof FbtCallExpression &&
+            $node->name === null &&
+            $this->isNameOfModule($node->moduleName);
+    }
+
+    /**
+     * @param mixed $node
+     * @return string|null - FbtNodeType
+     *
+     * js~php diff: fbt constructs within HTML elements aren't converted to function
+     * calls yet (see FbtElementNode::createChildNode()), so their DOM nodes are accepted too
+     */
+    public function getFbtConstructNameFromFunctionCall($node): ?string
+    {
+        if ($node instanceof FbtCallExpression) {
+            return $this->isNameOfModule($node->moduleName) ? FbtNodeType::cast($node->name) : null;
+        }
+
+        if ($node instanceof Node && $this->isNamespacedElement($node)) {
+            return FbtNodeType::cast(FbtUtils::validateNamespacedFbtElement($this->moduleName, $node));
         }
 
         return null;

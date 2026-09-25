@@ -13,4 +13,22 @@ class FbtNodeType
     public const PRONOUN = 'pronoun';
     public const SAME_PARAM = 'sameParam';
     public const TEXT = 'text';
+
+    /**
+     * Returns the given value if it's a valid FbtNodeType, or null.
+     */
+    public static function cast(?string $value): ?string
+    {
+        return in_array($value, [
+            self::ELEMENT,
+            self::ENUM,
+            self::IMPLICIT_PARAM,
+            self::NAME,
+            self::PARAM,
+            self::PLURAL,
+            self::PRONOUN,
+            self::SAME_PARAM,
+            self::TEXT,
+        ], true) ? $value : null;
+    }
 }

@@ -38,9 +38,6 @@ class JsJson
     }
 
     /**
-     * Recursively converts arrays to objects whose properties follow the JS order,
-     * so that they can be embedded into data serialized by json_encode().
-     *
      * @param mixed $value
      *
      * @return mixed
@@ -91,7 +88,6 @@ class JsJson
             return $key >= 0 && $key <= 4294967294;
         }
 
-        // Keys of stdClass properties are always strings
         return preg_match('/^(0|[1-9]\d*)$/', $key) === 1 && (float)$key <= 4294967294;
     }
 

@@ -9,14 +9,18 @@ use function fbt\invariant;
 use fbt\Runtime\Shared\fbs;
 use fbt\Runtime\Shared\fbt;
 use fbt\Transform\FbtRuntime\FbtRuntimeTransform;
+use fbt\Transform\FbtTransform\FbtCallExpression;
 use fbt\Transform\FbtTransform\FbtConstants;
+use fbt\Transform\FbtTransform\FbtNodeChecker;
 use fbt\Transform\FbtTransform\FbtNodes\FbtElementNode;
 use fbt\Transform\FbtTransform\FbtNodes\FbtImplicitParamNode;
 use fbt\Transform\FbtTransform\FbtNodes\FbtNode;
-use fbt\Transform\FbtTransform\FbtNodes\FbtNodeUtil;
+use fbt\Transform\FbtTransform\FbtNodes\FbtNodeType;
 use fbt\Transform\FbtTransform\FbtNodes\FbtParamNode;
 use fbt\Transform\FbtTransform\FbtNodes\StringVariationArg;
 use fbt\Transform\FbtTransform\FbtNodes\StringVariationArgsMap;
+use fbt\Transform\FbtTransform\FbtRuntimeScope;
+use fbt\Transform\FbtTransform\FbtUtils;
 use fbt\Transform\FbtTransform\JSFbtBuilder;
 use fbt\Transform\FbtTransform\Utils\AddLeafToTree;
 
@@ -24,8 +28,9 @@ use fbt\Transform\FbtTransform\Utils\AddLeafToTree;
  * This class provides utility methods to process the standard fbt function call
  * (i.e. `fbt(...)`)
  *
- * js~php diff: instead of generating the code of the `fbt::_()` runtime call,
- * the runtime call is executed right away.
+ * js~php diff: instead of generating the code of the `fbt::_()` runtime call, the
+ * callsite is compiled to meta-phrases once (see compile()), and the runtime call is
+ * executed with the values of the callsite (see render()).
  *
  * A meta-phrase is an array of the form:
  *   [
@@ -33,6 +38,7 @@ use fbt\Transform\FbtTransform\Utils\AddLeafToTree;
  *     'fbtNode' => FbtElementNode|FbtImplicitParamNode,
  *     'phrase' => array,
  *     'parentIndex' => int|null,
+ *     'runtimeInput' => array{table: mixed, options: array|null},
  *   ]
  */
 class FbtFunctionCallProcessor
@@ -43,35 +49,28 @@ class FbtFunctionCallProcessor
     private $validFbtExtraOptions;
     /** @var string */
     private $moduleName;
-    /** @var Node|null */
+    /** @var FbtCallExpression */
     private $node;
-    /**
-     * [contents (list of strings or DOM nodes), description, options]
-     * @var array
-     */
-    private $callArgs;
+    /** @var FbtNodeChecker */
+    private $nodeChecker;
     /** @var array */
     private $pluginOptions;
 
     /**
-     * @param string $moduleName
-     * @param Node|null $node - the <fbt> DOM node
-     * @param array $callArgs - [contents (list of strings or DOM nodes), description, options]
+     * @param FbtCallExpression $node - the fbt(contents, description, options) call
      * @param array $defaultFbtOptions - e.g. the file-level docblock options
      * @param array $validFbtExtraOptions
      * @param array $pluginOptions
      */
     public function __construct(
-        string $moduleName,
-        ?Node $node,
-        array $callArgs,
+        FbtCallExpression $node,
         array $defaultFbtOptions = [],
         array $validFbtExtraOptions = [],
         array $pluginOptions = []
     ) {
-        $this->moduleName = $moduleName;
+        $this->moduleName = $node->moduleName;
         $this->node = $node;
-        $this->callArgs = $callArgs;
+        $this->nodeChecker = FbtNodeChecker::forModule($node->moduleName);
         $this->defaultFbtOptions = $defaultFbtOptions;
         $this->validFbtExtraOptions = $validFbtExtraOptions;
         $this->pluginOptions = $pluginOptions;
@@ -82,11 +81,13 @@ class FbtFunctionCallProcessor
      */
     private function _assertHasEnoughArguments(): self
     {
-        if (count($this->callArgs) < 2) {
-            throw FbtNodeUtil::errorAt(
-                $this->node,
-                "Expected {$this->moduleName} calls to have at least two arguments. " .
-                'Only ' . count($this->callArgs) . ' was given.'
+        $moduleName = $this->moduleName;
+        $node = $this->node;
+        if (count($node->arguments) < 2) {
+            throw FbtUtils::errorAt(
+                $node,
+                "Expected $moduleName calls to have at least two arguments. " .
+                'Only ' . count($node->arguments) . ' was given.'
             );
         }
 
@@ -100,18 +101,17 @@ class FbtFunctionCallProcessor
     private function _createFbtRuntimeCallForMetaPhrase(
         array $metaPhrases,
         int $metaPhraseIndex,
-        array $stringVariationRuntimeArgs
+        array $stringVariationRuntimeArgs,
+        FbtRuntimeScope $scope
     ) {
         $metaPhrase = $metaPhrases[$metaPhraseIndex];
-        /** @var FbtElementNode|FbtImplicitParamNode $fbtNode */
-        $fbtNode = $metaPhrase['fbtNode'];
-
-        $runtimeInput = FbtRuntimeTransform::transform($metaPhrase['phrase'], $fbtNode->getExtraOptions());
-        $fbtRuntimeArgs = $this->_createFbtRuntimeArgumentsForMetaPhrase(
+        $runtimeInput = $metaPhrase['runtimeInput'];
+        $fbtRuntimeArgs = $scope->evaluate($this->_createFbtRuntimeArgumentsForMetaPhrase(
             $metaPhrases,
             $metaPhraseIndex,
-            $stringVariationRuntimeArgs
-        );
+            $stringVariationRuntimeArgs,
+            $scope
+        ));
 
         $runtime = $this->moduleName === FbtConstants::MODULE_NAME['FBS'] ? new fbs() : new fbt();
 
@@ -128,14 +128,15 @@ class FbtFunctionCallProcessor
      * @return mixed - result of the fbt runtime call
      * @throws \fbt\Exceptions\FbtException
      */
-    private function _createRootFbtRuntimeCall(array $metaPhrases)
+    private function _createRootFbtRuntimeCall(array $metaPhrases, FbtRuntimeScope $scope)
     {
         $stringVariationRuntimeArgs = $this->_createRuntimeArgsFromStringVariantNodes($metaPhrases[0]);
 
         return $this->_createFbtRuntimeCallForMetaPhrase(
             $metaPhrases,
             0,
-            $stringVariationRuntimeArgs
+            $stringVariationRuntimeArgs,
+            $scope
         );
     }
 
@@ -214,10 +215,7 @@ class FbtFunctionCallProcessor
     private function _metaPhrases(FbtElementNode $fbtElement): array
     {
         $stringVariationArgs = $fbtElement->getArgsForStringVariationCalc();
-        $jsfbtBuilder = new JSFbtBuilder(
-            $stringVariationArgs,
-            ! empty($this->pluginOptions['reactNativeMode'])
-        );
+        $jsfbtBuilder = new JSFbtBuilder($stringVariationArgs);
         $argsCombinations = $jsfbtBuilder->getStringVariationCombinations();
         $compactStringVariations = $this->_compactStringVariationArgs($argsCombinations[0] ?? []);
         $jsfbtMetadata = $jsfbtBuilder->buildMetadata($compactStringVariations['array']);
@@ -286,9 +284,11 @@ class FbtFunctionCallProcessor
                     'fbtNode' => $fbtNode,
                     'parentIndex' => $this->_getPhraseParentIndex($fbtNode, $list),
                     'phrase' => $phrase,
+                    // js~php diff: the equivalent of babel-plugin-fbt-runtime
+                    'runtimeInput' => FbtRuntimeTransform::transform($phrase, $fbtNode->getExtraOptions()),
                 ];
             } catch (\Throwable $error) {
-                throw FbtNodeUtil::errorAt($fbtNode->node, $error);
+                throw FbtUtils::errorAt($fbtNode->node, $error);
             }
         }, $list);
     }
@@ -304,14 +304,105 @@ class FbtFunctionCallProcessor
      */
     public function convertToFbtRuntimeCall(): array
     {
-        $fbtElement = $this->_convertToFbtNode();
-        $metaPhrases = $this->_metaPhrases($fbtElement);
-        $result = $this->_createRootFbtRuntimeCall($metaPhrases);
+        $metaPhrases = $this->compile();
 
         return [
-            'result' => $result,
+            'result' => $this->render($metaPhrases, new FbtRuntimeScope()),
             'metaPhrases' => $metaPhrases,
         ];
+    }
+
+    /**
+     * Generates the list of meta-phrases of current `fbt()` callsite.
+     *
+     * @throws \fbt\Exceptions\FbtParserException
+     * @throws \fbt\Exceptions\FbtException
+     */
+    public function compile(): array
+    {
+        return $this->_metaPhrases($this->_convertToFbtNode());
+    }
+
+    /**
+     * Executes the `fbt::_()` runtime call of the given meta-phrases (see compile()).
+     *
+     * @param array $metaPhrases
+     * @param FbtRuntimeScope $scope - the values of the callsite
+     *
+     * @return mixed - result of the fbt runtime call
+     * @throws \fbt\Exceptions\FbtException
+     */
+    public function render(array $metaPhrases, FbtRuntimeScope $scope)
+    {
+        return $this->_createRootFbtRuntimeCall($metaPhrases, $scope);
+    }
+
+    /**
+     * fbt constructs are not allowed to be direct children of fbt constructs.
+     * For example it is not okay to have
+     *    <fbt desc='desc'>
+     *      <fbt:param name="outer">
+     *        <fbt:param name="inner">
+     *          variable
+     *        </fbt:param>
+     *      </fbt:param>
+     *    </fbt>
+     * However, the next example is okay because the inner `fbt:param` sits inside
+     * an inner fbt.
+     *    <fbt desc='outer string'>
+     *      <fbt:param name="outer">
+     *        <fbt desc='inner string'>
+     *          <fbt:param name="inner">
+     *            variable
+     *          </fbt:param>
+     *        </fbt>
+     *      </fbt:param>
+     *    </fbt>
+     *
+     * @throws \fbt\Exceptions\FbtParserException
+     */
+    public function throwIfExistsNestedFbtConstruct(): void
+    {
+        $nodeChecker = $this->nodeChecker;
+
+        FbtCallExpression::traverse($this->node, function ($node, array $parentPath) use ($nodeChecker) {
+            $constructs = [
+                FbtNodeType::ENUM,
+                FbtNodeType::NAME,
+                FbtNodeType::PARAM,
+                FbtNodeType::PLURAL,
+                FbtNodeType::PRONOUN,
+                FbtNodeType::SAME_PARAM,
+            ];
+
+            $childFbtConstructName = $nodeChecker->getFbtConstructNameFromFunctionCall($node);
+            if (! in_array($childFbtConstructName, $constructs, true)) {
+                return;
+            }
+
+            for ($i = count($parentPath) - 1; $i >= 0; $i--) {
+                $parentNode = $parentPath[$i];
+                if (
+                    FbtNodeChecker::forFbtFunctionCall($parentNode) !== null ||
+                    // children <fbt> aren't converted to function calls
+                    ($parentNode instanceof Node && FbtNodeChecker::forFbt($parentNode) !== null)
+                ) {
+                    return;
+                }
+
+                $parentFbtConstructName = $nodeChecker->getFbtConstructNameFromFunctionCall($parentNode);
+                if (in_array($parentFbtConstructName, $constructs, true)) {
+                    throw FbtUtils::errorAt(
+                        $parentNode,
+                        'Expected fbt constructs to not nest inside fbt constructs, ' .
+                        'but found ' .
+                        "{$nodeChecker->moduleName}.$childFbtConstructName " .
+                        'nest inside ' .
+                        "{$nodeChecker->moduleName}.$parentFbtConstructName"
+                    );
+                }
+            }
+        });
     }
 
     /**
@@ -323,12 +414,17 @@ class FbtFunctionCallProcessor
     {
         $this->_assertHasEnoughArguments();
 
-        return FbtElementNode::fromNode(
-            $this->moduleName,
-            $this->node,
-            $this->callArgs,
-            $this->validFbtExtraOptions
-        );
+        $moduleName = $this->moduleName;
+        $node = $this->node;
+        $elementNode = FbtElementNode::fromNode($moduleName, $node, $this->validFbtExtraOptions);
+        if ($elementNode === null) {
+            throw FbtUtils::errorAt(
+                $node,
+                "$moduleName: unable to create FbtElementNode from given node"
+            );
+        }
+
+        return $elementNode;
     }
 
     /**
@@ -337,7 +433,8 @@ class FbtFunctionCallProcessor
     private function _createFbtRuntimeArgumentsForMetaPhrase(
         array $metaPhrases,
         int $metaPhraseIndex,
-        array $stringVariationRuntimeArgs
+        array $stringVariationRuntimeArgs,
+        FbtRuntimeScope $scope
     ): array {
         $metaPhrase = $metaPhrases[$metaPhraseIndex];
 
@@ -353,7 +450,8 @@ class FbtFunctionCallProcessor
             $this->_createRuntimeArgsFromImplicitParamNodes(
                 $metaPhrases,
                 $metaPhraseIndex,
-                $stringVariationRuntimeArgs
+                $stringVariationRuntimeArgs,
+                $scope
             )
         );
     }
@@ -396,7 +494,8 @@ class FbtFunctionCallProcessor
     private function _createRuntimeArgsFromImplicitParamNodes(
         array $metaPhrases,
         int $metaPhraseIndex,
-        array $runtimeArgsFromStringVariationNodes
+        array $runtimeArgsFromStringVariationNodes,
+        FbtRuntimeScope $scope
     ): array {
         $fbtRuntimeArgs = [];
         foreach ($metaPhrases as $innerMetaPhraseIndex => $innerMetaPhrase) {
@@ -413,10 +512,11 @@ class FbtFunctionCallProcessor
             $innerResult = $this->_createFbtRuntimeCallForMetaPhrase(
                 $metaPhrases,
                 $innerMetaPhraseIndex,
-                $runtimeArgsFromStringVariationNodes
+                $runtimeArgsFromStringVariationNodes,
+                $scope
             );
 
-            $fbtRuntimeArgs[] = $innerMetaPhraseFbtNode->createFbtRuntimeArgCallExpression([
+            $fbtRuntimeArgs[] = FbtUtils::createFbtRuntimeArgCallExpression($innerMetaPhraseFbtNode, [
                 $innerMetaPhraseFbtNode->getOuterTokenAlias(),
                 // js~php diff: the equivalent of cloning the JSX element with the inner result as children
                 $innerMetaPhraseFbtNode->wrapContents((string)$innerResult),
@@ -437,12 +537,12 @@ class FbtFunctionCallProcessor
         $defaultFbtOptions = $this->defaultFbtOptions;
 
         $ret = [
-            'author' => ($fbtElementOptions['author'] ?? $defaultFbtOptions['author'] ?? null) ?: null,
-            'common' => ($fbtElementOptions['common'] ?? $defaultFbtOptions['common'] ?? null) ?: null,
-            'doNotExtract' => ($fbtElementOptions['doNotExtract'] ?? $defaultFbtOptions['doNotExtract'] ?? null) ?: null,
-            'preserveWhitespace' => ($fbtElementOptions['preserveWhitespace'] ?? $defaultFbtOptions['preserveWhitespace'] ?? null) ?: null,
+            'author' => ($fbtElementOptions['author'] ?? FbtUtils::enforceStringOrNull($defaultFbtOptions['author'] ?? null)) ?: null,
+            'common' => ($fbtElementOptions['common'] ?? FbtUtils::enforceBooleanOrNull($defaultFbtOptions['common'] ?? null)) ?: null,
+            'doNotExtract' => ($fbtElementOptions['doNotExtract'] ?? FbtUtils::enforceBooleanOrNull($defaultFbtOptions['doNotExtract'] ?? null)) ?: null,
+            'preserveWhitespace' => ($fbtElementOptions['preserveWhitespace'] ?? FbtUtils::enforceBooleanOrNull($defaultFbtOptions['preserveWhitespace'] ?? null)) ?: null,
             // js~php diff: the subject is a runtime value, so it's not a part of the phrase
-            'project' => $fbtElementOptions['project'] ?: (string)($defaultFbtOptions['project'] ?? ''),
+            'project' => $fbtElementOptions['project'] ?: FbtUtils::enforceString($defaultFbtOptions['project'] ?? ''),
         ];
 
         // delete nullish options

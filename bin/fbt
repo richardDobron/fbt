@@ -1,4 +1,4 @@
-#!/usr/bin/php
+#!/usr/bin/env php
 <?php
 
 if (php_sapi_name() !== 'cli') {
@@ -13,60 +13,296 @@ if (!is_file($root_app . '/vendor/autoload.php')) {
 
 require $root_app . '/vendor/autoload.php';
 
+use fbt\FbtConfig;
+use fbt\Services\CollectFbtsService;
+use fbt\Services\TranslationsGeneratorService;
 use Minicli\App;
+use Minicli\Command\CommandCall;
 
+$positionalArgs = function (CommandCall $call): array {
+    return array_values(array_filter(array_slice($call->args, 2), function (string $arg) {
+        return $arg !== '' && $arg[0] !== '-';
+    }));
+};
+
+$listParam = function (?string $value): array {
+    $files = [];
+    foreach (array_filter(array_map('trim', explode(',', (string)$value))) as $pattern) {
+        $matches = glob($pattern);
+        $files = array_merge($files, $matches ?: [$pattern]);
+    }
+
+    return $files;
+};
+
+$run = function (callable $command) {
+    try {
+        exit((int)$command());
+    } catch (\Throwable $e) {
+        fwrite(STDERR, $e->getMessage() . PHP_EOL);
+        exit(1);
+    }
+};
+
+$usage = <<<USAGE
+Usage: fbt <command> [options]
+
+Commands:
+  collect-fbts           Collect fbt strings from PHP files
+  generate-translations  Generate missing translation hashes from collected source strings
+  translate              Build translation payloads from source strings and translations
+  migrate-v5             Migrate translation files from v4 to v5
+
+Run "fbt <command> --help" for the options of a command.
+
+USAGE;
+
+$commandName = $argv[1] ?? null;
+if ($commandName === null || in_array($commandName, ['help', '--help', '-h'], true)) {
+    echo $usage;
+    exit(0);
+}
+
+if (! in_array($commandName, ['collect-fbts', 'generate-translations', 'translate', 'migrate-v5'], true)) {
+    fwrite(STDERR, "Unknown command \"$commandName\"." . PHP_EOL . PHP_EOL . $usage);
+    exit(1);
+}
+
+// minicli/minicli 1.0.4 declares an implicitly nullable parameter, which is deprecated since PHP 8.4
+$errorReporting = error_reporting(error_reporting() & ~E_DEPRECATED);
 $app = new App([]);
+error_reporting($errorReporting);
 
-$app->registerCommand('collect-fbts', function (Minicli\Command\CommandCall $app) {
-    $generateTranslationsService = new \fbt\Services\CollectFbtsService();
-    $generateTranslationsService->collectFromFiles(
-        $app->getParam('--path'),
-        $app->getParam('--src'),
-        $app->getParam('--fbt-common-path'),
-        true
-    );
+$app->registerCommand('collect-fbts', function (CommandCall $call) use ($run, $positionalArgs) {
+    $run(function () use ($call, $positionalArgs) {
+        if ($call->hasFlag('--help') || $call->hasFlag('-h')) {
+            echo <<<HELP
+Collect fbt instances from source:
+  fbt collect-fbts --path=<dir> --src=<dir> [--fbt-common-path=<file>]
+      Collects the strings of the PHP files in <src> into <path>/.source_strings.json
+
+  fbt collect-fbts [options] [files or directories...]
+      Writes the collected strings as JSON to STDOUT instead of a file
+      (the source code is read from STDIN when no file is given)
+
+Options:
+  --packager=text|phrase|both|none  Packager to use (text by default)
+  --hash-module=md5|tiger           Hashing module of the text packager
+  --terse                           Output only hashes, texts and descriptions
+  --pretty                          Pretty-print the JSON output
+  --gen-outer-token-name            Generate the outer token name of inner strings
+  --gen-fbt-nodes                   Generate the fbt element nodes of the callsites
+  --options=<a,b>                   Additional options of fbt(...) calls
+  --fbt-common-path=<file>          Path to the common strings module
+
+HELP;
+
+            return 0;
+        }
+
+        if ($call->getParam('--fbt-common-path')) {
+            FbtConfig::set('fbtCommonPath', $call->getParam('--fbt-common-path'));
+        }
+        if ($call->getParam('--hash-module')) {
+            FbtConfig::set('hash_module', $call->getParam('--hash-module'));
+        }
+        if ($call->hasFlag('--gen-outer-token-name')) {
+            FbtConfig::set('generateOuterTokenName', true);
+        }
+        if ($call->getParam('--options')) {
+            FbtConfig::set('extraOptions', array_fill_keys(array_map('trim', explode(',', $call->getParam('--options'))), true));
+        }
+
+        $collectFbtsService = new CollectFbtsService();
+
+        if ($call->getParam('--path')) {
+            $collectFbtsService->collectFromFiles(
+                $call->getParam('--path'),
+                $call->getParam('--src') ?: '.',
+                $call->getParam('--fbt-common-path'),
+                true
+            );
+        } else {
+            $files = $positionalArgs($call);
+            $output = $collectFbtsService->collect($files, [
+                'packager' => $call->getParam('--packager') ?: CollectFbtsService::PACKAGER_TYPES['TEXT'],
+                'terse' => $call->hasFlag('--terse'),
+                'genFbtNodes' => $call->hasFlag('--gen-fbt-nodes'),
+                'stdin' => $files === [] ? stream_get_contents(STDIN) : null,
+            ]);
+            // like upstream `process.stdout.write('\n')`
+            echo CollectFbtsService::toJSON($output, $call->hasFlag('--pretty')) . "\n";
+        }
+
+        $errors = $collectFbtsService->getErrorCount();
+        if ($errors > 0) {
+            fwrite(STDERR, "Failed in $errors callsite(s)." . PHP_EOL . "Current working directory: '" . getcwd() . "'" . PHP_EOL);
+
+            return 1;
+        }
+
+        return 0;
+    });
 });
 
-$app->registerCommand('generate-translations', function (Minicli\Command\CommandCall $app) {
-    $generateTranslationsService = new \fbt\Services\TranslationsGeneratorService();
-    $generateTranslationsService->generateTranslations(
-        $app->getParam('--src') ?: ".source_strings.json",
-        $app->getParam('--translations'),
-        $app->getParam('--translation-input') ?: "translation_input.json"
-    );
+$app->registerCommand('generate-translations', function (CommandCall $call) use ($run) {
+    $run(function () use ($call) {
+        if ($call->hasFlag('--help') || $call->hasFlag('-h')) {
+            echo <<<HELP
+Generate missing translation hashes from collected source strings:
+  fbt generate-translations [--src=<file>] [--translations=<glob>] [--translation-input=<file>]
+      Adds an empty translation for every collected hash that is not translated yet
+
+Options:
+  --src=<file>                The file containing source strings (.source_strings.json by default)
+  --translations=<glob>       The translation files to update, named by locale (e.g. de_DE.json)
+  --translation-input=<file>  The translation input file written when --translations is not given
+                              (translation_input.json by default)
+
+HELP;
+
+            return 0;
+        }
+
+        $generateTranslationsService = new TranslationsGeneratorService();
+        $generateTranslationsService->generateTranslations(
+            $call->getParam('--src') ?: ".source_strings.json",
+            $call->getParam('--translations'),
+            $call->getParam('--translation-input') ?: "translation_input.json"
+        );
+
+        return 0;
+    });
 });
 
-$app->registerCommand('translate', function (Minicli\Command\CommandCall $app) {
-    $generateTranslationsService = new \fbt\Services\TranslationsGeneratorService();
-    $generateTranslationsService->exportTranslations(
-        $app->getParam('--path'),
-        $app->getParam('--translations'),
-        $app->hasFlag('--stdin') ? file_get_contents("php://stdin") : null,
-        $app->hasFlag('--pretty')
-    );
+$app->registerCommand('translate', function (CommandCall $call) use ($run, $listParam) {
+    $run(function () use ($call, $listParam) {
+        if ($call->hasFlag('--help') || $call->hasFlag('-h')) {
+            echo <<<HELP
+Translate fbt phrases with provided translations:
+  fbt translate --path=<dir> [--translations=<glob>] [--stdin] [--pretty]
+      Writes the runtime dictionary <path>/translatedFbts.json
+
+  fbt translate [options]
+      Writes the translations as JSON to STDOUT (or to --output-dir) instead of translatedFbts.json
+
+Options:
+  --source-strings=<file>       The file containing source strings (.source_strings.json by default)
+  --translations=<files>        The translation files (comma separated or globs), a translation group per file
+  --stdin                       Read a monolithic JSON payload ({phrases, translationGroups}) from STDIN
+  --jenkins                     Output a mapping from the "jenkins" hash to the translation payload
+  --fbt-hash-module=<file>      Like --jenkins, with a hash module (a PHP file returning a callable)
+  --output-dir=<dir>, -o=<dir>  Split the output by locale into <dir>/<locale>.json
+  --strict                      Stop execution on missing translations
+  --pretty                      Pretty print the translation output
+
+HELP;
+
+            return 0;
+        }
+
+        $translationsGeneratorService = new TranslationsGeneratorService();
+
+        if ($call->getParam('--path')) {
+            $translationsGeneratorService->exportTranslations(
+                $call->getParam('--path'),
+                $call->getParam('--translations'),
+                $call->hasFlag('--stdin') ? stream_get_contents(STDIN) : null,
+                $call->hasFlag('--pretty')
+            );
+
+            return 0;
+        }
+
+        $options = [
+            'jenkins' => $call->hasFlag('--jenkins'),
+            'hashModule' => $call->getParam('--fbt-hash-module') ?: false,
+            'strict' => $call->hasFlag('--strict'),
+        ];
+
+        $output = $call->hasFlag('--stdin')
+            ? TranslationsGeneratorService::processJSON(json_decode(stream_get_contents(STDIN), true), $options)
+            : TranslationsGeneratorService::processFiles(
+                $call->getParam('--source-strings') ?: '.source_strings.json',
+                $listParam($call->getParam('--translations')),
+                $options
+            );
+
+        $pretty = $call->hasFlag('--pretty');
+        $outputDir = $call->getParam('--output-dir') ?: $call->getParam('-o');
+        if ($outputDir) {
+            if (! is_dir($outputDir)) {
+                mkdir($outputDir, 0777, true);
+            }
+            // js~php diff: the files are named by locale (upstream writes `<key>.json` files
+            // containing `{key: value}`, i.e. `0.json` for the first translation group)
+            foreach ($output as $key => $translations) {
+                // translation groups are a list, the translations by hash are keyed by locale
+                $isGroup = is_int($key) && isset($translations['fb-locale']);
+                $locale = $isGroup ? $translations['fb-locale'] : $key;
+                file_put_contents(
+                    $outputDir . '/' . $locale . '.json',
+                    TranslationsGeneratorService::toJSON($isGroup ? [$translations] : [$locale => $translations], $pretty)
+                );
+            }
+        } else {
+            echo TranslationsGeneratorService::toJSON($output, $pretty, ! $options['jenkins'] && ! $options['hashModule']);
+        }
+
+        return 0;
+    });
 });
 
-$app->registerCommand('migrate-v5', function (Minicli\Command\CommandCall $app) {
-    $translations = $app->getParam('--translations');
-    if (! $translations) {
-        echo 'Usage: fbt migrate-v5 --translations="path/to/translations/*.json" [--src=.source_strings.json]' . PHP_EOL;
+$app->registerCommand('migrate-v5', function (CommandCall $call) use ($run) {
+    $run(function () use ($call) {
+        $help = <<<HELP
+Migrate translation files from v4 to v5:
+  fbt migrate-v5 --translations=<glob> [--src=<file>]
+      Converts the translation keys of the files in place and reports the strings to translate again
 
-        return;
-    }
+Options:
+  --translations=<glob>  The translation files to migrate, e.g. "path/to/translations/*.json"
+  --src=<file>           The source strings collected by v5 (.source_strings.json), used to report
+                         translations of strings that no longer exist and strings without translation
 
-    $migrateService = new \fbt\Services\MigrateV5Service($app->getParam('--src') ?: null);
-    $report = $migrateService->migrateFiles(glob($translations));
+HELP;
 
-    echo "Migrated translation keys: {$report['migrated']}" . PHP_EOL;
+        if ($call->hasFlag('--help') || $call->hasFlag('-h')) {
+            echo $help;
 
-    foreach ($report['unknown'] as $locale => $hashes) {
-        echo "\033[33m[$locale] " . count($hashes) . " translation(s) of strings that no longer exist (they have to be translated again):\033[0m" . PHP_EOL;
-        echo '  ' . implode(PHP_EOL . '  ', $hashes) . PHP_EOL;
-    }
+            return 0;
+        }
 
-    foreach ($report['untranslated'] as $locale => $hashes) {
-        echo "[$locale] " . count($hashes) . ' string(s) without translation' . PHP_EOL;
-    }
+        $translations = $call->getParam('--translations');
+        if (! $translations) {
+            fwrite(STDERR, $help);
+
+            return 1;
+        }
+
+        $files = glob($translations) ?: [];
+        if ($files === []) {
+            fwrite(STDERR, "No translation files match \"$translations\"." . PHP_EOL);
+
+            return 1;
+        }
+
+        $migrateService = new \fbt\Services\MigrateV5Service($call->getParam('--src') ?: null);
+        $report = $migrateService->migrateFiles($files);
+
+        echo "Migrated translation keys: {$report['migrated']}" . PHP_EOL;
+
+        foreach ($report['unknown'] as $locale => $hashes) {
+            echo "\033[33m[$locale] " . count($hashes) . " translation(s) of strings that no longer exist (they have to be translated again):\033[0m" . PHP_EOL;
+            echo '  ' . implode(PHP_EOL . '  ', $hashes) . PHP_EOL;
+        }
+
+        foreach ($report['untranslated'] as $locale => $hashes) {
+            echo "[$locale] " . count($hashes) . ' string(s) without translation' . PHP_EOL;
+        }
+
+        return 0;
+    });
 });
 
 $app->runCommand($argv);

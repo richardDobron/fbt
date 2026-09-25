@@ -2,10 +2,9 @@
 
 namespace fbt\Transform\FbtTransform\FbtNodes;
 
-use dobron\DomForge\Node;
-
 use function fbt\invariant;
 
+use fbt\Transform\FbtTransform\FbtCallExpression;
 use fbt\Transform\FbtTransform\FbtConstants;
 use fbt\Transform\FbtTransform\FbtUtils;
 
@@ -18,15 +17,11 @@ class FbtEnumNode extends FbtNode
     public const TYPE = FbtNodeType::ENUM;
 
     /**
-     * Create a new class instance given the construct's DOM node and arguments.
+     * @param mixed $node
      */
-    public static function fromNode(string $moduleName, ?Node $node, array $callArgs): self
+    public static function fromNode(string $moduleName, $node): ?self
     {
-        return new self([
-            'moduleName' => $moduleName,
-            'node' => $node,
-            'callArgs' => $callArgs,
-        ]);
+        return FbtNodeUtil::createInstanceFromFbtConstructCallsite($moduleName, $node, self::class);
     }
 
     public function getOptions(array $validExtraOptions = []): ?array
@@ -62,7 +57,7 @@ class FbtEnumNode extends FbtNode
                 'key' => $rawOptions['key'] ?? null,
             ];
         } catch (\Throwable $error) {
-            throw FbtNodeUtil::errorAt($this->node, $error);
+            throw FbtUtils::errorAt($this->node, $error);
         }
     }
 
@@ -76,7 +71,7 @@ class FbtEnumNode extends FbtNode
 
             return $text;
         } catch (\Throwable $error) {
-            throw FbtNodeUtil::errorAt($this->node, $error);
+            throw FbtUtils::errorAt($this->node, $error);
         }
     }
 
@@ -91,9 +86,9 @@ class FbtEnumNode extends FbtNode
         ];
     }
 
-    public function getFbtRuntimeArg(): ?array
+    public function getFbtRuntimeArg(): ?FbtCallExpression
     {
-        return $this->createFbtRuntimeArgCallExpression([
+        return FbtUtils::createFbtRuntimeArgCallExpression($this, [
             $this->options['value'],
             $this->options['range'],
         ]);

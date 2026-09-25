@@ -55,9 +55,9 @@ class FbtTable
      *
      * For example, if we have a female viewer, and a PLURAL number and a POST enum
      * value, in the above example, we'll first attempt to get:
-     * table[FEMALE][PLURAL][POST].  undefined. Back Up, attempting to get
-     * table[FEMALE]['*'][POST].  undefined also. since it's the same as the '*'
-     * table['*'][PLURAL][POST].  ALSO undefined. Deduped to '*'
+     * table[FEMALE][PLURAL][POST].  Not set. Back Up, attempting to get
+     * table[FEMALE]['*'][POST].  Not set either. since it's the same as the '*'
+     * table['*'][PLURAL][POST].  ALSO not set. Deduped to '*'
      * table['*']['*'][POST].  There it is.
      *
      * @param array $args - fbt runtime arguments
@@ -72,7 +72,7 @@ class FbtTable
     {
         if ($argsIndex >= count($args)) {
             // We've reached the end of our arguments at a valid entry, in which case
-            // table is now a string (leaf) or undefined (key doesn't exist)
+            // table is now a string (leaf) or null (key doesn't exist)
             // js~php diff: a [pattern, hash] leaf is a list of two strings
             invariant(
                 is_string($table) || (

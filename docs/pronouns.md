@@ -4,15 +4,15 @@ title: Pronouns
 sidebar_label: Pronouns
 ---
 
-`fbt:pronoun` and `fbt::pronoun` both take a required `FbtConstants::PRONOUN_USAGE` enum and a [`Gender::GENDER_CONST`](https://github.com/richardDobron/fbt/blob/main/src/fbt/Runtime/Gender.php) enum:
+`fbt:pronoun` and `fbt::pronoun` both take a required usage (`FbtConstants::VALID_PRONOUN_USAGES`) and a [`Gender::GENDER_CONST`](https://github.com/richardDobron/fbt/blob/main/src/fbt/Runtime/Gender.php) enum:
 ```php
 class FbtConstants
 {
-    const PRONOUN_USAGE = [
-        "OBJECT" => 0,
-        "POSSESSIVE" => 1,
-        "REFLEXIVE" => 2,
-        "SUBJECT" => 3
+    const VALID_PRONOUN_USAGES = [
+        "object" => 0,
+        "possessive" => 1,
+        "reflexive" => 2,
+        "subject" => 3,
     ];
 }
 

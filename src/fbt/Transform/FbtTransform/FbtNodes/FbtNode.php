@@ -3,9 +3,7 @@
 namespace fbt\Transform\FbtTransform\FbtNodes;
 
 use dobron\DomForge\Node;
-use fbt\Runtime\Shared\fbs;
-use fbt\Runtime\Shared\fbt;
-use fbt\Transform\FbtTransform\FbtConstants;
+use fbt\Transform\FbtTransform\FbtCallExpression;
 use fbt\Transform\FbtTransform\FbtNodeChecker;
 
 /**
@@ -27,8 +25,10 @@ abstract class FbtNode
     /** @var FbtNode[] */
     public $children = [];
     /**
-     * Reference to the DOM node that this fbt node represents (if any)
-     * @var Node|null
+     * Reference to the node that this fbt node represents (the equivalent of the babel node):
+     * the FbtCallExpression of fbt calls and constructs, or the DOM node of HTML elements
+     * and texts (js~php diff: or null for the texts of the functional form)
+     * @var FbtCallExpression|Node|null
      */
     public $node;
     /** @var FbtNodeChecker */
@@ -43,18 +43,11 @@ abstract class FbtNode
      * @var array|null
      */
     public $options;
-    /**
-     * js~php diff: arguments of the fbt construct "function call", which were
-     * extracted from the DOM node (see GetNamespacedArgs), or null.
-     * @var array|null
-     */
-    protected $callArgs;
 
     /**
      * @param array{
      *   moduleName: string,
-     *   node?: Node|null,
-     *   callArgs?: array|null,
+     *   node?: FbtCallExpression|Node|null,
      *   children?: FbtNode[]|null,
      *   parent?: FbtNode|null,
      *   validExtraOptions?: array,
@@ -66,12 +59,11 @@ abstract class FbtNode
     {
         $this->moduleName = $params['moduleName'];
         $this->node = $params['node'] ?? null;
-        $this->callArgs = $params['callArgs'] ?? null;
         if (isset($params['parent'])) {
             $this->parent = $params['parent'];
         }
         $this->children = $params['children'] ?? [];
-        $this->nodeChecker = new FbtNodeChecker($this->moduleName);
+        $this->nodeChecker = FbtNodeChecker::forModule($this->moduleName);
         $this->options = $this->getOptions($params['validExtraOptions'] ?? []);
         $this->initCheck();
     }
@@ -182,13 +174,20 @@ abstract class FbtNode
         return ['type' => static::TYPE];
     }
 
+    public function getCallNode(): ?FbtCallExpression
+    {
+        return $this->node instanceof FbtCallExpression ? $this->node : null;
+    }
+
     /**
      * Returns the list of arguments of this fbt node
      * (assuming that it's based on a function call), or null.
      */
     public function getCallNodeArguments(): ?array
     {
-        return $this->callArgs;
+        $callNode = $this->getCallNode();
+
+        return $callNode ? $callNode->arguments : null;
     }
 
     /**
@@ -220,22 +219,8 @@ abstract class FbtNode
      *
      * This method is responsible to generate <<runtimeFbtArg>>
      *
-     * js~php diff: the runtime argument is evaluated right away instead of
-     * generating the code of the runtime call.
+     * js~php diff: the runtime call is evaluated by FbtRuntimeScope instead of
+     * generating its code.
      */
-    abstract public function getFbtRuntimeArg(): ?array;
-
-    /**
-     * Creates the result of an `fbt::_<<methodName>>(args)` runtime function call.
-     * <<methodName>> is inferred from the current fbt node.
-     *
-     * @param array $args Arguments of the function call
-     * @param string|null $overrideMethodName Use this method name instead of the one from the fbtNode
-     */
-    public function createFbtRuntimeArgCallExpression(array $args, ?string $overrideMethodName = null): array
-    {
-        $runtime = $this->moduleName === FbtConstants::MODULE_NAME['FBS'] ? fbs::class : fbt::class;
-
-        return call_user_func_array([$runtime, '_' . ($overrideMethodName ?? static::TYPE)], $args);
-    }
+    abstract public function getFbtRuntimeArg(): ?FbtCallExpression;
 }

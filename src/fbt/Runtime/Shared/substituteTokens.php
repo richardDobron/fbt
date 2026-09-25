@@ -29,16 +29,20 @@ class substituteTokens
      */
     public static function substitute(string $template, ?array $args, ?IFbtErrorListener $errorListener = null)
     {
-        // js~php diff: without any substitutions, the template is returned as-is
+        if ($args === null) {
+            return $template;
+        }
+
+        // js~php diff: without any substitutions, the tokens of the template are kept
         // so that literal braces in plain strings are preserved
         if (! $args) {
-            if ($args !== null && preg_match_all(self::PARAMETER_REGEXP, $template, $matches)) {
+            if (preg_match_all(self::PARAMETER_REGEXP, $template, $matches)) {
                 foreach ($matches[1] as $parameter) {
                     self::onMissingParameterError($errorListener, [], $parameter);
                 }
             }
 
-            return $template;
+            return IntlPunctuation::applyPhonologicalRules($template);
         }
 
         $debug = FbtConfig::get('debug');
@@ -85,9 +89,14 @@ class substituteTokens
                         return '';
                     }
 
-                    $argument = is_bool($argument)
-                        ? ($argument ? 'true' : 'false')
-                        : (string)$argument;
+                    // js~php diff: like JS `String(argument)`
+                    if (is_bool($argument)) {
+                        $argument = $argument ? 'true' : 'false';
+                    } elseif (is_float($argument)) {
+                        $argument = intlNumUtils::toJsString($argument);
+                    } else {
+                        $argument = (string)$argument;
+                    }
 
                     return $argument . IntlPunctuation::dedupeStops($argument, $punctuation);
                 },

@@ -6,6 +6,7 @@ use dobron\DomForge\Node;
 
 use function fbt\invariant;
 
+use fbt\Transform\FbtTransform\FbtCallExpression;
 use fbt\Transform\FbtTransform\FbtConstants;
 use fbt\Transform\FbtTransform\FbtUtils;
 use fbt\Transform\FbtTransform\Translate\IntlVariations;
@@ -33,23 +34,12 @@ use fbt\Transform\FbtTransform\Utils\GetNamespacedArgs;
  *        |
  *        *- FbtTextNode             // 'World!'
  *
- * js~php diff: the "function call arguments" of this node are:
- *   [contents (list of strings or DOM nodes), description, options]
  */
 class FbtElementNode extends FbtNode implements IFbtElementNode
 {
     public const TYPE = FbtNodeType::ELEMENT;
 
-    private const CONSTRUCTS = [
-        'enum' => FbtEnumNode::class,
-        'name' => FbtNameNode::class,
-        'param' => FbtParamNode::class,
-        'plural' => FbtPluralNode::class,
-        'pronoun' => FbtPronounNode::class,
-        'sameParam' => FbtSameParamNode::class,
-    ];
-
-    /** @var array<string, FbtNode> */
+    /** @var array<string, FbtCallExpression|Node> */
     public $_tokenSet = [];
 
     public function getOptions(array $validExtraOptions = []): ?array
@@ -73,58 +63,26 @@ class FbtElementNode extends FbtNode implements IFbtElementNode
                 invariant(
                     is_string($extraOptionValue),
                     'Expected extra option values to be strings but got `%s` (%s)',
-                    is_scalar($extraOptionValue) ? var_export($extraOptionValue, true) : '',
-                    gettype($extraOptionValue)
+                    FbtUtils::varDump($extraOptionValue),
+                    FbtUtils::typeOf($extraOptionValue)
                 );
                 $extraOptions[$optionName] = $extraOptionValue;
             }
 
             return [
-                'author' => self::enforceStringOrNull($rawOptions['author'] ?? null),
-                'common' => self::enforceBooleanOrNull($rawOptions['common'] ?? null) ?? false,
-                'doNotExtract' => self::enforceBooleanOrNull($rawOptions['doNotExtract'] ?? null),
-                'preserveWhitespace' => self::enforceBooleanOrNull($rawOptions['preserveWhitespace'] ?? null) ?? false,
-                'project' => (string)(($rawOptions['project'] ?? '') ?: ''),
+                'author' => FbtUtils::enforceStringOrNull($rawOptions['author'] ?? null),
+                'common' => FbtUtils::enforceBooleanOrNull($rawOptions['common'] ?? null) ?: false,
+                'doNotExtract' => FbtUtils::enforceBooleanOrNull($rawOptions['doNotExtract'] ?? null),
+                'preserveWhitespace' => FbtUtils::enforceBooleanOrNull($rawOptions['preserveWhitespace'] ?? null) ?: false,
+                'project' => FbtUtils::enforceString(($rawOptions['project'] ?? null) ?: ''),
                 'subject' => $rawOptions['subject'] ?? null,
                 // js~php diff: whether the result can be inlined (see FbtHooks::inlineMode())
-                'reporting' => self::enforceBooleanOrNull($rawOptions['reporting'] ?? null) ?? true,
+                'reporting' => FbtUtils::enforceBooleanOrNull($rawOptions['reporting'] ?? null) ?? true,
                 'extraOptions' => $extraOptions,
             ];
         } catch (\Throwable $error) {
-            throw FbtNodeUtil::errorAt($this->node, $error);
+            throw FbtUtils::errorAt($this->node, $error);
         }
-    }
-
-    /**
-     * @param mixed $value
-     *
-     * @throws \fbt\Exceptions\FbtException
-     */
-    private static function enforceStringOrNull($value): ?string
-    {
-        invariant(
-            $value === null || is_string($value),
-            'Expected string value instead of %s',
-            gettype($value)
-        );
-
-        return $value;
-    }
-
-    /**
-     * @param mixed $value
-     *
-     * @throws \fbt\Exceptions\FbtException
-     */
-    private static function enforceBooleanOrNull($value): ?bool
-    {
-        invariant(
-            $value === null || is_bool($value),
-            'Expected boolean value instead of %s',
-            is_scalar($value) ? var_export($value, true) : gettype($value)
-        );
-
-        return $value;
     }
 
     /**
@@ -190,7 +148,7 @@ class FbtElementNode extends FbtNode implements IFbtElementNode
                 [FbtNodeUtil::class, 'getChildNodeText']
             );
         } catch (\Throwable $error) {
-            throw FbtNodeUtil::errorAt($this->node, $error);
+            throw FbtUtils::errorAt($this->node, $error);
         }
     }
 
@@ -230,37 +188,37 @@ class FbtElementNode extends FbtNode implements IFbtElementNode
     }
 
     /**
-     * Create a new class instance given the <fbt> DOM node and the arguments of the
-     * fbt "function call".
+     * Create a new class instance given a root node (the fbt() FbtCallExpression).
+     * If that node is incompatible, we'll just return `null`.
      *
      * @param string $moduleName
-     * @param Node|null $node
-     * @param array $callArgs - [contents (list of strings or DOM nodes), description, options]
+     * @param mixed $node
      * @param array $validExtraOptions
      *
      * @throws \fbt\Exceptions\FbtParserException
      */
-    public static function fromNode(
-        string $moduleName,
-        ?Node $node,
-        array $callArgs,
-        array $validExtraOptions = []
-    ): self {
+    public static function fromNode(string $moduleName, $node, array $validExtraOptions = []): ?self
+    {
+        if (! $node instanceof FbtCallExpression) {
+            return null;
+        }
         $fbtElement = new self([
             'moduleName' => $moduleName,
             'node' => $node,
-            'callArgs' => $callArgs,
             'validExtraOptions' => $validExtraOptions,
         ]);
+        $fbtContentsNode = $node->arguments[0] ?? null;
 
-        $fbtContents = $callArgs[0] ?? null;
-        if (! is_array($fbtContents)) {
-            throw FbtNodeUtil::errorAt($node, "$moduleName: expected callsite's first argument to be an array");
+        if (! is_array($fbtContentsNode)) {
+            throw FbtUtils::errorAt(
+                $node,
+                "$moduleName: expected callsite's first argument to be an array"
+            );
         }
 
-        foreach ($fbtContents as $elementChild) {
+        foreach ($fbtContentsNode as $elementChild) {
             if ($elementChild === null) {
-                throw FbtNodeUtil::errorAt($node, "$moduleName: elementChild must not be nullish");
+                throw FbtUtils::errorAt($node, "$moduleName: elementChild must not be nullish");
             }
             $fbtElement->appendChild(self::createChildNode($moduleName, $elementChild));
         }
@@ -269,46 +227,65 @@ class FbtElementNode extends FbtNode implements IFbtElementNode
     }
 
     /**
-     * Create a child fbt node for a given text or DOM node.
+     * Create a child fbt node for a given node.
      *
      * @param string $moduleName
-     * @param string|Node $node
+     * @param string|FbtCallExpression|Node $node - js~php diff: a text is a string
      *
      * @throws \fbt\Exceptions\FbtParserException
      */
     public static function createChildNode(string $moduleName, $node): FbtNode
     {
-        if (is_string($node)) {
-            return FbtTextNode::fromText($moduleName, $node);
-        }
-
-        if ($node instanceof Node) {
-            if ($node->isText()) {
-                return FbtTextNode::fromText($moduleName, $node->innerHtml(), $node);
-            }
-
-            if ($node->isElement()) {
-                $name = FbtUtils::validateNamespacedFbtElement($moduleName, $node);
-                if (isset(self::CONSTRUCTS[$name])) {
-                    $args = (new GetNamespacedArgs($moduleName))->{$name}($node);
-
-                    return call_user_func([self::CONSTRUCTS[$name], 'fromNode'], $moduleName, $node, $args);
-                }
-
-                // js~php diff: empty elements (e.g. <br> or <i class="icon"></i>) don't
-                // contain any text to translate, so they're kept as a part of the text
-                if (self::isEmptyElement($node)) {
-                    return FbtTextNode::fromText($moduleName, $node->outerHtml(), $node);
-                }
-
-                // Try to convert to FbtImplicitParamNode as a last resort
-                return FbtImplicitParamNode::fromNode($moduleName, $node);
+        // js~php diff: fbt constructs within HTML elements aren't converted to their
+        // functional form yet (JSXFbtProcessor converts all of them), e.g. <fbt:param> to fbt::param()
+        if ($node instanceof Node && $node->isElement()) {
+            $name = FbtUtils::validateNamespacedFbtElement($moduleName, $node);
+            if (FbtNodeType::cast($name) !== null) {
+                $node = new FbtCallExpression($moduleName, $name, (new GetNamespacedArgs($moduleName))->{$name}($node), $node);
             }
         }
 
-        throw FbtNodeUtil::errorAt(
-            $node instanceof Node ? $node : null,
-            "$moduleName: unsupported node: " . ($node instanceof Node ? $node->tag : gettype($node))
+        $fbtChildNode = null;
+        $fbtChildNodeClasses = [
+            FbtEnumNode::class,
+            FbtNameNode::class,
+            FbtParamNode::class,
+            FbtPluralNode::class,
+            FbtPronounNode::class,
+            FbtSameParamNode::class,
+            FbtTextNode::class,
+        ];
+
+        foreach ($fbtChildNodeClasses as $constructor) {
+            $fbtChildNode = $constructor::fromNode($moduleName, $node);
+            if ($fbtChildNode !== null) {
+                break;
+            }
+        }
+
+        // Try to convert to FbtImplicitParamNode as a last resort
+        if ($fbtChildNode === null && $node instanceof Node && $node->isElement()) {
+            // js~php diff: empty elements (e.g. <br> or <i class="icon"></i>) don't
+            // contain any text to translate, so they're kept as a part of the text
+            if (self::isEmptyElement($node)) {
+                return FbtTextNode::fromText($moduleName, $node->outerHtml(), $node);
+            }
+
+            // js~php diff: implicit params are rich contents, which the fbs runtime doesn't accept
+            if ($moduleName === FbtConstants::MODULE_NAME['FBS']) {
+                throw FbtUtils::errorAt($node, FbtConstants::FBS_RICH_CONTENT_ERROR);
+            }
+
+            $fbtChildNode = FbtImplicitParamNode::fromNode($moduleName, $node);
+        }
+
+        if ($fbtChildNode !== null) {
+            return $fbtChildNode;
+        }
+
+        throw FbtUtils::errorAt(
+            $node instanceof Node || $node instanceof FbtCallExpression ? $node : null,
+            "$moduleName: unsupported node: " . FbtUtils::typeOf($node)
         );
     }
 
@@ -341,13 +318,13 @@ class FbtElementNode extends FbtNode implements IFbtElementNode
         return $ret;
     }
 
-    public function getFbtRuntimeArg(): ?array
+    public function getFbtRuntimeArg(): ?FbtCallExpression
     {
         $subject = $this->options['subject'];
 
         return $subject === null
             ? null
-            : $this->createFbtRuntimeArgCallExpression([$subject], 'subject');
+            : FbtUtils::createFbtRuntimeArgCallExpression($this, [$subject], FbtConstants::VALID_PRONOUN_USAGES_KEYS['subject']);
     }
 
     /**
@@ -355,29 +332,7 @@ class FbtElementNode extends FbtNode implements IFbtElementNode
      */
     public function registerToken(string $name, FbtNode $source): void
     {
-        FbtElementNode::setUniqueToken($source, $this->moduleName, $name, $this->_tokenSet);
-    }
-
-    /**
-     * @param FbtNode $source
-     * @param string $moduleName
-     * @param string $name
-     * @param array<string, FbtNode> $paramSet
-     *
-     * @throws \fbt\Exceptions\FbtParserException
-     */
-    public static function setUniqueToken(FbtNode $source, string $moduleName, string $name, array &$paramSet): void
-    {
-        $cachedNode = $paramSet[$name] ?? null;
-        if ($cachedNode !== null && $cachedNode !== $source) {
-            throw FbtNodeUtil::errorAt(
-                $source->node,
-                "There's already a token called \"$name\" in this $moduleName call. " .
-                "Use $moduleName::sameParam if you want to reuse the same token name or " .
-                "give this token a different name"
-            );
-        }
-        $paramSet[$name] = $source;
+        FbtUtils::setUniqueToken($source->node, $this->moduleName, $name, $this->_tokenSet);
     }
 
     /**

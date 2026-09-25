@@ -27,13 +27,20 @@ class FbtHooks
     public static $storedHashes = [];
     /* @var array */
     public static $impression = [];
+    /**
+     * js~php diff: phrases collected at runtime are deduplicated by their content,
+     * phrases collected by collect-fbts by their callsite (like upstream)
+     * @var bool
+     */
+    public static $collectCallsites = false;
 
     /**
      * @param string $hash
+     * @param array{inputTable: string|array, tokens: array<string|int>}|null $options
      * @return void
      * @throws \fbt\Exceptions\FbtInvalidConfigurationException
      */
-    public static function logImpression(string $hash): void
+    public static function logImpression(string $hash, ?array $options = null): void
     {
         if (isset(self::$actions[__FUNCTION__])) {
             self::$actions[__FUNCTION__](...func_get_args());
@@ -57,7 +64,7 @@ class FbtHooks
         }
 
         return self::$locale
-            ?: self::getIntlViewerContext()->getLocale();
+            ?: self::getViewerContext()->getLocale();
     }
 
     /**
@@ -73,8 +80,12 @@ class FbtHooks
         return self::$inlineMode ?? 'NO_INLINE';
     }
 
-    public static function getIntlViewerContext(): IntlViewerContextInterface
+    public static function getViewerContext(): IntlViewerContextInterface
     {
+        if (isset(self::$actions['getViewerContext'])) {
+            return self::$actions['getViewerContext']();
+        }
+
         $viewerContext = FbtConfig::get('viewerContext');
 
         if (is_string($viewerContext) && class_exists($viewerContext)) {
@@ -162,16 +173,7 @@ class FbtHooks
             return self::$actions[__FUNCTION__](...func_get_args()) ?? $input;
         }
 
-        $translatedInput = FbtTranslations::getTranslatedInput($input['table'], $input['args'] ?? [], $input['options']);
-
-        if ($translatedInput === null) {
-            return $input;
-        }
-
-        return [
-            'table' => $translatedInput[0],
-            'args' => $translatedInput[1],
-        ];
+        return FbtTranslations::getTranslatedInput($input) ?? $input;
     }
 
     public static function getFallback(string $locale): ?string
@@ -205,9 +207,19 @@ class FbtHooks
         }
 
         register_shutdown_function(function () {
-            FbtHooks::storePhrases();
+            FbtHooks::storeCollectedPhrases();
             FbtHooks::storeImpressions();
         });
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    public static function storeCollectedPhrases(): void
+    {
+        if (FbtTransform::$phrases) {
+            self::storePhrases();
+        }
     }
 
     public static function canInline(array $backtrace): bool
@@ -247,13 +259,24 @@ class FbtHooks
     }
 
     /**
-     * Identity of a collected phrase
-     *
      * @throws \fbt\Exceptions\FbtException
      */
     private static function getPhraseKey(array $phrase): string
     {
-        return md5(JsJson::stringify($phrase['jsfbt']['t']) . json_encode($phrase['jsfbt']['m']));
+        $key = [
+            JsJson::stringify($phrase['jsfbt']['t']),
+            json_encode($phrase['jsfbt']['m']),
+            $phrase['project'] ?? '',
+            $phrase['author'] ?? '',
+            ! empty($phrase['common']) ? '1' : '',
+        ];
+
+        if (self::$collectCallsites) {
+            $key[] = $phrase['filepath'] ?? '';
+            $key[] = (string)($phrase['line_beg'] ?? '');
+        }
+
+        return md5(implode("\0", $key));
     }
 
     /**
@@ -323,6 +346,12 @@ class FbtHooks
             }
 
             self::$actions[__FUNCTION__](...func_get_args());
+
+            return;
+        }
+
+        if (! FbtTransform::$phrases) {
+            FbtTransform::$childToParent = [];
 
             return;
         }
@@ -435,13 +464,23 @@ class FbtHooks
     }
 
     /**
-     * @param string $tag
-     * @param callable $action
+     * js~php diff: a single hook can be registered by its name too (upstream:
+     * `FbtHooks.register({...})`)
+     *
+     * @param string|array<string, callable> $tag
+     * @param callable|null $action
      * @return void
      */
-    public static function register(string $tag, callable $action): void
+    public static function register($tag, ?callable $action = null): void
     {
-        self::$actions[$tag] = $action;
+        $registrations = is_array($tag) ? $tag : [$tag => $action];
+
+        foreach ($registrations as $name => $registration) {
+            if (! is_callable($registration)) {
+                throw new \InvalidArgumentException("Hook \"$name\" must be callable");
+            }
+            self::$actions[$name] = $registration;
+        }
     }
 
     /**

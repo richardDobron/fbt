@@ -7,6 +7,10 @@ use dobron\DomForge\Node;
 
 use function fbt\invariant;
 
+use fbt\Transform\FbtTransform\FbtCallExpression;
+use fbt\Transform\FbtTransform\FbtTransform;
+use fbt\Transform\FbtTransform\FbtUtils;
+
 /**
  * Represents non-fbt HTML element nested inside an fbt callsite.
  */
@@ -14,7 +18,7 @@ class FbtImplicitParamNode extends FbtNode implements IFbtElementNode
 {
     public const TYPE = FbtNodeType::IMPLICIT_PARAM;
 
-    /** @var array<string, FbtNode> */
+    /** @var array<string, FbtCallExpression|Node> */
     public $_tokenSet = [];
 
     private function _getElementNode(): FbtElementNode
@@ -79,7 +83,7 @@ class FbtImplicitParamNode extends FbtNode implements IFbtElementNode
                 [FbtNodeUtil::class, 'getChildNodeText']
             );
         } catch (\Throwable $error) {
-            throw FbtNodeUtil::errorAt($this->node, $error);
+            throw FbtUtils::errorAt($this->node, $error);
         }
     }
 
@@ -167,12 +171,17 @@ class FbtImplicitParamNode extends FbtNode implements IFbtElementNode
     }
 
     /**
-     * Create a new class instance given a DOM element.
+     * Create a new class instance given a DOM element (the equivalent of a JSX element).
+     * If that node is incompatible, we'll just return `null`.
      *
+     * @param mixed $node
      * @throws \fbt\Exceptions\FbtParserException
      */
-    public static function fromNode(string $moduleName, Node $node): self
+    public static function fromNode(string $moduleName, $node): ?self
     {
+        if (! $node instanceof Node || ! $node->isElement()) {
+            return null;
+        }
         $implicitParam = new self([
             'moduleName' => $moduleName,
             'node' => $node,
@@ -186,7 +195,12 @@ class FbtImplicitParamNode extends FbtNode implements IFbtElementNode
                     // js~php diff: whitespace-only texts are kept, because whitespace
                     // between HTML tags is significant (JSX drops the whitespace
                     // that doesn't neighbor raw text)
-                    $fbtChildren[] = FbtTextNode::fromText($moduleName, $child->innerHtml(), $child);
+                    // (fbt constructs may be concatenated with the text, see FbtCallExpression)
+                    foreach (FbtTransform::splitText($child->innerHtml()) as $part) {
+                        $fbtChildren[] = is_string($part)
+                            ? FbtTextNode::fromText($moduleName, $part, $child)
+                            : FbtElementNode::createChildNode($moduleName, $part);
+                    }
 
                     break;
 
@@ -208,14 +222,14 @@ class FbtImplicitParamNode extends FbtNode implements IFbtElementNode
         return $implicitParam;
     }
 
-    public function getFbtRuntimeArg(): ?array
+    public function getFbtRuntimeArg(): ?FbtCallExpression
     {
-        throw FbtNodeUtil::errorAt($this->node, 'This method must be implemented in a child class');
+        throw FbtUtils::errorAt($this->node, 'This method must be implemented in a child class');
     }
 
     public function registerToken(string $name, FbtNode $source): void
     {
-        FbtElementNode::setUniqueToken($source, $this->moduleName, $name, $this->_tokenSet);
+        FbtUtils::setUniqueToken($source->node, $this->moduleName, $name, $this->_tokenSet);
     }
 
     public function toPlainFbtNode(): array

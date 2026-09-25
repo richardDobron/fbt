@@ -42,11 +42,6 @@ class JSFbtBuilder
      */
     private $usedPronouns = [];
     /**
-     * Set this to `true` if we're extracting strings for React Native
-     * @var bool
-     */
-    private $reactNativeMode;
-    /**
      * List of string variation arguments from a given fbt callsite
      * @var StringVariationArg[]
      */
@@ -54,11 +49,9 @@ class JSFbtBuilder
 
     /**
      * @param StringVariationArg[] $stringVariationArgs
-     * @param bool $reactNativeMode
      */
-    public function __construct(array $stringVariationArgs, bool $reactNativeMode = false)
+    public function __construct(array $stringVariationArgs)
     {
-        $this->reactNativeMode = $reactNativeMode;
         $this->stringVariationArgs = array_values($stringVariationArgs);
     }
 
@@ -88,7 +81,7 @@ class JSFbtBuilder
                     ];
                 }
 
-                return $this->reactNativeMode ? ['type' => IntlVariations::INTL_FBT_VARIATION_TYPE['NUMBER']] : null;
+                return null;
             }
 
             if ($fbtNode instanceof FbtElementNode || $fbtNode instanceof FbtImplicitParamNode) {
@@ -99,7 +92,7 @@ class JSFbtBuilder
             }
 
             if ($fbtNode instanceof FbtPronounNode) {
-                return $this->reactNativeMode ? ['type' => IntlVariations::INTL_FBT_VARIATION_TYPE['PRONOUN']] : null;
+                return null;
             }
 
             if ($svArg instanceof EnumStringVariationArg) {
@@ -112,22 +105,7 @@ class JSFbtBuilder
                 // We ensure we have placeholders in our metadata because enums and
                 // pronouns don't have metadata and will add "levels" to our resulting
                 // table.
-                //
-                // Example for the code:
-                //
-                //   fbt::enum($value, [
-                //     'groups' => 'Groups',
-                //     'photos' => 'Photos',
-                //     'videos' => 'Videos',
-                //   ])
-                //
-                // Expected metadata entry:
-                //   for non-RN -> `null`
-                //   for RN     -> `['range' => ['groups', 'photos', 'videos']]`
-                return $this->reactNativeMode
-                    // Enum range will later be used to extract enums from the payload for React Native
-                    ? ['range' => FbtUtils::jsObjectKeys($fbtNode->options['range'])]
-                    : null;
+                return null;
             }
 
             if ($svArg instanceof GenderStringVariationArg || $svArg instanceof NumberStringVariationArg) {

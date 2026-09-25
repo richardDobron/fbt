@@ -9,7 +9,7 @@ function cx(string $clsname)
     return str_replace('/', '_', $clsname);
 }
 
-function em($content, string $inlineMode, string $translation, ?string $hash)
+function em($content, string $inlineMode, string $translation, ?string $hash, ?IFbtErrorListener $errorListener = null)
 {
     // TODO: in the future, might depend on the translation status of the
     // string to decide on the proper inline mode.
@@ -35,12 +35,11 @@ function em($content, string $inlineMode, string $translation, ?string $hash)
         }
     }
 
-    return new FbtResult($content);
+    return new FbtResult($content, $errorListener);
 }
 
 class InlineFbtResult extends FbtResult
 {
-    public $contents;
     public $inlineMode;
     public $translation;
     public $hash;
@@ -57,7 +56,6 @@ class InlineFbtResult extends FbtResult
         $this->hash = $hash;
         $this->translation = $translation;
         $this->inlineMode = $inlineMode;
-        $this->contents = $contents;
     }
 
     /**
@@ -95,10 +93,11 @@ class InlineFbtResult extends FbtResult
         // Not memoized: inlining depends on the call site (see FbtHooks::canInline),
         // which is why the call stack depth must stay as it is
         return (string) em(
-            self::flattenContentsToArray($this->contents),
+            self::flattenContentsToArray($this->_contents),
             $this->inlineMode,
             $this->translation,
-            $this->hash
+            $this->hash,
+            $this->__errorListener
         );
     }
 }

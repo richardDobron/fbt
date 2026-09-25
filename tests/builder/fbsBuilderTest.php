@@ -24,6 +24,12 @@ class fbsBuilderTest extends \tests\TestCase
             'transform' => false,
         ]);
 
+        $this->assertSame('<fbt common="true">Post</fbt>', (string)$html);
+
+        $html = \fbt\fbs::c('Post', [
+            'transform' => false,
+        ]);
+
         $this->assertSame('<fbs common="true">Post</fbs>', (string)$html);
     }
 

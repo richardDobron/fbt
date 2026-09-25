@@ -2,32 +2,33 @@
 
 namespace fbt\Transform\FbtTransform\FbtNodes;
 
-use dobron\DomForge\Node;
 use fbt\Exceptions\FbtParserException;
 
 use function fbt\invariant;
 
+use fbt\Transform\FbtTransform\FbtNodeChecker;
 use fbt\Transform\FbtTransform\FbtUtils;
 
 class FbtNodeUtil
 {
     /**
-     * js~php diff: equivalent of `errorAt(node, error)`, supporting fbt nodes without DOM node
-     *
-     * @param Node|null $node
-     * @param \Throwable|string $error
+     * @template N of FbtNode
+     * @param string $moduleName
+     * @param mixed $node
+     * @param class-string<N> $constructor
+     * @return N|null
      */
-    public static function errorAt(?Node $node, $error): FbtParserException
+    public static function createInstanceFromFbtConstructCallsite(string $moduleName, $node, string $constructor): ?FbtNode
     {
-        if ($error instanceof FbtParserException) {
-            return $error;
-        }
+        $checker = FbtNodeChecker::forModule($moduleName);
+        $constructName = $checker->getFbtConstructNameFromFunctionCall($node);
 
-        $message = $error instanceof \Throwable ? $error->getMessage() : $error;
-
-        return $node !== null
-            ? FbtUtils::errorAt($node, $message)
-            : new FbtParserException($message);
+        return $constructName === $constructor::TYPE
+            ? new $constructor([
+                'moduleName' => $moduleName,
+                'node' => $node,
+            ])
+            : null;
     }
 
     /**
@@ -145,7 +146,7 @@ class FbtNodeUtil
                 'preserveWhitespace' => $preserveWhitespace,
             ]));
         } catch (\Throwable $error) {
-            throw self::errorAt($instance->node, $error);
+            throw FbtUtils::errorAt($instance->node, $error);
         }
     }
 

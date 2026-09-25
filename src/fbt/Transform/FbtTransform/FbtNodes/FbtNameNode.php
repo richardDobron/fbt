@@ -2,10 +2,10 @@
 
 namespace fbt\Transform\FbtTransform\FbtNodes;
 
-use dobron\DomForge\Node;
-
 use function fbt\invariant;
 
+use fbt\Transform\FbtTransform\FbtCallExpression;
+use fbt\Transform\FbtTransform\FbtUtils;
 use fbt\Transform\FbtTransform\Translate\IntlVariations;
 
 /**
@@ -17,15 +17,11 @@ class FbtNameNode extends FbtNode
     public const TYPE = FbtNodeType::NAME;
 
     /**
-     * Create a new class instance given the construct's DOM node and arguments.
+     * @param mixed $node
      */
-    public static function fromNode(string $moduleName, ?Node $node, array $callArgs): self
+    public static function fromNode(string $moduleName, $node): ?self
     {
-        return new self([
-            'moduleName' => $moduleName,
-            'node' => $node,
-            'callArgs' => $callArgs,
-        ]);
+        return FbtNodeUtil::createInstanceFromFbtConstructCallsite($moduleName, $node, self::class);
     }
 
     public function getOptions(array $validExtraOptions = []): ?array
@@ -58,7 +54,7 @@ class FbtNameNode extends FbtNode
                 'gender' => $gender,
             ];
         } catch (\Throwable $error) {
-            throw FbtNodeUtil::errorAt($this->node, $error);
+            throw FbtUtils::errorAt($this->node, $error);
         }
     }
 
@@ -81,13 +77,13 @@ class FbtNameNode extends FbtNode
 
             return FbtNodeUtil::tokenNameToTextPattern($this->options['name']);
         } catch (\Throwable $error) {
-            throw FbtNodeUtil::errorAt($this->node, $error);
+            throw FbtUtils::errorAt($this->node, $error);
         }
     }
 
-    public function getFbtRuntimeArg(): ?array
+    public function getFbtRuntimeArg(): ?FbtCallExpression
     {
-        return $this->createFbtRuntimeArgCallExpression([
+        return FbtUtils::createFbtRuntimeArgCallExpression($this, [
             $this->options['name'],
             $this->options['value'],
             $this->options['gender'],

@@ -68,6 +68,12 @@ class FbtConfig
         'prettyPrint' => true,
 
         /*
+         * js~php diff: a callable (or a PHP file returning a callable) instead of a
+         * module path, fbtHash::fbtHashKey by default.
+         */
+        'fbtHashKeyModule' => null,
+
+        /*
          * Common string's, e.g. [['text' => 'desc'], ...].
          */
         'fbtCommon' => [],

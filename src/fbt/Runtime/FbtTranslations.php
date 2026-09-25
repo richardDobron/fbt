@@ -3,7 +3,6 @@
 namespace fbt\Runtime;
 
 use fbt\Exceptions\FbtInvalidConfigurationException;
-use fbt\fbt;
 use fbt\FbtConfig;
 use fbt\Runtime\Shared\FbtHooks;
 
@@ -14,16 +13,15 @@ class FbtTranslations
     public static $translatedFbts = [];
 
     /**
-     * @param array|string $inputTable
-     * @param array $args
-     * @param array $options
+     * @param array{table: string|array, args: array|null, options: array|null} $input
      *
-     * @return array|null
+     * @return array{table: string|array, args: array|null}|null
      * @throws FbtInvalidConfigurationException
      */
-    public static function getTranslatedInput($inputTable, array $args, array $options): ?array
+    public static function getTranslatedInput(array $input): ?array
     {
-        $hashKey = $options['hk'] ?? null;
+        $args = $input['args'] ?? null;
+        $hashKey = $input['options']['hk'] ?? null;
 
         $locale = FbtHooks::locale();
 
@@ -35,13 +33,13 @@ class FbtTranslations
             }
         }
 
-        if ($hashKey === null || empty($table[$hashKey])) {
+        if ($hashKey === null || ! isset($table[$hashKey])) {
             return null;
         }
 
         return [
-            $table[$hashKey],
-            $args,
+            'table' => $table[$hashKey],
+            'args' => $args,
         ];
     }
 
@@ -50,7 +48,7 @@ class FbtTranslations
      */
     public static function registerTranslations(array $translations): void
     {
-        fbt::_purgeCache();
+        Shared\fbt::_purgeCache();
         self::$translatedFbts = $translations;
     }
 
@@ -64,9 +62,9 @@ class FbtTranslations
      */
     public static function mergeTranslations(array $newTranslations): void
     {
-        fbt::_purgeCache();
+        Shared\fbt::_purgeCache();
         foreach (array_keys($newTranslations) as $locale) {
-            self::$translatedFbts[$locale] = array_merge(
+            self::$translatedFbts[$locale] = array_replace(
                 self::$translatedFbts[$locale] ?? [],
                 $newTranslations[$locale]
             );

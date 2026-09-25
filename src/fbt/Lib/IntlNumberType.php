@@ -264,6 +264,21 @@ class IntlNumberType
         return self::getNumberModuleForLang(FBLocaleToLang::get($locale));
     }
 
+    public static function forLanguage(?string $language = null): IntlNumberConsistency
+    {
+        return self::getNumberModuleForLang($language);
+    }
+
+    public static function _getNumberModuleForLang(?string $lang = null): IntlNumberConsistency
+    {
+        return self::getNumberModuleForLang($lang);
+    }
+
+    public static function _getNumberModuleForLocale(?string $locale = null): IntlNumberConsistency
+    {
+        return self::getNumberModuleForLocale($locale);
+    }
+
     public static function getLanguage(?string $language = null): IntlNumberConsistency
     {
         return self::getNumberModuleForLang($language);

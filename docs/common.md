@@ -24,8 +24,8 @@ or
 <?php
 
 return [
-  "Photo": "Still image ...",
-  "Video": "Moving pictures ...",
+  "Photo" => "Still image ...",
+  "Video" => "Moving pictures ...",
   ...
 ]
 ```
@@ -44,7 +44,7 @@ Example setup:
 ```
 
 ## Runtime API
-To use the strings at runtime, there is the `fbt::c(...)` function call or the `<fbt common="true">...</fbt>` JSX API.
+To use the strings at runtime, there is the `fbt::c(...)` function call or the `<fbt common="true">...</fbt>` HTML API.
 
 ***NOTE: The transform will throw if it encounters a common string *not* in the map provided.***
 
@@ -66,7 +66,7 @@ or
 
 Both examples above function as if the engineer had also included the description with the text.
 
-```js
+```html
   <fbt desc="Still image ...">Photo</fbt>
 ```
 

@@ -5,15 +5,12 @@ namespace fbt\Runtime\Shared;
 use function fbt;
 
 use fbt\fbt;
+use fbt\FbtConfig;
 
 use function fbt\invariant;
 
 class IntlList
 {
-    private $items;
-    private $conjunction;
-    private $delimiter;
-
     public const CONJUNCTIONS = [
         'AND' => 'AND',
         'NONE' => 'NONE',
@@ -26,51 +23,44 @@ class IntlList
         'SEMICOLON' => 'SEMICOLON',
     ];
 
-    public function __construct(array $items, ?string $conjunction = null, ?string $delimiter = null)
+    /**
+     * @param array $items_
+     * @param string|null $conjunction
+     * @param string|null $delimiter
+     *
+     * @return mixed|\fbt\fbt|string
+     * @throws \fbt\Exceptions\FbtException
+     */
+    public static function intlList(array $items_, ?string $conjunction = null, ?string $delimiter = null)
     {
         // js~php diff: support arrays that are not 0-indexed
-        $this->items = array_values(array_filter($items, [self::class, 'isTruthy']));
-        $this->conjunction = $conjunction;
-        $this->delimiter = $delimiter;
-    }
-
-    /**
-     * Equivalent of JS `items.filter(Boolean)`, e.g. the string "0" is kept
-     *
-     * @param mixed $item
-     */
-    private static function isTruthy($item): bool
-    {
-        if (is_float($item)) {
-            return $item != 0 && ! is_nan($item);
+        $items = array_values(array_filter($items_, [self::class, 'isTruthy']));
+        if (FbtConfig::get('debug')) {
+            foreach ($items as $item) {
+                invariant(
+                    is_string($item) || (is_object($item) && method_exists($item, '__toString')),
+                    'Must provide a string or an fbt result to intlList.'
+                );
+            }
         }
 
-        return $item !== null && $item !== false && $item !== '' && $item !== 0;
-    }
-
-    /**
-     * @throws \fbt\Exceptions\FbtException
-     * @return \fbt\fbt|string
-     */
-    public function format()
-    {
-        $count = count($this->items);
+        $count = count($items);
         if ($count === 0) {
             return '';
         } elseif ($count === 1) {
-            return $this->items[0];
+            return $items[0];
         }
 
-        $lastItem = $this->items[$count - 1];
-        $output = $this->items[0];
+        $lastItem = $items[$count - 1];
+        $output = $items[0];
 
         for ($i = 1; $i < $count - 1; ++$i) {
-            switch ($this->delimiter) {
+            switch ($delimiter) {
                 case self::DELIMITERS['SEMICOLON']:
                     $output = fbt([
                         fbt::param('previous items', $output),
                         '; ',
-                        fbt::param('following items', $this->items[$i]),
+                        fbt::param('following items', $items[$i]),
                     ], 'A list of items of various types, for example: ' .
                         '"Menlo Park, CA; Seattle, WA; New York City, NY". ' .
                         '{previous items} and {following items} are themselves ' .
@@ -81,7 +71,7 @@ class IntlList
                     $output = fbt([
                         fbt::param('previous items', $output),
                         " \u{2022} ",
-                        fbt::param('following items', $this->items[$i]),
+                        fbt::param('following items', $items[$i]),
                     ], 'A list of items of various types separated by bullets, for example: ' .
                         "\"Menlo Park, CA \u{2022} Seattle, WA \u{2022} New York City, NY\". " .
                         '{previous items} and {following items} are themselves ' .
@@ -92,7 +82,7 @@ class IntlList
                     $output = fbt([
                         fbt::param('previous items', $output),
                         ', ',
-                        fbt::param('following items', $this->items[$i]),
+                        fbt::param('following items', $items[$i]),
                     ], 'A list of items of various types. {previous items} and' .
                         ' {following items} are themselves lists that contain one or' .
                         ' more items.');
@@ -102,9 +92,23 @@ class IntlList
         return self::_getConjunction(
             $output,
             $lastItem,
-            $this->conjunction ?: self::CONJUNCTIONS['AND'],
-            $this->delimiter ?: self::DELIMITERS['COMMA']
+            $conjunction ?: self::CONJUNCTIONS['AND'],
+            $delimiter ?: self::DELIMITERS['COMMA']
         );
+    }
+
+    /**
+     * js~php diff: equivalent of JS `items.filter(Boolean)`, e.g. the string "0" is kept
+     *
+     * @param mixed $item
+     */
+    private static function isTruthy($item): bool
+    {
+        if (is_float($item)) {
+            return $item != 0 && ! is_nan($item);
+        }
+
+        return $item !== null && $item !== false && $item !== '' && $item !== 0;
     }
 
     /**

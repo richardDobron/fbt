@@ -10,4 +10,9 @@ namespace fbt\Exceptions;
 
 class FbtParserException extends FbtRootException
 {
+    /**
+     * Whether the message contains the location of the error (see FbtUtils::errorAt())
+     * @var bool
+     */
+    public $_hasBabelNodeLocation = false;
 }

@@ -27,6 +27,8 @@ class createElementTest extends \tests\TestCase
 
         $this->assertEquals('<div title="Rock&amp;Roll">Rock&Roll</div>', createElement('div', 'Rock&Roll', ['title' => 'Rock&Roll']));
 
-        $this->assertEquals('<div title="Categories &raquo; 💻 &gt; Acer">Categories &raquo; 💻 > Acer</div>', createElement('div', 'Categories &raquo; 💻 > Acer', ['title' => 'Categories &raquo; 💻 > Acer']));
+        $this->assertEquals('<div title="Categories &amp;raquo; 💻 &gt; Acer">Categories &raquo; 💻 > Acer</div>', createElement('div', 'Categories &raquo; 💻 > Acer', ['title' => 'Categories &raquo; 💻 > Acer']));
+
+        $this->assertEquals('<div title="It&#039;s &quot;café&quot;">x</div>', createElement('div', 'x', ['title' => 'It\'s "café"']));
     }
 }

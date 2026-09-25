@@ -146,14 +146,24 @@ namespace fbt {
     }
 
     /**
+     * Port of upstream `fbtInit({translations, hooks})`: registers the translations
+     * and the hooks (the default implementations are used for missing hooks).
+     *
+     * @param array{translations?: array, hooks?: array<string, callable>} $input
+     */
+    function fbtInit(array $input): void
+    {
+        \fbt\Runtime\FbtTranslations::registerTranslations($input['translations'] ?? []);
+        \fbt\Runtime\Shared\FbtHooks::register($input['hooks'] ?? []);
+    }
+
+    /**
      * @throws FbtException
      * @return \fbt\fbt|string
      */
     function intlList(array $items, ?string $conjunction = null, ?string $delimiter = null)
     {
-        $intlList = new IntlList($items, $conjunction, $delimiter);
-
-        return $intlList->format();
+        return IntlList::intlList($items, $conjunction, $delimiter);
     }
 
     /**
@@ -171,16 +181,17 @@ namespace fbt {
         if ($attributes) {
             $attributeStrings = [];
             foreach ($attributes as $attribute => $value) {
-                if ($value === '') {
+                if ($value === true) {
                     $attributeStrings[] = $attribute;
 
                     continue;
                 }
 
+                $value = (string)$value;
                 $hash = md5($value);
 
                 if (! isset($cachedValues[$hash])) {
-                    $cachedValues[$hash] = htmlentities($value, ENT_QUOTES, 'UTF-8', false);
+                    $cachedValues[$hash] = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
                 }
 
                 $attributeStrings[] = "$attribute=\"$cachedValues[$hash]\"";

@@ -24,6 +24,7 @@ module.exports = {
       "pronouns",
       "autoparam",
       "common",
+      "enforcing_plain_text",
       "utilities",
       "hooks"
     ],

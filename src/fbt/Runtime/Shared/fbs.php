@@ -18,11 +18,12 @@ class fbs extends fbt
      */
     public static function _param(string $label, $value, array $variations = []): array
     {
+        // js~php diff: fbs() returns an \fbt\fbs object (rendered when it's converted to a string)
         invariant(
-            is_string($value) || $value instanceof FbtPureStringResult,
+            is_string($value) || $value instanceof FbtPureStringResult || $value instanceof \fbt\fbs,
             'Expected fbs parameter value to be the result of fbs(), <fbs/>, or a string; ' .
             'instead we got `%s` (type: %s)',
-            is_scalar($value) ? $value : '',
+            is_object($value) ? get_class($value) : json_encode($value),
             gettype($value)
         );
 
@@ -42,10 +43,10 @@ class fbs extends fbt
     public static function _plural($count, ?string $label = null, $value = null): array
     {
         invariant(
-            $value === null || is_string($value) || $value instanceof FbtPureStringResult,
+            $value === null || is_string($value) || $value instanceof FbtPureStringResult || $value instanceof \fbt\fbs,
             'Expected fbs plural UI value to be nullish or the result of fbs(), <fbs/>, or a string; ' .
             'instead we got `%s` (type: %s)',
-            is_scalar($value) ? $value : '',
+            is_object($value) ? get_class($value) : json_encode($value),
             gettype($value)
         );
 

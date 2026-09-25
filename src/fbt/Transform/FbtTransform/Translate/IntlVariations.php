@@ -6,10 +6,6 @@ use fbt\Exceptions\FbtException;
 
 class IntlVariations
 {
-    public const GENDER_MALE = 1;
-    public const GENDER_FEMALE = 2;
-    public const GENDER_UNKNOWN = 3;
-
     public const INTL_NUMBER_VARIATIONS = [
         'ZERO' => 0x10, //  0b10000
         'ONE' => 0x4, //    0b00100
@@ -57,26 +53,35 @@ class IntlVariations
     // with a singular entry
     public const EXACTLY_ONE = '_1';
 
-    // Default candidate values of gender and number string variations
+    // Gender variation key used in JSFBT to represent any gender
     public const GENDER_ANY = '*';
+    // Number variation key used in JSFBT to represent "many" (i.e. non-exactly one)
     public const NUMBER_ANY = '*';
 
     public const SUBJECT = '__subject__';
     public const VIEWING_USER = '__viewing_user__';
 
-    public static function isValidValue(string $v): bool
+    /**
+     * @param string|int $value
+     */
+    public static function isValidValue($value): bool
     {
+        // Like upstream, the key of the special entry is the literal 'EXACTLY_ONE'
+        // (not the value of the constant)
         $specials = [
             // The default entry.  When no entry exists, we fallback to this in the fbt
             // table access logic.
             '*' => true,
-            self::EXACTLY_ONE => true,
+            'EXACTLY_ONE' => true,
         ];
 
+        // like JS `Number(value)` in a bitwise operation (NaN is 0)
+        $num = is_numeric($value) ? (int)$value : 0;
+
         return (
-            $specials[$v] ??
-            ($v & self::INTL_VARIATION_MASK['NUMBER'] && ! ($v & ~self::INTL_VARIATION_MASK['NUMBER'])) ||
-            ($v & self::INTL_VARIATION_MASK['GENDER'] && ! ($v & ~self::INTL_VARIATION_MASK['GENDER']))
+            ($specials[$value] ?? false) ||
+            ($num & self::INTL_VARIATION_MASK['NUMBER'] && ! ($num & ~self::INTL_VARIATION_MASK['NUMBER'])) ||
+            ($num & self::INTL_VARIATION_MASK['GENDER'] && ! ($num & ~self::INTL_VARIATION_MASK['GENDER']))
         );
     }
 }

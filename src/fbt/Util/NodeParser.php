@@ -18,11 +18,15 @@ class NodeParser
         // fbt self-closing tags are registered globally in helpers.php
         $configuration = (new Configuration())
             ->setLowercase(false)
-            ->setForceTagsClosed(true)
+            ->setForceTagsClosed(false)
             ->setTargetCharset('UTF-8')
             ->setRemoveLineBreaks(false)
             ->setDefaultBrText("\n")
             ->setDefaultSpanText(' ');
+
+        // DomForge doesn't recognize a valueless attribute followed directly by "/>"
+        // (e.g. <fbt:pronoun ... human/>) as a self-closing element
+        $str = preg_replace('~(<[^<>]*\s[A-Za-z_:][\w:.-]*)/>~', '$1 />', $str);
 
         return DomForge::fromHtml($str, $configuration);
     }

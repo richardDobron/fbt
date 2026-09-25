@@ -19,6 +19,31 @@ php ./vendor/bin/fbt collect-fbts --path=./path/to/fbt/ --src=./path/to/project/
 
 ⚠️ Unlike Facebook's version of fbt, we primarily collect `<fbt>` & translate strings during script execution.
 
+### Writing to the standard output
+
+Without `--path`, the collected strings are written as JSON to the standard output instead of
+`.source_strings.json`. The files and directories to scan are given as arguments, and the source code
+is read from the standard input when no file is given. Progress and errors are written to the
+standard error output.
+
+```shell
+php ./vendor/bin/fbt collect-fbts --pretty ./path/to/project/ > source_strings.json
+echo '<?php fbt("Hello", "greeting");' | php ./vendor/bin/fbt collect-fbts
+```
+
+| name                                     | default | description                                                                                                                                              |
+|------------------------------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --packager=`text\|phrase\|both\|none`    | `text`  | `text` outputs `hashToLeaf`, `phrase` outputs the `hash_key` and `hash_code` of the callsite instead, `both` outputs both, `none` outputs neither         |
+| --hash-module=`md5\|tiger`               | `md5`   | Hash module of `hashToLeaf`                                                                                                                              |
+| --terse                                  | no      | Leave out `jsfbt` (only hashes, texts and descriptions)                                                                                                  |
+| --pretty                                 | no      | Pretty print the JSON output                                                                                                                             |
+| --gen-outer-token-name                   | no      | Add the outer token name of inner strings to the phrases (see the `generateOuterTokenName` option)                                                       |
+| --gen-fbt-nodes                          | no      | Add the fbt element nodes of the callsites to the output (`fbtElementNodes`)                                                                             |
+| --options=`[a,b]`                        | *none*  | Extra options allowed on fbt callsites (see the `extraOptions` option)                                                                                  |
+| --fbt-common-path=`[path]`               | *none*  | Optional path to the common strings module                                                                                                               |
+
+The command exits with code `1` when some callsites couldn't be collected.
+
 Upon successful execution, the output of the `/your/path/to/fbt/.source_strings.json` will be in the following format
 (the same as the output of `collectFbt` of Facebook's fbt):
 

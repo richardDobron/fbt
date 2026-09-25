@@ -9,22 +9,38 @@ See [UPGRADE-5.0.md](UPGRADE-5.0.md).
 ### Changed
 - The compiler is a port of [babel-plugin-fbt v1.0.0](https://github.com/facebook/fbt/tree/babel-plugin-fbt-v1.0.0) (fbt nodes)
 - Runtime (`fbt::_()`, `fbs::_()`, token substitution, result objects, hooks) is aligned 1:1 with the JavaScript runtime of [fbt v1.0.0](https://github.com/facebook/fbt/tree/fbt-v1.0.0)
-- Collected phrases use the upstream format (`hashToLeaf`, `jsfbt` leaves with `desc` and `tokenAliases`, location of the phrase)
-- Inner strings refer to token aliases at runtime (`{=m1}`), and their descriptions are generated like upstream
-- Hash keys of translated payloads are computed like upstream
-- md5 hashes of source strings are encoded in `base64` by default (like upstream)
+- Collected phrases use the format of Facebook's fbt (`hashToLeaf`, `jsfbt` leaves with `desc` and `tokenAliases`, location of the phrase)
+- Inner strings refer to token aliases at runtime (`{=m1}`), and their descriptions contain the whole enclosing string (e.g. `In the phrase: "{name1} {=poked you}."`)
+- Hash keys of translated payloads are computed from the texts and token aliases of all leaves (unchanged for strings without inner strings)
+- md5 hashes of source strings are encoded in `base64` instead of `hex` by default (set `md5_digest` to `hex` to keep the old keys)
 - Plurals, enums and pronouns are no longer deduplicated by value (use the `key` option)
 - Empty HTML elements are kept as a part of the text
-- `TranslationBuilder`, `FbtSite`, `TranslationConfig` and `TranslationData` are ported from upstream v1.0.0
+- `TranslationBuilder`, `FbtSite`, `TranslationConfig` and `TranslationData` are ported from Facebook's fbt v1.0.0
 - Redundant punctuation after a parameter is only removed when it is really redundant (e.g. `T.J.?` is kept, `Chess!!` becomes `Chess!`)
 - A substitution token registered more than once (e.g. `fbt:name` and `fbt:param` with the same name) now throws an exception
 - `fbs()` returns `FbtPureStringResult` objects and is never inlined in inline translation mode
 - Numbers are formatted exactly like in JavaScript (precision is not limited by the `precision` ini setting, halves are rounded up like `Math.round`)
-- Direct runtime calls: boolean parameter values are rendered as `true` / `false`, and `fbs::_param()` / `fbs::_plural()` only accept strings or `FbtPureStringResult` values (like upstream)
+- Direct runtime calls: boolean parameter values are rendered as `true` / `false`, and `fbs::_param()` / `fbs::_plural()` only accept strings or `FbtPureStringResult` values
 - Rendered strings are not cached in inline translation mode
-- `FbtUtils::substituteTokens()` and `IntlPunctuation::endsInPunct()` are deprecated
+- `IntlPunctuation::endsInPunct()` is deprecated
+- `FbtHooks::getIntlViewerContext()` is renamed to `FbtHooks::getViewerContext()` (like the hook)
+- `IntlList` is a function like `intlList` of Facebook's fbt (`IntlList::intlList($items, $conjunction, $delimiter)`, the constructor and `format()` are removed), `intlNumUtils::escapeRegex()` is moved to `escapeRegex::escapeRegex()`, and the duplicate `InlineFbtResult::$contents` is removed
+- The runtime constants of `IntlVariations` (`BITMASK_*`, `NUMBER_*`, `GENDER_*`) are moved to `fbt\Lib\IntlVariations` (the runtime `IntlVariations` of Facebook's fbt), and runtime error messages don't depend on the transform (`FbtUtils::describe()`)
+- The runtime uses `GenderConst` (like Facebook's fbt), and `FbtTableAccessor::getGenderResult()` / `getNumberResult()` receive the gender / number value
+- `intlInlineMode.css` (styles of inline translation mode) is shipped in `src/fbt/Runtime/`
+- `FbtUtils::substituteTokens()` (use `substituteTokens::substitute()`), `FbtUtils::getVariationValue()` and `FbtConstants::PRONOUN_USAGE` (use `FbtConstants::VALID_PRONOUN_USAGES`) are removed
 - `Gender::GENDER_CONST['MIXED_SINGULAR']` and `Gender::GENDER_CONST['MIXED_PLURAL']` (removed in v4.4.0) are restored as aliases of `MIXED_UNKNOWN`
-- Upstream changes after v1.0.0 (up to fbt v1.0.2 / main of Nov 2024):
+- fbt constructs (`fbt::param()`, `fbt::plural()`, ...) return `FbtCallExpression` objects (the equivalent of the babel call expressions of Facebook's fbt) instead of markup, and fbt() callsites are compiled from them directly (like `FbtFunctionCallProcessor` of Facebook's fbt), once for all of their runtime values (`FbtExpression`)
+- `fbt::c()` is processed by `FbtCommonFunctionCallProcessor` (port of Facebook's fbt)
+- The runtime tables of compiled callsites are computed once (instead of on every render)
+- Values of `fbt::param()` (with the `number` option) and `fbt::plural()` are formatted only when they are numbers (like Facebook's fbt), e.g. the string `'12345'` isn't rendered as `12,345` (numeric values of HTML constructs are still numbers)
+- Phonological rules are applied to strings without parameters too (e.g. Turkish apostrophes)
+- `<fbt desc>` without a value throws an exception (like Facebook's fbt)
+- `generate-translations` writes a translation group per file (the format of `translate --translations` of Facebook's fbt, files of older versions are converted), and the generated tokens and types are aligned
+- `FbtElementNode` trees of callsites with `doNotExtract` are not collected
+- Common strings from `fbtCommonPath` are loaded once
+- `translate --jenkins` prints `{}` without translation groups, and line terminators (U+2028, U+2029) aren't escaped in the JSON output
+- Changes of Facebook's fbt after v1.0.0 (up to fbt v1.0.2 / main of Nov 2024):
   - a missing parameter is reported to the `onMissingParameterError()` method of the error listener
   - `logImpression` hook receives the input table and the keys used to access it
   - `intlList()` ignores empty items (`null`, `false`, `''`)

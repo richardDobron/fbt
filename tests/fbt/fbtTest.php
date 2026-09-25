@@ -50,11 +50,10 @@ FBT
         $this->assertCount(1, FbtTransform::$phrases);
     }
 
-    public function testDisableEmptyFbt()
+    public function testEmptyFbt()
     {
-        self::expectExceptionMessage('text cannot be null');
-
-        self::transform('<fbt desc="Empty fbt"></fbt>');
+        $this->assertSame('', self::transform('<fbt desc="Empty fbt"></fbt>'));
+        $this->assertSame('', (string)fbt('', 'Empty fbt'));
     }
 
     public function testPlural()
@@ -364,7 +363,7 @@ FBT;
 
     public function testUnknownUsageValue()
     {
-        $this->expectExceptionMessage('must be one of [object, possessive, reflexive, subject]');
+        $this->expectExceptionMessage('fbt:pronoun attribute "type" must be one of [object,possessive,reflexive,subject]');
 
         self::transform(
             <<<FBT
@@ -955,11 +954,9 @@ FBT;
 
         $this->assertSame('By artist <span><a>Lou Reed</a> & <a>Metallica</a></span>', $fbt);
 
-        if (version_compare(PHP_VERSION, '7.4.0') >= 0) {
-            $this->expectException(\Exception::class);
+        $fbt = (string)fbt('By artist ' . \fbt\fbt::param('artist', '<a>Lou Reed</a> & <a>Metallica</a>'), 'test');
 
-            (string)fbt('By artist ' . \fbt\fbt::param('artist', '<a>Lou Reed</a> & <a>Metallica</a>'), 'test');
-        }
+        $this->assertSame('By artist <a>Lou Reed</a> & <a>Metallica</a>', $fbt);
     }
 
     public function testEmptyParameter()
@@ -992,7 +989,7 @@ FBT;
     public function testSubject()
     {
         $fbt = fbt('You<fbt:param name="lineBreak"><br></fbt:param>see<fbt:same-param name="lineBreak"/>the world', 'expose subject', [
-            'subject' => IntlVariations::GENDER_MALE,
+            'subject' => \fbt\Lib\IntlVariations::GENDER_MALE,
         ]);
 
         $this->assertSame('You<br>see<br>the world', (string)$fbt);

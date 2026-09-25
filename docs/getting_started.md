@@ -47,7 +47,8 @@ Below are the less important parameters.
 * **collectFbt** `bool`: (Default: `true`) Collect fbt instances from the source and store them to a JSON file.
 * **prettyPrint** `bool`: (Default: `true`) Pretty print source strings in a JSON file.
 * **hash_module** `string`: (Default: `md5`) Hash module. You can choose `md5` or `tiger` hash module.
-* **md5_digest** `string`: (Default: `base64`) MD5 digest. You can choose `base64` (like upstream) or `hex` (default in v4).
+* **md5_digest** `string`: (Default: `base64`) Encoding of md5 hashes. You can choose `base64` or `hex` (default in v4).
+* **fbtHashKeyModule** `callable|string`: (Default: `null`) Function computing the hash keys of callsites (the keys of `translatedFbts.json`), or a path to a PHP file returning it. It receives the `jsfbt.t` table of a phrase. By default, `fbtHash::fbtHashKey()` (jenkins hash) is used. The same function has to be used by the runtime and the `translate` command.
 * **driver** `string`: (Default: `json`) Currently, only JSON storage is supported.
 * **extraOptions** `array`: (Default: `[]`) Extra options allowed on fbt callsites, e.g. `['myOption' => true]`. Their values are passed to the runtime (see the [`getFbtResult` hook](hooks.md#getfbtresult--getfbsresult)).
 * **generateOuterTokenName** `bool`: (Default: `false`) Add the outer token name of inner strings to the collected phrases.
@@ -65,7 +66,7 @@ Example code:
 
 namespace App;
 
-use fbt\Transform\FbtTransform\Translate\IntlVariations;
+use fbt\Lib\IntlVariations;
 use fbt\Lib\IntlViewerContextInterface;
 use fbt\Runtime\Gender;
 
