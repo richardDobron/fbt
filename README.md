@@ -48,11 +48,11 @@ See the [Getting Started](docs/getting_started.md) guide for more.
 
 ## 📑 Version Guidance
 
-| Version | Released   | Status     | Repo             | PHP Version |
-|---------|------------|------------|------------------|-------------|
-| 3.x     | 2022-02-18 | Maintained | [v3][fbt-3-repo] | >= 7.0      |
-| 4.x     | 2022-04-09 | Maintained | [v4][fbt-4-repo] | >= 7.2      |
-| 5.x     | Unreleased | Latest     | [v5][fbt-5-repo] | >= 7.2      |
+| Version | Released   | Status      | Repo             | PHP Version |
+|---------|------------|-------------|------------------|-------------|
+| 3.x     | 2022-02-18 | Unsupported | [v3][fbt-3-repo] | >= 7.0      |
+| 4.x     | 2022-04-09 | Unsupported | [v4][fbt-4-repo] | >= 7.2      |
+| 5.x     | 2026-09-25 | Latest      | [v5][fbt-5-repo] | >= 7.2      |
 
 ## 🔌 Official integrations
 
