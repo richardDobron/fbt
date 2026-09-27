@@ -1,21 +1,24 @@
 /**
- * Copyright (c) 2017-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-/**
- * /src/css/custom.css
- * You can override the default Infima variables here.
- * Note: this is not a complete list of --ifm- variables.
+ * Infima variables, see https://infima.dev
  */
 :root {
   --ifm-color-primary: #4267b2;
-  --ifm-color-primary-dark: #23469c;
-  --ifm-color-primary-darker: #113178;
-  --ifm-color-primary-darkest: #091e4a;
-  --ifm-color-primary-light: #7981c2;
-  --ifm-color-primary-lighter: #a09cc7;
-  --ifm-color-primary-lightest: #c4c2cc;
+  --ifm-color-primary-dark: #3b5da0;
+  --ifm-color-primary-darker: #385897;
+  --ifm-color-primary-darkest: #2e487d;
+  --ifm-color-primary-light: #5577bb;
+  --ifm-color-primary-lighter: #5f7fbf;
+  --ifm-color-primary-lightest: #7b95cb;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #7b95cb;
+  --ifm-color-primary-dark: #6583c2;
+  --ifm-color-primary-darker: #5a7abe;
+  --ifm-color-primary-darkest: #4466ae;
+  --ifm-color-primary-light: #91a7d4;
+  --ifm-color-primary-lighter: #9cb0d8;
+  --ifm-color-primary-lightest: #bccae4;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }

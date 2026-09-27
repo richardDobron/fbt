@@ -1,0 +1,95 @@
+{
+    "fb-locale": "tr_TR",
+    "translations": {
+        "ocxOfiWOgPppLCPniKirHg==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "1 okunmamış mesajın var.",
+                    "variations": []
+                }
+            ]
+        },
+        "kSEgIONMKvwP/Nc/CA4RHQ==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "{count} okunmamış mesajın var.",
+                    "variations": []
+                }
+            ]
+        },
+        "J1HEeNs7izzBIZDqd38OyA==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "{name} seninle bir fotoğraf paylaştı.",
+                    "variations": []
+                }
+            ]
+        },
+        "p5OyguEh4OhZHdb1ZhEPxA==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "Siparişin kargoya verildi.",
+                    "variations": []
+                }
+            ]
+        },
+        "HqcJ4ubxKWua6YhdfSCmIw==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "Siparişin teslim edildi.",
+                    "variations": []
+                }
+            ]
+        },
+        "jX0ziFVOhs/3N51mgf/ooQ==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "Siparişin iptal edildi.",
+                    "variations": []
+                }
+            ]
+        },
+        "u2pL5C1cF+bPN2mNt/DnSg==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "{name} profilini güncelledi.",
+                    "variations": []
+                }
+            ]
+        },
+        "dDSu3I1VivYaarIiBk8dHQ==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "{name} profilini güncelledi.",
+                    "variations": []
+                }
+            ]
+        },
+        "AdtnOEJQLuBzf5fYq9adqQ==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "{name} profilini güncelledi.",
+                    "variations": []
+                }
+            ]
+        }
+    }
+}

@@ -1,0 +1,131 @@
+{
+    "fb-locale": "sk_SK",
+    "translations": {
+        "ocxOfiWOgPppLCPniKirHg==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "Máš 1 neprečítanú správu.",
+                    "variations": []
+                }
+            ]
+        },
+        "kSEgIONMKvwP/Nc/CA4RHQ==": {
+            "tokens": [
+                "count"
+            ],
+            "types": [
+                28
+            ],
+            "translations": [
+                {
+                    "translation": "Máš {count} neprečítané správy.",
+                    "variations": [
+                        20
+                    ]
+                },
+                {
+                    "translation": "Máš {count} neprečítaných správ.",
+                    "variations": [
+                        12
+                    ]
+                },
+                {
+                    "translation": "Máš {count} neprečítaných správ.",
+                    "variations": [
+                        24
+                    ]
+                }
+            ]
+        },
+        "J1HEeNs7izzBIZDqd38OyA==": {
+            "tokens": [
+                "name"
+            ],
+            "types": [
+                3
+            ],
+            "translations": [
+                {
+                    "translation": "{name} s tebou zdieľal fotku.",
+                    "variations": [
+                        1
+                    ]
+                },
+                {
+                    "translation": "{name} s tebou zdieľala fotku.",
+                    "variations": [
+                        2
+                    ]
+                },
+                {
+                    "translation": "{name} s tebou zdieľal(a) fotku.",
+                    "variations": [
+                        3
+                    ]
+                }
+            ]
+        },
+        "p5OyguEh4OhZHdb1ZhEPxA==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "Tvoja objednávka bola odoslaná.",
+                    "variations": []
+                }
+            ]
+        },
+        "HqcJ4ubxKWua6YhdfSCmIw==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "Tvoja objednávka bola doručená.",
+                    "variations": []
+                }
+            ]
+        },
+        "jX0ziFVOhs/3N51mgf/ooQ==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "Tvoja objednávka bola zrušená.",
+                    "variations": []
+                }
+            ]
+        },
+        "u2pL5C1cF+bPN2mNt/DnSg==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "{name} aktualizovala svoj profil.",
+                    "variations": []
+                }
+            ]
+        },
+        "dDSu3I1VivYaarIiBk8dHQ==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "{name} aktualizoval svoj profil.",
+                    "variations": []
+                }
+            ]
+        },
+        "AdtnOEJQLuBzf5fYq9adqQ==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "{name} aktualizoval(a) svoj profil.",
+                    "variations": []
+                }
+            ]
+        }
+    }
+}

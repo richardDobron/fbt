@@ -1,0 +1,9 @@
+{
+  "docs": [
+    {"type": "category", "label": "Getting started", "items": ["getting_started", "locale_detection", "best_practices"]},
+    {"type": "category", "label": "API", "items": ["api_intro", "params", "implicit_params", "plurals", "enums", "pronouns", "autoparam", "common", "utilities"]},
+    {"type": "category", "label": "Transforms", "items": ["transform"]},
+    {"type": "category", "label": "Collection", "items": ["collection"]},
+    {"type": "category", "label": "Translating", "items": ["translating", "standards", "locales", "inline_translating"]}
+  ]
+}

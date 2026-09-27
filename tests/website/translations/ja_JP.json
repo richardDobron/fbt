@@ -1,0 +1,95 @@
+{
+    "fb-locale": "ja_JP",
+    "translations": {
+        "ocxOfiWOgPppLCPniKirHg==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "未読メッセージが1件あります。",
+                    "variations": []
+                }
+            ]
+        },
+        "kSEgIONMKvwP/Nc/CA4RHQ==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "未読メッセージが{count}件あります。",
+                    "variations": []
+                }
+            ]
+        },
+        "J1HEeNs7izzBIZDqd38OyA==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "{name}さんが写真を共有しました。",
+                    "variations": []
+                }
+            ]
+        },
+        "p5OyguEh4OhZHdb1ZhEPxA==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "ご注文の商品を発送しました。",
+                    "variations": []
+                }
+            ]
+        },
+        "HqcJ4ubxKWua6YhdfSCmIw==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "ご注文の商品をお届けしました。",
+                    "variations": []
+                }
+            ]
+        },
+        "jX0ziFVOhs/3N51mgf/ooQ==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "ご注文はキャンセルされました。",
+                    "variations": []
+                }
+            ]
+        },
+        "u2pL5C1cF+bPN2mNt/DnSg==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "{name}さんがプロフィールを更新しました。",
+                    "variations": []
+                }
+            ]
+        },
+        "dDSu3I1VivYaarIiBk8dHQ==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "{name}さんがプロフィールを更新しました。",
+                    "variations": []
+                }
+            ]
+        },
+        "AdtnOEJQLuBzf5fYq9adqQ==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "{name}さんがプロフィールを更新しました。",
+                    "variations": []
+                }
+            ]
+        }
+    }
+}

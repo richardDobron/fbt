@@ -1,0 +1,208 @@
+{
+    "locales": {
+        "en_US": "English",
+        "de_DE": "Deutsch",
+        "sk_SK": "Slovenčina",
+        "ru_RU": "Русский",
+        "tr_TR": "Türkçe",
+        "ja_JP": "日本語"
+    },
+    "examples": {
+        "plural": [
+            {
+                "label": "$count = 1",
+                "values": {
+                    "count": 1
+                },
+                "outputs": {
+                    "en_US": "You have 1 unread message.",
+                    "de_DE": "Du hast 1 ungelesene Nachricht.",
+                    "sk_SK": "Máš 1 neprečítanú správu.",
+                    "ru_RU": "У вас 1 непрочитанное сообщение.",
+                    "ja_JP": "未読メッセージが1件あります。",
+                    "tr_TR": "1 okunmamış mesajın var."
+                }
+            },
+            {
+                "label": "$count = 3",
+                "values": {
+                    "count": 3
+                },
+                "outputs": {
+                    "en_US": "You have 3 unread messages.",
+                    "de_DE": "Du hast 3 ungelesene Nachrichten.",
+                    "sk_SK": "Máš 3 neprečítané správy.",
+                    "ru_RU": "У вас 3 непрочитанных сообщения.",
+                    "ja_JP": "未読メッセージが3件あります。",
+                    "tr_TR": "3 okunmamış mesajın var."
+                }
+            },
+            {
+                "label": "$count = 5",
+                "values": {
+                    "count": 5
+                },
+                "outputs": {
+                    "en_US": "You have 5 unread messages.",
+                    "de_DE": "Du hast 5 ungelesene Nachrichten.",
+                    "sk_SK": "Máš 5 neprečítaných správ.",
+                    "ru_RU": "У вас 5 непрочитанных сообщений.",
+                    "ja_JP": "未読メッセージが5件あります。",
+                    "tr_TR": "5 okunmamış mesajın var."
+                }
+            },
+            {
+                "label": "$count = 21",
+                "values": {
+                    "count": 21
+                },
+                "outputs": {
+                    "en_US": "You have 21 unread messages.",
+                    "de_DE": "Du hast 21 ungelesene Nachrichten.",
+                    "sk_SK": "Máš 21 neprečítaných správ.",
+                    "ru_RU": "У вас 21 непрочитанное сообщение.",
+                    "ja_JP": "未読メッセージが21件あります。",
+                    "tr_TR": "21 okunmamış mesajın var."
+                }
+            }
+        ],
+        "name": [
+            {
+                "label": "Peter · male",
+                "values": {
+                    "name": "Peter",
+                    "gender": 1
+                },
+                "outputs": {
+                    "en_US": "Peter shared a photo with you.",
+                    "de_DE": "Peter hat ein Foto mit dir geteilt.",
+                    "sk_SK": "Peter s tebou zdieľal fotku.",
+                    "ru_RU": "Peter поделился с вами фотографией.",
+                    "ja_JP": "Peterさんが写真を共有しました。",
+                    "tr_TR": "Peter seninle bir fotoğraf paylaştı."
+                }
+            },
+            {
+                "label": "Jana · female",
+                "values": {
+                    "name": "Jana",
+                    "gender": 2
+                },
+                "outputs": {
+                    "en_US": "Jana shared a photo with you.",
+                    "de_DE": "Jana hat ein Foto mit dir geteilt.",
+                    "sk_SK": "Jana s tebou zdieľala fotku.",
+                    "ru_RU": "Jana поделилась с вами фотографией.",
+                    "ja_JP": "Janaさんが写真を共有しました。",
+                    "tr_TR": "Jana seninle bir fotoğraf paylaştı."
+                }
+            },
+            {
+                "label": "Alex · unknown",
+                "values": {
+                    "name": "Alex",
+                    "gender": 3
+                },
+                "outputs": {
+                    "en_US": "Alex shared a photo with you.",
+                    "de_DE": "Alex hat ein Foto mit dir geteilt.",
+                    "sk_SK": "Alex s tebou zdieľal(a) fotku.",
+                    "ru_RU": "Alex поделился(-ась) с вами фотографией.",
+                    "ja_JP": "Alexさんが写真を共有しました。",
+                    "tr_TR": "Alex seninle bir fotoğraf paylaştı."
+                }
+            }
+        ],
+        "enum": [
+            {
+                "label": "shipped",
+                "values": {
+                    "status": "shipped"
+                },
+                "outputs": {
+                    "en_US": "Your order has been shipped.",
+                    "de_DE": "Deine Bestellung wurde versandt.",
+                    "sk_SK": "Tvoja objednávka bola odoslaná.",
+                    "ru_RU": "Ваш заказ отправлен.",
+                    "ja_JP": "ご注文の商品を発送しました。",
+                    "tr_TR": "Siparişin kargoya verildi."
+                }
+            },
+            {
+                "label": "delivered",
+                "values": {
+                    "status": "delivered"
+                },
+                "outputs": {
+                    "en_US": "Your order has been delivered.",
+                    "de_DE": "Deine Bestellung wurde zugestellt.",
+                    "sk_SK": "Tvoja objednávka bola doručená.",
+                    "ru_RU": "Ваш заказ доставлен.",
+                    "ja_JP": "ご注文の商品をお届けしました。",
+                    "tr_TR": "Siparişin teslim edildi."
+                }
+            },
+            {
+                "label": "cancelled",
+                "values": {
+                    "status": "cancelled"
+                },
+                "outputs": {
+                    "en_US": "Your order has been cancelled.",
+                    "de_DE": "Deine Bestellung wurde storniert.",
+                    "sk_SK": "Tvoja objednávka bola zrušená.",
+                    "ru_RU": "Ваш заказ отменён.",
+                    "ja_JP": "ご注文はキャンセルされました。",
+                    "tr_TR": "Siparişin iptal edildi."
+                }
+            }
+        ],
+        "pronoun": [
+            {
+                "label": "Jana · female",
+                "values": {
+                    "name": "Jana",
+                    "gender": 1
+                },
+                "outputs": {
+                    "en_US": "Jana updated her profile.",
+                    "de_DE": "Jana hat ihr Profil aktualisiert.",
+                    "sk_SK": "Jana aktualizovala svoj profil.",
+                    "ru_RU": "Jana обновила свой профиль.",
+                    "ja_JP": "Janaさんがプロフィールを更新しました。",
+                    "tr_TR": "Jana profilini güncelledi."
+                }
+            },
+            {
+                "label": "Peter · male",
+                "values": {
+                    "name": "Peter",
+                    "gender": 2
+                },
+                "outputs": {
+                    "en_US": "Peter updated his profile.",
+                    "de_DE": "Peter hat sein Profil aktualisiert.",
+                    "sk_SK": "Peter aktualizoval svoj profil.",
+                    "ru_RU": "Peter обновил свой профиль.",
+                    "ja_JP": "Peterさんがプロフィールを更新しました。",
+                    "tr_TR": "Peter profilini güncelledi."
+                }
+            },
+            {
+                "label": "Alex · unknown",
+                "values": {
+                    "name": "Alex",
+                    "gender": 7
+                },
+                "outputs": {
+                    "en_US": "Alex updated their profile.",
+                    "de_DE": "Alex hat das eigene Profil aktualisiert.",
+                    "sk_SK": "Alex aktualizoval(a) svoj profil.",
+                    "ru_RU": "Alex обновил(а) свой профиль.",
+                    "ja_JP": "Alexさんがプロフィールを更新しました。",
+                    "tr_TR": "Alex profilini güncelledi."
+                }
+            }
+        ]
+    }
+}

@@ -1,0 +1,137 @@
+{
+    "fb-locale": "ru_RU",
+    "translations": {
+        "ocxOfiWOgPppLCPniKirHg==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "У вас 1 непрочитанное сообщение.",
+                    "variations": []
+                }
+            ]
+        },
+        "kSEgIONMKvwP/Nc/CA4RHQ==": {
+            "tokens": [
+                "count"
+            ],
+            "types": [
+                28
+            ],
+            "translations": [
+                {
+                    "translation": "У вас {count} непрочитанное сообщение.",
+                    "variations": [
+                        4
+                    ]
+                },
+                {
+                    "translation": "У вас {count} непрочитанных сообщения.",
+                    "variations": [
+                        20
+                    ]
+                },
+                {
+                    "translation": "У вас {count} непрочитанных сообщений.",
+                    "variations": [
+                        12
+                    ]
+                },
+                {
+                    "translation": "У вас {count} непрочитанных сообщений.",
+                    "variations": [
+                        24
+                    ]
+                }
+            ]
+        },
+        "J1HEeNs7izzBIZDqd38OyA==": {
+            "tokens": [
+                "name"
+            ],
+            "types": [
+                3
+            ],
+            "translations": [
+                {
+                    "translation": "{name} поделился с вами фотографией.",
+                    "variations": [
+                        1
+                    ]
+                },
+                {
+                    "translation": "{name} поделилась с вами фотографией.",
+                    "variations": [
+                        2
+                    ]
+                },
+                {
+                    "translation": "{name} поделился(-ась) с вами фотографией.",
+                    "variations": [
+                        3
+                    ]
+                }
+            ]
+        },
+        "p5OyguEh4OhZHdb1ZhEPxA==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "Ваш заказ отправлен.",
+                    "variations": []
+                }
+            ]
+        },
+        "HqcJ4ubxKWua6YhdfSCmIw==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "Ваш заказ доставлен.",
+                    "variations": []
+                }
+            ]
+        },
+        "jX0ziFVOhs/3N51mgf/ooQ==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "Ваш заказ отменён.",
+                    "variations": []
+                }
+            ]
+        },
+        "u2pL5C1cF+bPN2mNt/DnSg==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "{name} обновила свой профиль.",
+                    "variations": []
+                }
+            ]
+        },
+        "dDSu3I1VivYaarIiBk8dHQ==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "{name} обновил свой профиль.",
+                    "variations": []
+                }
+            ]
+        },
+        "AdtnOEJQLuBzf5fYq9adqQ==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "{name} обновил(а) свой профиль.",
+                    "variations": []
+                }
+            ]
+        }
+    }
+}

@@ -1,0 +1,95 @@
+{
+    "fb-locale": "de_DE",
+    "translations": {
+        "ocxOfiWOgPppLCPniKirHg==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "Du hast 1 ungelesene Nachricht.",
+                    "variations": []
+                }
+            ]
+        },
+        "kSEgIONMKvwP/Nc/CA4RHQ==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "Du hast {count} ungelesene Nachrichten.",
+                    "variations": []
+                }
+            ]
+        },
+        "J1HEeNs7izzBIZDqd38OyA==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "{name} hat ein Foto mit dir geteilt.",
+                    "variations": []
+                }
+            ]
+        },
+        "p5OyguEh4OhZHdb1ZhEPxA==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "Deine Bestellung wurde versandt.",
+                    "variations": []
+                }
+            ]
+        },
+        "HqcJ4ubxKWua6YhdfSCmIw==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "Deine Bestellung wurde zugestellt.",
+                    "variations": []
+                }
+            ]
+        },
+        "jX0ziFVOhs/3N51mgf/ooQ==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "Deine Bestellung wurde storniert.",
+                    "variations": []
+                }
+            ]
+        },
+        "u2pL5C1cF+bPN2mNt/DnSg==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "{name} hat ihr Profil aktualisiert.",
+                    "variations": []
+                }
+            ]
+        },
+        "dDSu3I1VivYaarIiBk8dHQ==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "{name} hat sein Profil aktualisiert.",
+                    "variations": []
+                }
+            ]
+        },
+        "AdtnOEJQLuBzf5fYq9adqQ==": {
+            "tokens": [],
+            "types": [],
+            "translations": [
+                {
+                    "translation": "{name} hat das eigene Profil aktualisiert.",
+                    "variations": []
+                }
+            ]
+        }
+    }
+}

@@ -1,127 +1,252 @@
-/**
- * Copyright (c) 2017-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-/**
- * CSS files with the .module.css suffix will be treated as CSS modules
- * and scoped locally.
- */
-
-.heroBanner {
-  padding: 4rem 0;
-  text-align: center;
+.hero {
   position: relative;
   overflow: hidden;
+  padding: 5rem 0 4rem;
+  background:
+    radial-gradient(circle at 85% 20%, rgba(56, 189, 248, 0.25), transparent 45%),
+    linear-gradient(135deg, #eef4ff 0%, #f0f9ff 100%);
+  border-bottom: 1px solid var(--ifm-toc-border-color);
 }
 
-@media screen and (max-width: 966px) {
-  .heroBanner {
-    padding: 2rem;
-  }
+[data-theme='dark'] .hero {
+  background:
+    radial-gradient(circle at 85% 20%, rgba(56, 189, 248, 0.18), transparent 45%),
+    linear-gradient(135deg, #0b1220 0%, #0f172a 100%);
 }
 
-.topContainer {
+.heroContainer {
   display: flex;
-  justify-content: space-around;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3rem;
+}
+
+.heroText {
+  max-width: 640px;
+}
+
+.badge {
+  display: inline-block;
+  margin-bottom: 1.25rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid rgba(66, 103, 178, 0.3);
+  border-radius: 999px;
+  background: rgba(66, 103, 178, 0.1);
+  color: var(--ifm-color-primary-darker);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+[data-theme='dark'] .badge {
+  color: var(--ifm-color-primary-lightest);
+}
+
+.heroTitle {
+  margin-bottom: 1rem;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(90deg, #4267b2 0%, #0ea5e9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+[data-theme='dark'] .heroTitle {
+  background-image: linear-gradient(90deg, #7b95cb 0%, #38bdf8 100%);
+}
+
+.heroTagline {
+  margin-bottom: 2rem;
+  font-size: 1.3rem;
+  line-height: 1.5;
 }
 
 .buttons {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.sections {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: center;
+.install {
+  max-width: 460px;
+  margin-top: 1.5rem;
 }
 
-@media only screen and (max-width: 1023px) {
-  .sections {
-    flex-direction: column-reverse;
-  }
+.install :global(.theme-code-block) {
+  margin-bottom: 0;
 }
 
-.splashImage {
-  max-height: 150px;
+.heroImage {
+  width: 220px;
+  height: 220px;
+  filter: drop-shadow(0 20px 40px rgba(14, 165, 233, 0.35));
 }
 
-@media only screen and (max-width: 1023px) {
-  .splashImage {
-    margin-bottom: 30px;
-  }
+.section {
+  padding: 4.5rem 0;
 }
 
-.descriptionImage {
-  max-height: 250px;
+.sectionAlt {
+  background: var(--ifm-background-surface-color);
+  border-top: 1px solid var(--ifm-toc-border-color);
+  border-bottom: 1px solid var(--ifm-toc-border-color);
 }
 
-.button {
-  margin: 0 1rem;
-}
-
-.features {
-  display: flex;
-  align-items: center;
-  padding: 2rem 0;
-  width: 100%;
-}
-
-.featureBlock {
+.sectionTitle {
+  margin-bottom: 0.75rem;
+  font-size: 2.2rem;
   text-align: center;
 }
 
-.showcase {
-  padding: 0 20px 80px 20px;
+.sectionLead {
+  max-width: 680px;
+  margin: 0 auto 2.5rem;
+  font-size: 1.1rem;
+  text-align: center;
+  color: var(--ifm-color-emphasis-700);
 }
 
-.showcaseHeading {
-  font-size: 30px;
-  line-height: 1em;
-  margin-top: 20px;
-  padding: 10px 0;
+.narrow {
+  max-width: 860px;
 }
 
-.showcaseHeadingColored {
-  color: var(--ifm-color-primary);
+.center {
+  text-align: center;
 }
 
-.showcaseLogos {
-  align-items: center;
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: center;
-  padding: 20px;
+.outputCard {
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: var(--ifm-code-border-radius);
+  background: var(--ifm-background-color);
+  box-shadow: var(--ifm-global-shadow-lw);
 }
 
-.showcaseLogo {
-  width: 120px;
-  height: 120px;
+.outputHeader {
   display: flex;
   align-items: center;
-  background: white;
-  margin: 15px;
-  border-radius: 8px;
-  padding: 5px;
-  justify-content: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--ifm-toc-border-color);
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
-.description {
-  padding: 80px 0;
-  background: gray;
+.localeSwitch {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.localeButton {
+  padding: 0.35rem 1rem;
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.localeButtonActive {
+  background: var(--ifm-color-primary);
   color: #fff;
 }
 
-.row {
-  margin: 0 auto;
-  padding: 0 20px;
+.outputList {
+  margin: 0;
+  padding: 0.5rem 1rem;
+  list-style: none;
 }
 
-.column {
+.outputList li {
+  padding: 0.75rem 0;
+  border-bottom: 1px dashed var(--ifm-toc-border-color);
+}
+
+.outputList li:last-child {
+  border-bottom: 0;
+}
+
+.outputMeta {
+  font-size: 0.8rem;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.outputText {
+  font-size: 1.05rem;
+}
+
+.exampleTabs {
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.exampleNote {
+  margin-top: 1rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.exampleFootnote {
+  margin: 1rem 0 0;
+  font-size: 0.9rem;
   text-align: center;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.featureCard {
+  padding: 1.5rem;
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 12px;
+  background: var(--ifm-background-color);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.featureCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ifm-global-shadow-md);
+}
+
+.featureCard p {
+  margin-bottom: 0;
+}
+
+.featureIcon {
+  margin-bottom: 0.75rem;
+  font-size: 1.8rem;
+}
+
+.basedOnLogo {
+  width: 72px;
+  height: 72px;
+}
+
+@media screen and (max-width: 996px) {
+  .hero {
+    padding: 3rem 0;
+  }
+
+  .heroImage {
+    display: none;
+  }
+
+  .featureGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .featureGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
