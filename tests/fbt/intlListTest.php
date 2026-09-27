@@ -66,6 +66,21 @@ class intlListTest extends \tests\TestCase
         $this->assertSame('first, second and third', (string)intlList(['first', 'second', 'third'], '', ''));
     }
 
+    public function testSerialComma()
+    {
+        $serialComma = ['serialComma' => true];
+
+        $this->assertSame('first, second and third', (string)intlList(['first', 'second', 'third']));
+        $this->assertSame('first, second, and third', (string)intlList(['first', 'second', 'third'], intlList::CONJUNCTIONS['AND'], intlList::DELIMITERS['COMMA'], $serialComma));
+        $this->assertSame('1, 2, 3, and 4', (string)intlList(['1', '2', '3', '4'], intlList::CONJUNCTIONS['AND'], intlList::DELIMITERS['COMMA'], $serialComma));
+        $this->assertSame('first, second, or third', (string)intlList(['first', 'second', 'third'], intlList::CONJUNCTIONS['OR'], intlList::DELIMITERS['COMMA'], $serialComma));
+        $this->assertSame('first, second, and third', (string)intlList(['first', 'second', 'third'], null, null, $serialComma));
+        $this->assertSame('first and second', (string)intlList(['first', 'second'], intlList::CONJUNCTIONS['AND'], intlList::DELIMITERS['COMMA'], $serialComma));
+        $this->assertSame('first', (string)intlList(['first'], intlList::CONJUNCTIONS['AND'], intlList::DELIMITERS['COMMA'], $serialComma));
+        $this->assertSame('first; second and third', (string)intlList(['first', 'second', 'third'], intlList::CONJUNCTIONS['AND'], intlList::DELIMITERS['SEMICOLON'], $serialComma));
+        $this->assertSame('first, second, third', (string)intlList(['first', 'second', 'third'], intlList::CONJUNCTIONS['NONE'], intlList::DELIMITERS['COMMA'], $serialComma));
+    }
+
     public function testNonSequentialKeys()
     {
         $this->assertSame('first and second', (string)intlList([3 => 'first', 7 => 'second']));

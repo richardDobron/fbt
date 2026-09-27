@@ -35,6 +35,13 @@ Available delimiters are `COMMA` (default), `SEMICOLON` and `BULLET`:
 // Menlo Park, CA • Seattle, WA • New York City, NY
 ```
 
+Pass `['serialComma' => true]` to use a serial (Oxford) comma with the `COMMA` delimiter and the `AND` / `OR` conjunctions (lists of three or more items):
+
+```php
+\fbt\intlList(['Tokyo', 'London', 'Vienna'], $CONJUNCTIONS['AND'], $DELIMITERS['COMMA'], ['serialComma' => true]);
+// Tokyo, London, and Vienna
+```
+
 ### formatNumber
 [`formatNumber`](https://github.com/richardDobron/fbt/blob/main/src/fbt/Runtime/Shared/formatNumber.php)
 formats numbers according to the viewer's locale:

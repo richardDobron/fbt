@@ -27,11 +27,12 @@ class IntlList
      * @param array $items_
      * @param string|null $conjunction
      * @param string|null $delimiter
+     * @param array{serialComma?: bool}|null $options
      *
      * @return mixed|\fbt\fbt|string
      * @throws \fbt\Exceptions\FbtException
      */
-    public static function intlList(array $items_, ?string $conjunction = null, ?string $delimiter = null)
+    public static function intlList(array $items_, ?string $conjunction = null, ?string $delimiter = null, ?array $options = null)
     {
         // js~php diff: support arrays that are not 0-indexed
         $items = array_values(array_filter($items_, [self::class, 'isTruthy']));
@@ -93,7 +94,9 @@ class IntlList
             $output,
             $lastItem,
             $conjunction ?: self::CONJUNCTIONS['AND'],
-            $delimiter ?: self::DELIMITERS['COMMA']
+            $delimiter ?: self::DELIMITERS['COMMA'],
+            $count,
+            $options
         );
     }
 
@@ -114,10 +117,19 @@ class IntlList
     /**
      * @throws \fbt\Exceptions\FbtException
      */
-    private static function _getConjunction($list, $lastItem, string $conjunction, string $delimiter): fbt
+    private static function _getConjunction($list, $lastItem, string $conjunction, string $delimiter, int $count, ?array $options): fbt
     {
         switch ($conjunction) {
             case self::CONJUNCTIONS['AND']:
+                if (($options['serialComma'] ?? false) && $delimiter === self::DELIMITERS['COMMA'] && $count > 2) {
+                    return fbt([
+                        fbt::param('list of items', $list),
+                        ', and ',
+                        fbt::param('last item', $lastItem),
+                    ], 'A list of items of various types with a serial comma, for example:' .
+                        ' "item1, item2, and item3"');
+                }
+
                 return fbt([
                     fbt::param('list of items', $list),
                     ' and ',
@@ -126,6 +138,15 @@ class IntlList
                     ' "item1, item2, item3 and item4"');
 
             case self::CONJUNCTIONS['OR']:
+                if (($options['serialComma'] ?? false) && $delimiter === self::DELIMITERS['COMMA'] && $count > 2) {
+                    return fbt([
+                        fbt::param('list of items', $list),
+                        ', or ',
+                        fbt::param('last item', $lastItem),
+                    ], 'A list of items of various types with a serial comma, for example:' .
+                        ' "item1, item2, or item3"');
+                }
+
                 return fbt([
                     fbt::param('list of items', $list),
                     ' or ',

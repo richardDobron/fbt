@@ -161,9 +161,9 @@ namespace fbt {
      * @throws FbtException
      * @return \fbt\fbt|string
      */
-    function intlList(array $items, ?string $conjunction = null, ?string $delimiter = null)
+    function intlList(array $items, ?string $conjunction = null, ?string $delimiter = null, ?array $options = null)
     {
-        return IntlList::intlList($items, $conjunction, $delimiter);
+        return IntlList::intlList($items, $conjunction, $delimiter, $options);
     }
 
     /**
