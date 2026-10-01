@@ -127,6 +127,18 @@ class runtimeParityTest extends \tests\TestCase
         $this->assertSame($result, $this->fbtRuntime->_('Memoized string', null));
     }
 
+    // fbtee: should not reuse cached FbtResults with different hash keys
+    public function testCachedResultsAreNotReusedForDifferentHashKeys()
+    {
+        $first = $this->fbtRuntime->_('same text with different hashes', null, ['hk' => 'hash-a']);
+        $second = $this->fbtRuntime->_('same text with different hashes', null, ['hk' => 'hash-b']);
+
+        $this->assertNotSame($first, $second);
+        $this->assertSame($first, fbt::_getCachedFbt('same text with different hashes', 'hash-a'));
+        $this->assertSame($second, fbt::_getCachedFbt('same text with different hashes', 'hash-b'));
+        $this->assertSame($second, $this->fbtRuntime->_('same text with different hashes', null, ['hk' => 'hash-b']));
+    }
+
     public function testTableWithoutArgs()
     {
         $this->expectExceptionMessage('Table access did not result in string: {"*":"a","_1":"b"}, Type: array');

@@ -14,7 +14,7 @@ use fbt\Runtime\GenderConst;
 
 class fbt
 {
-    /** @var array<string, FbtResultBase> */
+    /** @var array<string, array<string, FbtResultBase>> */
     private static $_cachedFbtResults = [];
 
     /**
@@ -129,7 +129,8 @@ class fbt
         // callsite), so they are never cached
         $inlineMode = FbtHooks::inlineMode();
         $cacheable = ! $reporting || ! $inlineMode || $inlineMode === 'NO_INLINE';
-        $cachedFbt = self::$_cachedFbtResults[$cacheKey] ?? null;
+        $hashKey = $options['hk'] ?? null;
+        $cachedFbt = self::$_cachedFbtResults[$cacheKey][(string)$hashKey] ?? null;
         $hasSubstitutions = self::_hasKeys($allSubstitutions);
 
         if ($cachedFbt && ! $hasSubstitutions && $cacheable) {
@@ -151,7 +152,7 @@ class fbt
                 $reporting
             );
             if (! $hasSubstitutions && $cacheable) {
-                self::$_cachedFbtResults[$cacheKey] = $result;
+                self::$_cachedFbtResults[$cacheKey][(string)$hashKey] = $result;
             }
 
             return $result;
@@ -163,9 +164,9 @@ class fbt
      *
      * @return FbtResultBase|mixed|null
      */
-    public static function _getCachedFbt(string $patternString)
+    public static function _getCachedFbt(string $patternString, ?string $hashKey = null)
     {
-        return self::$_cachedFbtResults[static::class . "\0" . FbtHooks::locale() . "\0" . $patternString] ?? null;
+        return self::$_cachedFbtResults[static::class . "\0" . FbtHooks::locale() . "\0" . $patternString][(string)$hashKey] ?? null;
     }
 
     /**
