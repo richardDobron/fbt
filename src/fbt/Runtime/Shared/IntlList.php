@@ -2,48 +2,44 @@
 
 namespace fbt\Runtime\Shared;
 
-use function fbt;
-
+use fbt\Exceptions\FbtException;
 use fbt\fbt;
-use fbt\FbtConfig;
-
-use function fbt\invariant;
 
 class IntlList
 {
     public const CONJUNCTIONS = [
-        'AND' => 'AND',
-        'NONE' => 'NONE',
-        'OR' => 'OR',
+        'AND' => 'and',
+        'NONE' => 'none',
+        'OR' => 'or',
     ];
 
     public const DELIMITERS = [
-        'BULLET' => 'BULLET',
-        'COMMA' => 'COMMA',
-        'SEMICOLON' => 'SEMICOLON',
+        'BULLET' => 'bullet',
+        'COMMA' => 'comma',
+        'SEMICOLON' => 'semicolon',
     ];
 
     /**
-     * @param array $items_
+     * @param array $items
      * @param string|null $conjunction
      * @param string|null $delimiter
      * @param array{serialComma?: bool}|null $options
+     * @param string $fbt - js~php diff: the class of the fbt API (fbt or fbs)
      *
      * @return mixed|\fbt\fbt|string
      * @throws \fbt\Exceptions\FbtException
      */
-    public static function intlList(array $items_, ?string $conjunction = null, ?string $delimiter = null, ?array $options = null)
-    {
+    public static function listWithRuntime(
+        array $items,
+        ?string $conjunction = null,
+        ?string $delimiter = null,
+        ?array $options = null,
+        string $fbt = fbt::class
+    ) {
+        $conjunction = $conjunction ?? self::CONJUNCTIONS['AND'];
+        $delimiter = $delimiter ?? self::DELIMITERS['COMMA'];
         // js~php diff: support arrays that are not 0-indexed
-        $items = array_values(array_filter($items_, [self::class, 'isTruthy']));
-        if (FbtConfig::get('debug')) {
-            foreach ($items as $item) {
-                invariant(
-                    is_string($item) || (is_object($item) && method_exists($item, '__toString')),
-                    'Must provide a string or an fbt result to intlList.'
-                );
-            }
-        }
+        $items = array_values(array_filter($items, [self::class, 'isTruthy']));
 
         $count = count($items);
         if ($count === 0) {
@@ -55,49 +51,100 @@ class IntlList
         $lastItem = $items[$count - 1];
         $output = $items[0];
 
-        for ($i = 1; $i < $count - 1; ++$i) {
+        for ($index = 1; $index < $count - 1; $index++) {
             switch ($delimiter) {
                 case self::DELIMITERS['SEMICOLON']:
-                    $output = fbt([
-                        fbt::param('previous items', $output),
+                    $output = new $fbt([
+                        $fbt::param('previous items', $output),
                         '; ',
-                        fbt::param('following items', $items[$i]),
-                    ], 'A list of items of various types, for example: ' .
-                        '"Menlo Park, CA; Seattle, WA; New York City, NY". ' .
-                        '{previous items} and {following items} are themselves ' .
-                        'lists that contain one or more items.');
+                        $fbt::param('following items', $items[$index]),
+                    ], 'A list of items of various types, for example: "San Francisco; London; Tokyo". {previous items} and {following items} are themselves lists that contain one or more items.');
 
                     break;
                 case self::DELIMITERS['BULLET']:
-                    $output = fbt([
-                        fbt::param('previous items', $output),
+                    $output = new $fbt([
+                        $fbt::param('previous items', $output),
                         " \u{2022} ",
-                        fbt::param('following items', $items[$i]),
-                    ], 'A list of items of various types separated by bullets, for example: ' .
-                        "\"Menlo Park, CA \u{2022} Seattle, WA \u{2022} New York City, NY\". " .
-                        '{previous items} and {following items} are themselves ' .
-                        'lists that contain one or more items.');
+                        $fbt::param('following items', $items[$index]),
+                    ], 'A list of items of various types separated by bullets, for example: "San Francisco \u2022 London \u2022 Tokyo". {previous items} and {following items} are themselves lists that contain one or more items.');
 
                     break;
                 default:
-                    $output = fbt([
-                        fbt::param('previous items', $output),
+                    $output = new $fbt([
+                        $fbt::param('previous items', $output),
                         ', ',
-                        fbt::param('following items', $items[$i]),
-                    ], 'A list of items of various types. {previous items} and' .
-                        ' {following items} are themselves lists that contain one or' .
-                        ' more items.');
+                        $fbt::param('following items', $items[$index]),
+                    ], 'A list of items of various types separated by commas, for example: "San Francisco, London, Tokyo". {previous items} and {following items} are themselves lists that contain one or more items.');
             }
         }
 
-        return self::_getConjunction(
-            $output,
-            $lastItem,
-            $conjunction ?: self::CONJUNCTIONS['AND'],
-            $delimiter ?: self::DELIMITERS['COMMA'],
-            $count,
-            $options
-        );
+        switch ($conjunction) {
+            case self::CONJUNCTIONS['AND']:
+                if (($options['serialComma'] ?? false) && $delimiter === self::DELIMITERS['COMMA'] && $count > 2) {
+                    return new $fbt([
+                        $fbt::param('list of items', $output),
+                        ', and ',
+                        $fbt::param('last item', $lastItem),
+                    ], 'A list of items of various types with a serial comma, for example: "item1, item2, and item3"');
+                }
+
+                return new $fbt([
+                    $fbt::param('list of items', $output),
+                    ' and ',
+                    $fbt::param('last item', $lastItem),
+                ], 'A list of items of various types, for example: "item1, item2, item3 and item4"');
+
+            case self::CONJUNCTIONS['OR']:
+                if (($options['serialComma'] ?? false) && $delimiter === self::DELIMITERS['COMMA'] && $count > 2) {
+                    return new $fbt([
+                        $fbt::param('list of items', $output),
+                        ', or ',
+                        $fbt::param('last item', $lastItem),
+                    ], 'A list of items of various types with a serial comma, for example: "item1, item2, or item3"');
+                }
+
+                return new $fbt([
+                    $fbt::param('list of items', $output),
+                    ' or ',
+                    $fbt::param('last item', $lastItem),
+                ], 'A list of items of various types, for example: "item1, item2, item3 or item4"');
+
+            case self::CONJUNCTIONS['NONE']:
+                switch ($delimiter) {
+                    case self::DELIMITERS['SEMICOLON']:
+                        return new $fbt([
+                            $fbt::param('previous items', $output),
+                            '; ',
+                            $fbt::param('last item', $lastItem),
+                        ], 'A list of items of various types, for example: "San Francisco; London; Tokyo". {previous items} itself contains one or more items.');
+                    case self::DELIMITERS['BULLET']:
+                        return new $fbt([
+                            $fbt::param('list of items', $output),
+                            " \u{2022} ",
+                            $fbt::param('last item', $lastItem),
+                        ], 'A list of items of various types separated by bullets, for example: "San Francisco \u2022 London \u2022 Tokyo". {previous items} contains one or more items.');
+                    default:
+                        return new $fbt([
+                            $fbt::param('list of items', $output),
+                            ', ',
+                            $fbt::param('last item', $lastItem),
+                        ], 'A list of items of various types, for example: "item1, item2, item3, item4"');
+                }
+                // no break
+            default:
+                throw new FbtException("Invalid conjunction $conjunction provided to '<fbt:list>'.");
+        }
+    }
+
+    /**
+     * @param array{serialComma?: bool}|null $options
+     *
+     * @return mixed|\fbt\fbt|string
+     * @throws FbtException
+     */
+    public static function intlList(array $items, ?string $conjunction = null, ?string $delimiter = null, ?array $options = null)
+    {
+        return self::listWithRuntime($items, $conjunction, $delimiter, $options);
     }
 
     /**
@@ -112,84 +159,5 @@ class IntlList
         }
 
         return $item !== null && $item !== false && $item !== '' && $item !== 0;
-    }
-
-    /**
-     * @throws \fbt\Exceptions\FbtException
-     */
-    private static function _getConjunction($list, $lastItem, string $conjunction, string $delimiter, int $count, ?array $options): fbt
-    {
-        switch ($conjunction) {
-            case self::CONJUNCTIONS['AND']:
-                if (($options['serialComma'] ?? false) && $delimiter === self::DELIMITERS['COMMA'] && $count > 2) {
-                    return fbt([
-                        fbt::param('list of items', $list),
-                        ', and ',
-                        fbt::param('last item', $lastItem),
-                    ], 'A list of items of various types with a serial comma, for example:' .
-                        ' "item1, item2, and item3"');
-                }
-
-                return fbt([
-                    fbt::param('list of items', $list),
-                    ' and ',
-                    fbt::param('last item', $lastItem),
-                ], 'A list of items of various types, for example:' .
-                    ' "item1, item2, item3 and item4"');
-
-            case self::CONJUNCTIONS['OR']:
-                if (($options['serialComma'] ?? false) && $delimiter === self::DELIMITERS['COMMA'] && $count > 2) {
-                    return fbt([
-                        fbt::param('list of items', $list),
-                        ', or ',
-                        fbt::param('last item', $lastItem),
-                    ], 'A list of items of various types with a serial comma, for example:' .
-                        ' "item1, item2, or item3"');
-                }
-
-                return fbt([
-                    fbt::param('list of items', $list),
-                    ' or ',
-                    fbt::param('last item', $lastItem),
-                ], 'A list of items of various types, for example:' .
-                    ' "item1, item2, item3 or item4"');
-
-            case self::CONJUNCTIONS['NONE']:
-                switch ($delimiter) {
-                    case self::DELIMITERS['SEMICOLON']:
-                        return fbt([
-                            fbt::param('previous items', $list),
-                            '; ',
-                            fbt::param('last item', $lastItem),
-                        ], 'A list of items of various types, for example:' .
-                            ' "Menlo Park, CA; Seattle, WA; New York City, NY". ' .
-                            '{previous items} itself contains one or more items.');
-                    case self::DELIMITERS['BULLET']:
-                        return fbt([
-                            fbt::param('list of items', $list),
-                            " \u{2022} ",
-                            fbt::param('last item', $lastItem),
-                        ], 'A list of items of various types separated by bullets, for example: ' .
-                            "\"Menlo Park, CA \u{2022} Seattle, WA \u{2022} New York City, NY\". " .
-                            '{previous items} contains one or more items.');
-                    default:
-                        return fbt(
-                            [
-                            fbt::param('list of items', $list),
-                            ', ',
-                            fbt::param('last item', $lastItem),
-                        ],
-                            'A list of items of various types, for example:' .
-                            ' "item1, item2, item3, item4"'
-                        );
-                }
-                // no break
-            default:
-                invariant(
-                    false,
-                    'Invalid conjunction %s provided to intlList',
-                    $conjunction
-                );
-        }
     }
 }

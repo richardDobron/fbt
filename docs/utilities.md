@@ -12,15 +12,14 @@ Bundled with fbt come a few useful utilities for constructing strings.
 As an example
 
 ```php
-$CONJUNCTIONS = \fbt\Runtime\Shared\IntlList::CONJUNCTIONS;
-$DELIMITERS = \fbt\Runtime\Shared\IntlList::DELIMITERS;
 $people = ['Adam', 'Becky', fbt('4 others', 'last item')];
-\fbt\intlList($people, $CONJUNCTIONS['AND'], $DELIMITERS['COMMA']);
+\fbt\intlList($people, 'and', 'comma');
+// Adam, Becky and 4 others
 ```
 produces the fbt
 ```
 <fbt
-  desc="A list of items of various types. {previous items} and {following items} are themselves lists that contain one or more items.">
+  desc="A list of items of various types separated by commas, for example: &quot;San Francisco, London, Tokyo&quot;. {previous items} and {following items} are themselves lists that contain one or more items.">
   <fbt:param name="previous items">{$output}</fbt:param>,
   <fbt:param name="following items">{$items[$i]}</fbt:param>
 </fbt>
@@ -28,17 +27,18 @@ produces the fbt
 recursively combining fbts.
 **Note that genders are not used in this `fbt:param` instances, so they default to `UNKNOWN`**
 
-Available delimiters are `COMMA` (default), `SEMICOLON` and `BULLET`:
+The conjunctions are `and` (default), `or` and `none`, the delimiters are `comma` (default), `semicolon` and `bullet`
+(also available as `IntlList::CONJUNCTIONS` and `IntlList::DELIMITERS`):
 
 ```php
-\fbt\intlList(['Menlo Park, CA', 'Seattle, WA', 'New York City, NY'], $CONJUNCTIONS['NONE'], $DELIMITERS['BULLET']);
-// Menlo Park, CA • Seattle, WA • New York City, NY
+\fbt\intlList(['San Francisco', 'London', 'Tokyo'], 'none', 'bullet');
+// San Francisco • London • Tokyo
 ```
 
-Pass `['serialComma' => true]` to use a serial (Oxford) comma with the `COMMA` delimiter and the `AND` / `OR` conjunctions (lists of three or more items):
+Pass `['serialComma' => true]` to use a serial (Oxford) comma with the `comma` delimiter and the `and` / `or` conjunctions (lists of three or more items):
 
 ```php
-\fbt\intlList(['Tokyo', 'London', 'Vienna'], $CONJUNCTIONS['AND'], $DELIMITERS['COMMA'], ['serialComma' => true]);
+\fbt\intlList(['Tokyo', 'London', 'Vienna'], 'and', 'comma', ['serialComma' => true]);
 // Tokyo, London, and Vienna
 ```
 

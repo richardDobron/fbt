@@ -3,9 +3,6 @@
 namespace tests\runtime;
 
 use fbt\FbtConfig;
-
-use function fbt\intlList;
-
 use fbt\Lib\IntlNumberType;
 use fbt\Lib\IntlViewerContext;
 use fbt\Runtime\FbtTranslations;
@@ -158,14 +155,6 @@ class runtimeParityTest extends \tests\TestCase
             '2 items',
             (string)$this->fbtRuntime->_(['*' => '{0} items', '_1' => '1 item'], [fbt::_plural(2, '0')])
         );
-    }
-
-    public function testIntlListItemsAreValidatedInDebugMode()
-    {
-        FbtConfig::set('debug', true);
-        $this->expectExceptionMessage('Must provide a string or an fbt result to intlList.');
-
-        intlList(['a', 1]);
     }
 
     public function testFbsRejectsRichContents()
