@@ -139,6 +139,83 @@ class jsParityFixesTest extends \tests\TestCase
         ], $result['newOne']);
     }
 
+    // prepareTranslations-test.tsx of fbtee: with sortByHash=true
+    public function testUpdateTranslationsSortByHash()
+    {
+        $phrase = function (string $desc, string $text): array {
+            return ['desc' => $desc, 'text' => $text];
+        };
+        $existingEntry = function (string $translation): array {
+            return [
+                'description' => 'desc',
+                'status' => 'translated',
+                'tokens' => [],
+                'translations' => [['translation' => $translation, 'variations' => []]],
+                'types' => [],
+            ];
+        };
+
+        // sorts pre-existing entries by hash and preserves translation values
+        $result = TranslationsGeneratorService::updateTranslations([
+            'zzz' => $phrase('z desc', 'z text'),
+            'aaa' => $phrase('a desc', 'a text'),
+            'mmm' => $phrase('m desc', 'm text'),
+        ], [
+            'zzz' => $existingEntry('Z translated'),
+            'aaa' => $existingEntry('A translated'),
+            'mmm' => $existingEntry('M translated'),
+        ], true);
+        $this->assertSame(['aaa', 'mmm', 'zzz'], array_keys($result));
+        $this->assertSame('A translated', $result['aaa']['translations'][0]['translation']);
+        $this->assertSame('M translated', $result['mmm']['translations'][0]['translation']);
+        $this->assertSame('Z translated', $result['zzz']['translations'][0]['translation']);
+
+        // sorts mixed existing + new entries and drops removed ones
+        $result = TranslationsGeneratorService::updateTranslations([
+            'keep2' => $phrase('keep2 desc', 'keep2 text'),
+            'new1' => $phrase('new1 desc', 'new1 text'),
+            'keep1' => $phrase('keep1 desc', 'keep1 text'),
+            'new2' => $phrase('new2 desc', 'new2 text'),
+        ], [
+            'keep1' => $existingEntry('keep1 translated'),
+            'remove1' => $existingEntry('remove1 translated'),
+            'keep2' => $existingEntry('keep2 translated'),
+        ], true);
+        $this->assertSame(['keep1', 'keep2', 'new1', 'new2'], array_keys($result));
+        $this->assertArrayNotHasKey('remove1', $result);
+        $this->assertSame('keep1 translated', $result['keep1']['translations'][0]['translation']);
+        $this->assertSame('new', $result['new1']['status']);
+        $this->assertSame('new1 text', $result['new1']['translations'][0]['translation']);
+        $this->assertSame('new', $result['new2']['status']);
+
+        // sorts when there are no pre-existing translations
+        $this->assertSame(['aaa', 'mmm', 'zzz'], array_keys(TranslationsGeneratorService::updateTranslations([
+            'zzz' => $phrase('z desc', 'z text'),
+            'aaa' => $phrase('a desc', 'a text'),
+            'mmm' => $phrase('m desc', 'm text'),
+        ], [], true)));
+
+        // returns an empty object when all pre-existing entries are removed
+        $this->assertSame([], TranslationsGeneratorService::updateTranslations([], [
+            'gone1' => $existingEntry('gone1 translated'),
+            'gone2' => $existingEntry('gone2 translated'),
+        ], true));
+
+        // produces deterministic output regardless of input insertion order
+        $this->assertEquals(
+            TranslationsGeneratorService::updateTranslations([
+                'zzz' => $phrase('z desc', 'z text'),
+                'aaa' => $phrase('a desc', 'a text'),
+                'mmm' => $phrase('m desc', 'm text'),
+            ], ['zzz' => $existingEntry('Z translated'), 'aaa' => $existingEntry('A translated')], true),
+            TranslationsGeneratorService::updateTranslations([
+                'mmm' => $phrase('m desc', 'm text'),
+                'zzz' => $phrase('z desc', 'z text'),
+                'aaa' => $phrase('a desc', 'a text'),
+            ], ['aaa' => $existingEntry('A translated'), 'zzz' => $existingEntry('Z translated')], true)
+        );
+    }
+
     public function testGeneratedTranslationsAreNew()
     {
         $source = $this->dir . '/.source_strings.json';

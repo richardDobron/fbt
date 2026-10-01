@@ -21,6 +21,7 @@ php ./vendor/bin/fbt generate-translations --src=./path/to/fbt/.source_strings.j
 | --src                   | ./.source_strings.json   | Path to collected source strings file                                                                   |
 | --translation-input     | ./translation_input.json | Path to translation input file                                                                          |
 | --translations=`[path]` | *none*                   | The translation files containing translations.<br />E.g. `--translations=./path/to/translations/*.json` |
+| --sort-by-hash          | no                       | Sort translation entries by hash key (both existing and new), for cleaner diffs of committed files      |
 
 Translation files have to be named by their locale (e.g. `de_DE.json`), other files are skipped.
 Each file contains a translation group (`{"fb-locale": "de_DE", "translations": {...}}`), so it can be passed to `translate --translations`.

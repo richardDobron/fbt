@@ -417,8 +417,9 @@ class TranslationsGeneratorService
      *
      * @param array $phrases - the leaves of the phrases by hash (hashToLeaf)
      * @param array $translations - the translations by hash
+     * @param bool $sortByHash - sort the translations by hash
      */
-    public static function updateTranslations(array $phrases, array $translations): array
+    public static function updateTranslations(array $phrases, array $translations, bool $sortByHash = false): array
     {
         // js~php diff: hashes are strings (PHP converts numeric keys to integers)
         $hashes = array_map('strval', array_keys($phrases));
@@ -453,6 +454,12 @@ class TranslationsGeneratorService
             }
         }
 
+        if ($sortByHash) {
+            uksort($updatedTranslations, function ($a, $b): int {
+                return strcmp((string)$a, (string)$b);
+            });
+        }
+
         return $updatedTranslations;
     }
 
@@ -477,10 +484,11 @@ class TranslationsGeneratorService
      * @param string $source
      * @param string|null $translationsPath
      * @param string $inputPath
+     * @param bool $sortByHash - sort the translations by hash (for cleaner diffs of committed files)
      *
      * @throws \Exception
      */
-    public function generateTranslations(string $source, ?string $translationsPath, string $inputPath): void
+    public function generateTranslations(string $source, ?string $translationsPath, string $inputPath, bool $sortByHash = false): void
     {
         if (! file_exists($source)) {
             throw new \Exception('Source strings file does not exist: ' . $source);
@@ -514,7 +522,7 @@ class TranslationsGeneratorService
                     "fb-locale" => $match[1],
                     "translations" => [],
                 ];
-                $group['translations'] = self::updateTranslations($hashToLeaf, $group['translations'] ?? []);
+                $group['translations'] = self::updateTranslations($hashToLeaf, $group['translations'] ?? [], $sortByHash);
 
                 file_put_contents($file, json_encode($group, $flags));
             }
@@ -532,7 +540,7 @@ class TranslationsGeneratorService
             $translationInput['phrases'] = $phrases;
 
             foreach ($translationInput['translationGroups'] as &$group) {
-                $group['translations'] = self::updateTranslations($hashToLeaf, $group['translations'] ?? []);
+                $group['translations'] = self::updateTranslations($hashToLeaf, $group['translations'] ?? [], $sortByHash);
             }
 
             file_put_contents($inputPath, json_encode($translationInput, $flags));

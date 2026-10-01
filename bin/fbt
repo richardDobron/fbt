@@ -150,7 +150,7 @@ $app->registerCommand('generate-translations', function (CommandCall $call) use 
         if ($call->hasFlag('--help') || $call->hasFlag('-h')) {
             echo <<<HELP
 Generate missing translation hashes from collected source strings:
-  fbt generate-translations [--src=<file>] [--translations=<glob>] [--translation-input=<file>]
+  fbt generate-translations [--src=<file>] [--translations=<glob>] [--translation-input=<file>] [--sort-by-hash]
       Adds new strings (with their source text, marked as new) and removes strings that are no longer collected
 
 Options:
@@ -158,6 +158,7 @@ Options:
   --translations=<glob>       The translation files to update, named by locale (e.g. de_DE.json)
   --translation-input=<file>  The translation input file written when --translations is not given
                               (translation_input.json by default)
+  --sort-by-hash              Sort translation entries by hash key (both existing and new)
 
 HELP;
 
@@ -168,7 +169,8 @@ HELP;
         $generateTranslationsService->generateTranslations(
             $call->getParam('--src') ?: ".source_strings.json",
             $call->getParam('--translations'),
-            $call->getParam('--translation-input') ?: "translation_input.json"
+            $call->getParam('--translation-input') ?: "translation_input.json",
+            $call->hasFlag('--sort-by-hash')
         );
 
         return 0;
