@@ -4,7 +4,7 @@ All notable changes to `fbt` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
-## v5.1.0 - Unreleased
+## v5.1.0 - 2026-10-01
 Ports features and fixes of [fbtee](https://github.com/nkzw-tech/fbtee), the maintained fork of Facebook's fbt.
 ### Added
 - `<fbt:list>` and `fbt::list()` / `fbs::list()` constructs (see [docs/lists.md](docs/lists.md)): a list of items as a single token, the items of `<fbt:list>` are a JSON array
