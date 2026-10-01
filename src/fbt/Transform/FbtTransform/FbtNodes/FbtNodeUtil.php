@@ -67,7 +67,7 @@ class FbtNodeUtil
     public static function toPlainFbtNodeTree(FbtNode $fbtNode, \SplObjectStorage $phraseToIndexMap): array
     {
         $ret = [
-            'phraseIndex' => $phraseToIndexMap->contains($fbtNode) ? $phraseToIndexMap[$fbtNode] : null,
+            'phraseIndex' => $phraseToIndexMap->offsetExists($fbtNode) ? $phraseToIndexMap[$fbtNode] : null,
             'children' => array_values(array_map(function (FbtNode $child) use ($phraseToIndexMap) {
                 return self::toPlainFbtNodeTree($child, $phraseToIndexMap);
             }, $fbtNode->children)),

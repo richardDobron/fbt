@@ -247,7 +247,7 @@ class TranslationsGeneratorService
         // js~php diff: translations of the fallback locale are used for missing translations
         $fallback = FbtHooks::getFallback($group['fb-locale']);
         $fallbackTranslations = FbtUtils::objMap(
-            array_filter($options['fallback'][$fallback]['translations'] ?? [], 'is_array'),
+            array_filter($fallback !== null ? ($options['fallback'][$fallback]['translations'] ?? []) : [], 'is_array'),
             [TranslationData::class, 'fromJSON']
         );
 

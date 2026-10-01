@@ -36,7 +36,9 @@ class fbtListTest extends \tests\TestCase
     private static function compiledCount(): int
     {
         $compiled = new \ReflectionProperty(FbtTransform::class, 'compiled');
-        $compiled->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $compiled->setAccessible(true);
+        }
 
         return count($compiled->getValue());
     }
