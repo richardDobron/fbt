@@ -37,6 +37,9 @@ class FbtCommon
                     if ($extension === 'json') {
                         $fbtCommonData = json_decode(file_get_contents($opts['fbtCommonPath']), true);
                     } else {
+                        if (! is_file($opts['fbtCommonPath'])) {
+                            throw new FbtException("Cannot find file '" . $opts['fbtCommonPath'] . "'");
+                        }
                         $fbtCommonData = require($opts['fbtCommonPath']);
                     }
                 } catch (\Throwable $e) {

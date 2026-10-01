@@ -171,6 +171,6 @@ class fbtListTest extends \tests\TestCase
             'Expected fbt constructs to not nest inside fbt constructs, but found fbt.list nest inside fbt.plural'
         );
 
-        (string)fbt(['a ', fbt::plural('cat ' . fbt::list('y', ['a', 'b']), 2)], 'd');
+        fbt(['a ', fbt::plural('cat ' . fbt::list('y', ['a', 'b']), 2)], 'd')->__toString();
     }
 }

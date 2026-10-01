@@ -109,7 +109,7 @@ class callExpressionTest extends \tests\TestCase
             'Expected fbt constructs to not nest inside fbt constructs, but found fbt.param nest inside fbt.plural'
         );
 
-        (string)fbt(['a ', fbt::plural('cat ' . fbt::param('y', 1), 2)], 'd');
+        fbt(['a ', fbt::plural('cat ' . fbt::param('y', 1), 2)], 'd')->__toString();
     }
 
     public function testConstructOfAnotherModuleError()
@@ -117,7 +117,7 @@ class callExpressionTest extends \tests\TestCase
         $this->expectException(FbtParserException::class);
         $this->expectExceptionMessage('fbs: unsupported node: ' . FbtCallExpression::class);
 
-        (string)fbs(['a ', fbt::param('x', 'y')], 'd');
+        fbs(['a ', fbt::param('x', 'y')], 'd')->__toString();
     }
 
     public function testConstructWithinHtmlDocument()

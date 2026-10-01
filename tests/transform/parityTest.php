@@ -225,7 +225,7 @@ class parityTest extends \tests\TestCase
     public function testErrorsContainTheLineOfTheCallsite()
     {
         try {
-            (string)fbt('x', 'd', ['foo' => 'bar']);
+            fbt('x', 'd', ['foo' => 'bar'])->__toString();
             $this->fail('Expected exception');
         } catch (\fbt\Exceptions\FbtParserException $e) {
             $this->assertStringStartsWith(
@@ -261,7 +261,7 @@ class parityTest extends \tests\TestCase
             $fbt->_trace(['file' => $file, 'line' => 2]);
             // upstream: '%sExpected string value instead of %s (%s)'
             $this->expectExceptionMessage('Expected string value instead of true (bool)');
-            (string)$fbt;
+            $fbt->__toString();
         } finally {
             unlink($file);
         }
@@ -273,7 +273,7 @@ class parityTest extends \tests\TestCase
 
         try {
             $this->expectExceptionMessage("Please double check your fbtCommonPath setting.");
-            (string)fbt('x', 'd');
+            fbt('x', 'd')->__toString();
         } finally {
             FbtConfig::set('fbtCommonPath', null);
         }

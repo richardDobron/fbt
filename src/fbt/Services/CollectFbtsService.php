@@ -367,7 +367,7 @@ class CollectFbtsService
                 $fbt = self::evaluate($this->compileCode($node));
                 if ($fbt instanceof \fbt\fbt) {
                     $fbt->_trace($trace);
-                    (string)$fbt;
+                    $fbt->__toString();
                 }
             } catch (\Throwable $e) {
                 $this->reportError($e, $path, $line);

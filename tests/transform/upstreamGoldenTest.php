@@ -78,7 +78,7 @@ class upstreamGoldenTest extends \tests\TestCase
     private static function pretty(string $json): string
     {
         return json_encode(
-            json_decode($json, false, 512, JSON_THROW_ON_ERROR),
+            json_decode($json),
             JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_LINE_TERMINATORS
         );
     }
@@ -784,7 +784,7 @@ class upstreamGoldenTest extends \tests\TestCase
         $message = null;
 
         try {
-            (string)fbt('There were ' . fbt::plural('a like', 2, ['showCount' => 'badkey']), 'plurals');
+            fbt('There were ' . fbt::plural('a like', 2, ['showCount' => 'badkey']), 'plurals')->__toString();
         } catch (\Throwable $e) {
             $message = $e->getMessage();
         }
@@ -874,7 +874,7 @@ class upstreamGoldenTest extends \tests\TestCase
         return [
             // fbtFunctional-test.js:179
             'two arguments with the same names' => [function () {
-                return (string)fbt('a ' . fbt::param('name', 'v1') . fbt::param('name', 'v2') . ' b', 'desc');
+                return fbt('a ' . fbt::param('name', 'v1') . fbt::param('name', 'v2') . ' b', 'desc')->__toString();
             }, 'There\'s already a token called "name" in this fbt call'],
             // fbtFunctional-test.js:213
             'param nested inside param' => [function () {
@@ -886,41 +886,41 @@ class upstreamGoldenTest extends \tests\TestCase
             }, 'Expected fbt constructs to not nest inside fbt constructs, but found fbt.param nest inside fbt.name'],
             // fbtFunctional-test.js "should throw when multiple tokens have the same names due to implicit params"
             'implicit params with the same token names' => [function () {
-                return (string)fbt(['Hello ', '<a>world</a>', ' ', '<a>world</a>'], 'token name collision due to autoparam');
+                return fbt(['Hello ', '<a>world</a>', ' ', '<a>world</a>'], 'token name collision due to autoparam')->__toString();
             }, $collision],
             'implicit param and enum with the same token names' => [function () {
-                return (string)fbt(
+                return fbt(
                     ['Hello ', '<a>world</a>', ' ', '<a>' . fbt::enum('world', ['world']) . '</a>'],
                     'token name collision due to autoparam'
-                );
+                )->__toString();
             }, $collision],
             'implicit param and param with the same token names' => [function () {
-                return (string)fbt(['Hello ', '<a>world</a>', ' ', fbt::param('=world', 'v')], 'token name collision due to autoparam');
+                return fbt(['Hello ', '<a>world</a>', ' ', fbt::param('=world', 'v')], 'token name collision due to autoparam')->__toString();
             }, $collision],
             'implicit param and plural with the same token names' => [function () {
-                return (string)fbt(
+                return fbt(
                     ['Hello ', '<a>world</a>', ' ', '<b>' . fbt::plural('world', 1) . '</b>'],
                     'token name collision due to autoparam'
-                );
+                )->__toString();
             }, $collision],
             // fbtFunctional-test.js:1820 (the PHP list of allowed options also has `key`)
             'unknown plural option' => [function () {
-                return (string)fbt('There were ' . fbt::plural('a like', 2, ['whatisthis' => 'huh?']), 'plurals');
+                return fbt('There were ' . fbt::plural('a like', 2, ['whatisthis' => 'huh?']), 'plurals')->__toString();
             }, 'Invalid option "whatisthis". Only allowed: value, showCount, name, many'],
             // fbtFunctional-test.js:1921
             'sameParam with an undefined token name' => [function () {
-                return (string)fbt(fbt::param('name1', 'v') . ' and ' . fbt::sameParam('name2'), 'd');
+                return fbt(fbt::param('name1', 'v') . ' and ' . fbt::sameParam('name2'), 'd')->__toString();
             }, sprintf($sameParam, 'name2')],
             // fbtFunctional-test.js "should throw if the token name of a sameParam construct in a nested string is not defined"
             'sameParam with an undefined token name in a nested string' => [function () {
-                return (string)fbt([fbt::param('name', 'v'), ' and ', '<b>inner string ' . fbt::sameParam('name1') . '</b>'], 'd');
+                return fbt([fbt::param('name', 'v'), ' and ', '<b>inner string ' . fbt::sameParam('name1') . '</b>'], 'd')->__toString();
             }, sprintf($sameParam, 'name1')],
             // fbtFunctional-test.js:1964
             'sameParam referring to a plural' => [function () {
-                return (string)fbt(
+                return fbt(
                     fbt::plural('cat', 2, ['value' => 'x', 'name' => 'tokenName', 'showCount' => 'yes']) . ' and ' . fbt::sameParam('tokenName'),
                     'd'
-                );
+                )->__toString();
             }, sprintf($sameParam, 'tokenName')],
             // fbtAutoWrap-test.js "prevent token name collisions among fbt constructs across all nesting levels (v1)"
             'token name collision across nesting levels (v1)' => [function () {
