@@ -192,6 +192,41 @@ PHP
         TranslationsGeneratorService::processJSON($input, ['strict' => true]);
     }
 
+    private function runCli(string $command): string
+    {
+        exec(
+            escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(dirname(__DIR__, 2) . '/bin/fbt') . ' ' . $command . ' 2>&1',
+            $output,
+            $exitCode
+        );
+        $this->assertSame(0, $exitCode, implode("\n", $output));
+
+        return implode("\n", $output);
+    }
+
+    public function testTranslateOutputFile()
+    {
+        $input = self::translationInput();
+        $input['translationGroups'][1] = $input['translationGroups'][0];
+        $input['translationGroups'][1]['fb-locale'] = 'de_DE';
+        $input['translationGroups'][1]['translations']['h1']['translations'][0]['translation'] = 'Hallo';
+        file_put_contents($this->dir . '/.source_strings.json', json_encode(['phrases' => $input['phrases']]));
+        file_put_contents($this->dir . '/sk_SK.json', json_encode($input['translationGroups'][0]));
+        file_put_contents($this->dir . '/de_DE.json', json_encode($input['translationGroups'][1]));
+
+        $args = '--jenkins --source-strings=' . escapeshellarg($this->dir . '/.source_strings.json')
+            . ' --translations=' . escapeshellarg($this->dir . '/sk_SK.json,' . $this->dir . '/de_DE.json');
+        $stdout = $this->runCli('translate --pretty ' . $args);
+        $this->runCli('translate ' . $args . ' --output-file=' . escapeshellarg($this->dir . '/translations.json'));
+
+        $hk = fbtHash::fbtHashKey($input['phrases'][0]['jsfbt']['t']);
+        $this->assertSame($stdout, file_get_contents($this->dir . '/translations.json'));
+        $this->assertSame(
+            ['sk_SK' => [$hk => 'Ahoj'], 'de_DE' => [$hk => 'Hallo']],
+            json_decode(file_get_contents($this->dir . '/translations.json'), true)
+        );
+    }
+
     public function testTranslateFiles()
     {
         $input = self::translationInput();

@@ -193,6 +193,7 @@ Options:
   --jenkins                     Output a mapping from the "jenkins" hash to the translation payload
   --fbt-hash-module=<file>      Like --jenkins, with a hash module (a PHP file returning a callable)
   --output-dir=<dir>, -o=<dir>  Split the output by locale into <dir>/<locale>.json
+  --output-file=<file>          Write the combined output of all locales into a single file
   --strict                      Stop execution on missing translations
   --pretty                      Pretty print the translation output
 
@@ -230,6 +231,7 @@ HELP;
 
         $pretty = $call->hasFlag('--pretty');
         $outputDir = $call->getParam('--output-dir') ?: $call->getParam('-o');
+        $outputFile = $call->getParam('--output-file');
         if ($outputDir) {
             if (! is_dir($outputDir)) {
                 mkdir($outputDir, 0777, true);
@@ -245,6 +247,14 @@ HELP;
                     TranslationsGeneratorService::toJSON($isGroup ? [$translations] : [$locale => $translations], $pretty)
                 );
             }
+        } elseif ($outputFile) {
+            if (! is_dir(dirname($outputFile))) {
+                mkdir(dirname($outputFile), 0777, true);
+            }
+            file_put_contents(
+                $outputFile,
+                TranslationsGeneratorService::toJSON($output, true, ! $options['jenkins'] && ! $options['hashModule'])
+            );
         } else {
             echo TranslationsGeneratorService::toJSON($output, $pretty, ! $options['jenkins'] && ! $options['hashModule']);
         }

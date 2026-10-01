@@ -59,6 +59,7 @@ php ./vendor/bin/fbt translate --stdin --jenkins -o=./path/to/output/ < translat
 | --jenkins                    | no                     | Output the translations by locale and callsite hash (`{"cs_CZ": {"<hash>": <payload>}}`), like `translatedFbts.json`. Without it, the output is a list of translation groups (`[{"fb-locale": ..., "translatedPhrases": [...]}]`) |
 | --fbt-hash-module=`[path]`   | *none*                 | Like `--jenkins`, with the hashes computed by a PHP file returning a callable                                |
 | --output-dir=`[dir]`, -o=`[dir]` | *none*             | Write one `<locale>.json` file per locale into the directory instead of the standard output                 |
+| --output-file=`[file]`       | *none*                 | Write the combined output of all locales into a single file instead of the standard output                   |
 | --strict                     | no                     | Stop on missing translations                                                                                 |
 | --pretty                     | no                     | Pretty print the translation output                                                                          |
 
