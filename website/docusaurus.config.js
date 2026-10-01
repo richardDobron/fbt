@@ -112,7 +112,7 @@ module.exports = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Richard Dobroň & Meta Platforms, Inc. and affiliates.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Richard Dobroň, Meta Platforms, Inc. and affiliates & Nakazawa Tech.`,
     },
     prism: {
       theme: themes.github,
