@@ -98,7 +98,48 @@ class jsParityFixesTest extends \tests\TestCase
         );
     }
 
-    public function testGeneratedTranslationSkeletonAlignsTokensAndTypes()
+    // prepareTranslations-test.tsx of fbtee: preserves pre-existing order and appends new hashes at the end
+    public function testUpdateTranslations()
+    {
+        $phrase = function (string $desc, string $text): array {
+            return ['desc' => $desc, 'text' => $text];
+        };
+        $existingEntry = function (string $translation, string $description = 'desc'): array {
+            return [
+                'description' => $description,
+                'status' => 'translated',
+                'tokens' => [],
+                'translations' => [['translation' => $translation, 'variations' => []]],
+                'types' => [],
+            ];
+        };
+
+        $result = TranslationsGeneratorService::updateTranslations([
+            'zzz' => $phrase('z desc', 'z text'),
+            'aaa' => $phrase('a desc', 'a text'),
+            'mmm' => $phrase('m desc', 'm text'),
+            'newOne' => $phrase('new desc', 'new text'),
+        ], [
+            'zzz' => $existingEntry('Z translated'),
+            'aaa' => $existingEntry('A translated'),
+            'mmm' => $existingEntry('M translated'),
+            'removed' => $existingEntry('R translated'),
+            'removedNull' => null,
+        ]);
+
+        $this->assertSame(['zzz', 'aaa', 'mmm', 'removedNull', 'newOne'], array_keys($result));
+        $this->assertSame('Z translated', $result['zzz']['translations'][0]['translation']);
+        $this->assertSame('new', $result['newOne']['status']);
+        $this->assertEquals([
+            'description' => 'new desc',
+            'status' => 'new',
+            'tokens' => [],
+            'translations' => [['translation' => 'new text', 'variations' => new \stdClass()]],
+            'types' => [],
+        ], $result['newOne']);
+    }
+
+    public function testGeneratedTranslationsAreNew()
     {
         $source = $this->dir . '/.source_strings.json';
         file_put_contents($source, json_encode([
@@ -117,9 +158,10 @@ class jsParityFixesTest extends \tests\TestCase
 
         (new TranslationsGeneratorService())->generateTranslations($source, $this->dir . '/*.json', $this->dir . '/input.json');
 
-        $generated = json_decode(file_get_contents($translations), true)['translations']['h1'];
-        $this->assertSame([null, 'name'], $generated['tokens']);
-        $this->assertCount(2, $generated['types']);
+        $this->assertSame(
+            '{"description":"d","status":"new","tokens":[],"translations":[{"translation":"{name} shared a photo.","variations":{}}],"types":[]}',
+            json_encode(json_decode(file_get_contents($translations))->translations->h1)
+        );
     }
 
     public function testFbtElementNodesOfExtractedStringsOnly()

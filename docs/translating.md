@@ -26,6 +26,9 @@ Translation files have to be named by their locale (e.g. `de_DE.json`), other fi
 Each file contains a translation group (`{"fb-locale": "de_DE", "translations": {...}}`), so it can be passed to `translate --translations`.
 Without `--translations`, the missing translations are written to the `--translation-input` file.
 
+The translations are merged with the collected strings like `prepare-translations` of [fbtee](https://github.com/nkzw-tech/fbtee):
+new strings are added with their source text, their description and `"status": "new"`, and translations of strings that are no longer collected are removed.
+
 ## Command to convert provided translations to jenkins:
 ```shell
 php ./vendor/bin/fbt translate --path=./path/to/fbt/ --stdin < translation_input.json

@@ -10,7 +10,6 @@ use fbt\Runtime\Shared\FbtHooks;
 use fbt\Transform\FbtTransform\fbtHash;
 use fbt\Transform\FbtTransform\FbtUtils;
 use fbt\Transform\FbtTransform\Translate\FbtSite;
-use fbt\Transform\FbtTransform\Translate\FbtSiteMetaEntry;
 use fbt\Transform\FbtTransform\Translate\TranslationBuilder;
 use fbt\Transform\FbtTransform\Translate\TranslationConfig;
 use fbt\Transform\FbtTransform\Translate\TranslationData;
@@ -362,6 +361,69 @@ class TranslationsGeneratorService
     }
 
     /**
+     * Merges the phrases with the existing translations: new strings are added with
+     * their source text and marked as new, strings that were removed are dropped.
+     * Port of updateTranslations() of fbtee (prepareTranslationsUtils.tsx).
+     *
+     * @param array $phrases - the leaves of the phrases by hash (hashToLeaf)
+     * @param array $translations - the translations by hash
+     */
+    public static function updateTranslations(array $phrases, array $translations): array
+    {
+        // js~php diff: hashes are strings (PHP converts numeric keys to integers)
+        $hashes = array_map('strval', array_keys($phrases));
+        $translatedHashes = array_map('strval', array_keys($translations));
+        $newHashes = array_diff($hashes, $translatedHashes);
+        $removedHashes = array_diff($translatedHashes, $hashes);
+
+        $updatedTranslations = $translations;
+        foreach ($newHashes as $hash) {
+            if (! self::jsonTruthy($updatedTranslations[$hash] ?? null)) {
+                $phrase = $phrases[$hash] ?? null;
+                if ($phrase) {
+                    $updatedTranslations[$hash] = [
+                        'description' => $phrase['desc'],
+                        'status' => 'new',
+                        'tokens' => [],
+                        'translations' => [
+                            [
+                                'translation' => $phrase['text'],
+                                'variations' => new \stdClass(),
+                            ],
+                        ],
+                        'types' => [],
+                    ];
+                }
+            }
+        }
+
+        foreach ($removedHashes as $hash) {
+            if (self::jsonTruthy($updatedTranslations[$hash] ?? null)) {
+                unset($updatedTranslations[$hash]);
+            }
+        }
+
+        return $updatedTranslations;
+    }
+
+    /**
+     * JS truthiness of a JSON value (json_truthy() of fbtee)
+     *
+     * @param mixed $value
+     */
+    private static function jsonTruthy($value): bool
+    {
+        if (is_array($value)) {
+            return true;
+        }
+        if (is_float($value)) {
+            return $value != 0 && ! is_nan($value);
+        }
+
+        return $value !== null && $value !== false && $value !== 0 && $value !== '';
+    }
+
+    /**
      * @param string $source
      * @param string|null $translationsPath
      * @param string $inputPath
@@ -379,27 +441,11 @@ class TranslationsGeneratorService
         $sourceStrings = json_decode(FbtHooks::readLocked($source), true);
         $phrases = $sourceStrings['phrases'];
 
-        $translations = [];
+        // The leaves of all phrases (like prepare-translations of fbtee)
+        $hashToLeaf = [];
         foreach ($phrases as $phrase) {
-            // Tokens and types are aligned (e.g. a pronoun has a type, but no token)
-            $metadata = array_values(array_filter($phrase['jsfbt']['m'] ?? []));
-            $tokens = array_map(function (array $entry) {
-                return $entry['token'] ?? null;
-            }, $metadata);
-            $types = array_map(function (array $entry) {
-                return $entry['type'] ?? null;
-            }, $metadata);
-            foreach (array_keys($phrase['hashToLeaf']) as $hash) {
-                $translations[$hash] = [
-                    'translations' => [
-                        [
-                            'translation' => '',
-                            'variations' => [],
-                        ],
-                    ],
-                    'tokens' => $tokens,
-                    'types' => array_map([FbtSiteMetaEntry::class, 'getVariationMaskFromType'], $types),
-                ];
+            if (isset($phrase['hashToLeaf'])) {
+                $hashToLeaf = array_replace($hashToLeaf, $phrase['hashToLeaf']);
             }
         }
 
@@ -418,7 +464,7 @@ class TranslationsGeneratorService
                     "fb-locale" => $match[1],
                     "translations" => [],
                 ];
-                $group['translations'] += $translations;
+                $group['translations'] = self::updateTranslations($hashToLeaf, $group['translations'] ?? []);
 
                 file_put_contents($file, json_encode($group, $flags));
             }
@@ -436,7 +482,7 @@ class TranslationsGeneratorService
             $translationInput['phrases'] = $phrases;
 
             foreach ($translationInput['translationGroups'] as &$group) {
-                $group['translations'] += $translations;
+                $group['translations'] = self::updateTranslations($hashToLeaf, $group['translations'] ?? []);
             }
 
             file_put_contents($inputPath, json_encode($translationInput, $flags));

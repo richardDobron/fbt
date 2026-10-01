@@ -151,7 +151,7 @@ $app->registerCommand('generate-translations', function (CommandCall $call) use 
             echo <<<HELP
 Generate missing translation hashes from collected source strings:
   fbt generate-translations [--src=<file>] [--translations=<glob>] [--translation-input=<file>]
-      Adds an empty translation for every collected hash that is not translated yet
+      Adds new strings (with their source text, marked as new) and removes strings that are no longer collected
 
 Options:
   --src=<file>                The file containing source strings (.source_strings.json by default)
