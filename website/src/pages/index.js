@@ -111,7 +111,8 @@ const features = [
     description: (
       <>
         A port of <a href="https://github.com/facebook/fbt">fbt</a>, the framework Facebook built to translate its
-        apps. Same source strings, same translation formats.
+        apps, and of <a href="https://github.com/nkzw-tech/fbtee">fbtee</a>, its maintained fork. Same source
+        strings, same translation formats.
       </>
     ),
   },
@@ -327,6 +328,9 @@ function BasedOn() {
       <a href="https://github.com/facebook/fbt">
         <img className={styles.basedOnLogo} src={useBaseUrl("img/flogo_RGB_HEX-72.svg")} alt="Facebook" />
       </a>
+      <p>
+        and its maintained fork <a href="https://github.com/nkzw-tech/fbtee">fbtee</a>
+      </p>
     </section>
   );
 }

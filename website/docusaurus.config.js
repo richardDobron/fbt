@@ -108,6 +108,7 @@ module.exports = {
           items: [
             { label: "FBT for Laravel", href: "https://github.com/richardDobron/laravel-fbt" },
             { label: "FBT for JavaScript (Facebook)", href: "https://github.com/facebook/fbt" },
+            { label: "fbtee for JavaScript", href: "https://github.com/nkzw-tech/fbtee" },
           ],
         },
       ],

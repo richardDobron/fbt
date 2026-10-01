@@ -4,7 +4,27 @@ All notable changes to `fbt` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
-## v5.0.0 - Unreleased
+## v5.1.0 - Unreleased
+Ports features and fixes of [fbtee](https://github.com/nkzw-tech/fbtee), the maintained fork of Facebook's fbt.
+### Added
+- `<fbt:list>` and `fbt::list()` constructs (see [docs/lists.md](docs/lists.md))
+- `translate --output-file=<file>` writes the combined output of all locales into a single file
+- `generate-translations --sort-by-hash` sorts the translation entries by hash key, for cleaner diffs of committed files
+- `serialComma` option of `intlList()`, e.g. "item1, item2, and item3"
+- PHP 8.5 support
+### Changed
+- `intlList()` is a port of `list()` of fbtee: the conjunctions and delimiters are lowercase (`and`, `or`, `none`, `comma`, `semicolon`, `bullet`, the values of `IntlList::CONJUNCTIONS` / `IntlList::DELIMITERS`), the strings have the descriptions of fbtee (their translations have to be translated again), an invalid conjunction (e.g. `''`) throws an exception, and the items are not validated in debug mode
+- `generate-translations` merges the collected strings with the translations like `prepare-translations` of fbtee: new strings are added with their source text, their description, empty `tokens` / `types` and `"status": "new"`, and translations of strings that are no longer collected are removed
+- `translate` skips translation entries marked with `"status": "new"`, and the translations by hash (`--jenkins`, `--fbt-hash-module`, `translatedFbts.json`) omit the strings without a translation (the source string is used)
+- `translate --strict` requires a completed translation of every collected string (missing entries, entries marked as new and entries without translations fail)
+- The runtime construct methods (`fbt::_param()`, `_plural()`, `_enum()`, `_subject()`, `_implicitParam()`, `_list()`, `_pronoun()`, `_name()`, `fbs::_param()`, `fbs::_plural()`) and helpers used by tests and the compiler are marked `@internal`
+### Fixed
+- Cached results of the same text are no longer reused for another hash key (like fbtee)
+- Collecting strings on PHP < 7.4: an error in one callsite was a fatal error instead of a reported error
+- A missing `fbtCommonPath` PHP file is reported ("Please double check your fbtCommonPath setting.") instead of a fatal error
+- Deprecations on PHP 8.5 (`null` array offset in `translate`, `SplObjectStorage::contains()`)
+
+## v5.0.0 - 2026-09-25
 See [UPGRADE-5.0.md](UPGRADE-5.0.md).
 ### Changed
 - The compiler is a port of [babel-plugin-fbt v1.0.0](https://github.com/facebook/fbt/tree/babel-plugin-fbt-v1.0.0) (fbt nodes)

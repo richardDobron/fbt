@@ -14,7 +14,7 @@ FBT is an internationalization framework for PHP designed to be not just **power
 * Composing grammatically correct translatable UI
 * Eliminating verbose boilerplate for generating UI
 
-**This library is based on the JavaScript implementation of Facebook's [FBT][link-facebook-fbt].**
+**This library is based on the JavaScript implementation of Facebook's [FBT][link-facebook-fbt] and its maintained fork [fbtee][link-fbtee].**
 
 <img src="docs/intro.png" alt="FBT intro"/>
 <img src="docs/plurals.png" alt="FBT plurals"/>
@@ -98,4 +98,5 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 [fbt-4-repo]: https://github.com/richarddobron/fbt/tree/4.x
 [fbt-5-repo]: https://github.com/richarddobron/fbt
 [link-facebook-fbt]: https://github.com/facebook/fbt
+[link-fbtee]: https://github.com/nkzw-tech/fbtee
 [dom-forge]: https://github.com/richardDobron/dom-forge
