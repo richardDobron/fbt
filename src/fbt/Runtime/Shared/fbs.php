@@ -21,6 +21,8 @@ class fbs extends fbt
      *
      * @return array
      * @throws \fbt\Exceptions\FbtException
+     *
+     * @internal
      */
     public static function _param(string $label, $value, array $variations = []): array
     {
@@ -45,6 +47,8 @@ class fbs extends fbt
      *
      * @return array
      * @throws \fbt\Exceptions\FbtException
+     *
+     * @internal
      */
     public static function _plural($count, ?string $label = null, $value = null): array
     {

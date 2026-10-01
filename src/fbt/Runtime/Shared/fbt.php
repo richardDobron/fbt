@@ -235,6 +235,8 @@ class fbt
      *
      * @throws \fbt\Exceptions\FbtException
      * @throws \fbt\Exceptions\FbtInvalidConfigurationException
+     *
+     * @internal
      */
     public static function _enum($value, array $range): array
     {
@@ -251,6 +253,8 @@ class fbt
      * @param int $value - Example: "16777216"
      *
      * @throws \fbt\Exceptions\FbtException
+     *
+     * @internal
      */
     public static function _subject(int $value): array
     {
@@ -274,6 +278,8 @@ class fbt
      *
      * @return array
      * @throws FbtException
+     *
+     * @internal
      */
     public static function _param(string $label, $value, array $variations = []): array
     {
@@ -318,6 +324,8 @@ class fbt
      *
      * @return array
      * @throws FbtException
+     *
+     * @internal
      */
     public static function _implicitParam(string $label, $value, array $variations = []): array
     {
@@ -336,6 +344,8 @@ class fbt
      *
      * @return array
      * @throws FbtException
+     *
+     * @internal
      */
     public static function _plural($count, ?string $label = null, $value = null): array
     {
@@ -365,6 +375,8 @@ class fbt
      * [null, {label: "replaces {label} in pattern string"}]
      *
      * @throws FbtException
+     *
+     * @internal
      */
     public static function _list(string $label, array $items, ?string $conjunction = null, ?string $delimiter = null): array
     {
@@ -390,6 +402,8 @@ class fbt
      * @param array|null $options - Example: [ 'human' => 1 ]
      *
      * @throws \fbt\Exceptions\FbtException
+     *
+     * @internal
      */
     public static function _pronoun($usage, int $gender, ?array $options = null): array
     {
@@ -460,6 +474,8 @@ class fbt
      * @return array
      *
      * @throws FbtException
+     *
+     * @internal
      */
     public static function _name(string $label, $value, int $gender): array
     {
