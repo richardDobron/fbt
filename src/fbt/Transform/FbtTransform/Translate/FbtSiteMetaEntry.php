@@ -81,6 +81,8 @@ class FbtSiteMetaEntry extends FbtSiteMetaEntryBase
 
     /**
      * @throws \fbt\Exceptions\FbtException
+     *
+     * @internal
      */
     public static function _validate(array $entry): void
     {

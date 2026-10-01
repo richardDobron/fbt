@@ -269,11 +269,17 @@ class IntlNumberType
         return self::getNumberModuleForLang($language);
     }
 
+    /**
+     * @internal
+     */
     public static function _getNumberModuleForLang(?string $lang = null): IntlNumberConsistency
     {
         return self::getNumberModuleForLang($lang);
     }
 
+    /**
+     * @internal
+     */
     public static function _getNumberModuleForLocale(?string $locale = null): IntlNumberConsistency
     {
         return self::getNumberModuleForLocale($locale);

@@ -247,6 +247,8 @@ class intlNumUtils
 
     /**
      * @param int|float|string $valueParam
+     *
+     * @internal
      */
     public static function _roundNumber($valueParam, ?int $decimalsParam = null): string
     {
@@ -353,6 +355,8 @@ class intlNumUtils
     /**
      * A codified number has \u0001 in the place of a decimal separator and a
      * \u0002 in the place of a negative sign.
+     *
+     * @internal
      */
     public static function _parseCodifiedNumber(string $text): ?float
     {
@@ -365,6 +369,9 @@ class intlNumUtils
         return $_text === '' || ! is_numeric($_text) ? null : (float)$_text;
     }
 
+    /**
+     * @internal
+     */
     public static function _getNativeDigitsMap(): ?array
     {
         $numberFormatConfig = self::config();

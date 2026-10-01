@@ -145,6 +145,8 @@ abstract class FbtNode
 
     /**
      * For debugging and unit tests
+     *
+     * @internal
      */
     public function __toJSONForTestsOnly(): array
     {

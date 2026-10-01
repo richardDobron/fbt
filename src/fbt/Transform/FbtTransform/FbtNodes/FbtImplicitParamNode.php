@@ -251,6 +251,9 @@ class FbtImplicitParamNode extends FbtNode implements IFbtElementNode
         ];
     }
 
+    /**
+     * @internal
+     */
     public function __toJSONForTestsOnly(): array
     {
         return parent::__toJSONForTestsOnly() + [

@@ -100,6 +100,8 @@ class FbtSite extends FbtSiteBase
      * @param array $textAndDescToHash Reverse mapping of hashToLeaf for leaf lookups
      *
      * @return string|array
+     *
+     * @internal
      */
     public static function _hashifyLeaves(array $entry, array $textAndDescToHash)
     {
@@ -128,6 +130,8 @@ class FbtSite extends FbtSiteBase
      * {text: 'a photo', desc: 'In the phrase: She has shared {a photo}.'}
      * {text: 'a photo', desc: 'In the phrase: He has shared {a photo}.'}
      * ....
+     *
+     * @internal
      */
     public static function _serializeTextAndDesc(string $text, string $desc): string
     {

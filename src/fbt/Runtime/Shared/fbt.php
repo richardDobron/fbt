@@ -170,6 +170,8 @@ class fbt
      * Cached result of a pattern (upstream `fbt._getCachedFbt()`, for tests)
      *
      * @return FbtResultBase|mixed|null
+     *
+     * @internal
      */
     public static function _getCachedFbt(string $patternString, ?string $hashKey = null)
     {

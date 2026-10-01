@@ -346,6 +346,8 @@ class FbtTransform
     /**
      * @throws \fbt\Exceptions\FbtException
      * @throws \fbt\Exceptions\FbtParserException
+     *
+     * @internal
      */
     public static function _fbtTraverse(Node $node): void
     {

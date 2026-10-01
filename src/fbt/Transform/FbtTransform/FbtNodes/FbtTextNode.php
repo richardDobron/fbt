@@ -77,6 +77,9 @@ class FbtTextNode extends FbtNode
         return null;
     }
 
+    /**
+     * @internal
+     */
     public function __toJSONForTestsOnly(): array
     {
         return parent::__toJSONForTestsOnly() + ['text' => $this->text];

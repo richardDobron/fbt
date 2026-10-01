@@ -58,6 +58,8 @@ abstract class FbtArgumentBase
 
     /**
      * For debugging and unit tests
+     *
+     * @internal
      */
     public function __toJSONForTestsOnly(): array
     {
