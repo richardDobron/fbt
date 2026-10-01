@@ -220,6 +220,55 @@ PHP
         $this->assertSame(['sk_SK' => [$hk => 'Hello']], TranslationsGeneratorService::processJSON($input, ['jenkins' => true]));
     }
 
+    /**
+     * fbtee: strict_translation_rejects_incomplete_source_entries
+     *
+     * @dataProvider incompleteTranslationsProvider
+     */
+    public function testStrictTranslationRejectsIncompleteSourceEntries(array $translations)
+    {
+        $input = self::translationInput();
+        $input['translationGroups'][0]['translations'] = $translations;
+
+        foreach ([['jenkins' => false], ['jenkins' => true]] as $options) {
+            try {
+                TranslationsGeneratorService::processJSON($input, ['strict' => true] + $options);
+                $this->fail('Expected an exception');
+            } catch (\Exception $e) {
+                $this->assertSame('Missing sk_SK translation for string (h1)', $e->getMessage());
+            }
+        }
+        $this->assertSame(['sk_SK' => []], TranslationsGeneratorService::processJSON($input, ['jenkins' => true]));
+    }
+
+    public function incompleteTranslationsProvider(): array
+    {
+        return [
+            'missing' => [[]],
+            'null' => [['h1' => null]],
+            'new' => [['h1' => ['status' => 'new', 'translations' => [['translation' => 'A', 'variations' => []]]]]],
+            'no translations' => [['h1' => ['translations' => []]]],
+        ];
+    }
+
+    // fbtee: strict_translation_preserves_empty_and_source_equal_translations
+    public function testStrictTranslationPreservesEmptyAndSourceEqualTranslations()
+    {
+        $hk = fbtHash::fbtHashKey(self::translationInput()['phrases'][0]['jsfbt']['t']);
+        foreach (['', 'Hello', 'Ahoj'] as $translation) {
+            $input = self::translationInput();
+            $input['translationGroups'][0]['translations'] = [
+                'h1' => ['translations' => [['translation' => $translation, 'variations' => []]]],
+                'obsolete' => ['status' => 'new', 'translations' => []],
+            ];
+
+            $this->assertSame(
+                ['sk_SK' => [$hk => $translation]],
+                TranslationsGeneratorService::processJSON($input, ['jenkins' => true, 'strict' => true])
+            );
+        }
+    }
+
     public function testTranslateStrictMode()
     {
         $input = self::translationInput();

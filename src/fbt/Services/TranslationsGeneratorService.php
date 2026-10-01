@@ -119,11 +119,19 @@ class TranslationsGeneratorService
     {
         $options += self::DEFAULT_OPTIONS;
         $fbtSites = array_map([FbtSite::class, 'fromScan'], $json['phrases']);
+        $requiredHashes = [];
+        if ($options['strict']) {
+            foreach ($json['phrases'] as $phrase) {
+                foreach (array_keys($phrase['hashToLeaf'] ?? []) as $hash) {
+                    $requiredHashes[] = (string)$hash;
+                }
+            }
+        }
 
         return self::processGroups(
             $json['phrases'],
-            array_map(function (array $group) use ($fbtSites, $options) {
-                return self::processTranslations($fbtSites, $group, $options);
+            array_map(function (array $group) use ($fbtSites, $options, $requiredHashes) {
+                return self::processTranslations($fbtSites, $group, $options, $requiredHashes);
             }, $json['translationGroups']),
             $options
         );
@@ -215,8 +223,9 @@ class TranslationsGeneratorService
     /**
      * @throws \Exception
      */
-    private static function checkAndFilterTranslations(string $locale, array $translations, array $options): array
+    private static function checkAndFilterTranslations(string $locale, array $translations, array $options, array $requiredHashes = []): array
     {
+
         $filteredTranslations = [];
         foreach ($translations as $hash => $translation) {
             if ($translation === null) {
@@ -236,17 +245,31 @@ class TranslationsGeneratorService
             $filteredTranslations[$hash] = $translation;
         }
 
+        // In strict mode, every collected string needs a completed translation (like fbtee)
+        if ($options['strict']) {
+            foreach ($requiredHashes as $hash) {
+                $translation = $translations[$hash] ?? null;
+                if (
+                    $translation === null
+                    || ($translation['status'] ?? null) === 'new'
+                    || (isset($translation['translations']) && $translation['translations'] === [])
+                ) {
+                    throw new \Exception("Missing $locale translation for string ($hash)");
+                }
+            }
+        }
+
         return $filteredTranslations;
     }
 
     /**
      * @throws \fbt\Exceptions\FbtException
      */
-    private static function processTranslations(array $fbtSites, array $group, array $options): array
+    private static function processTranslations(array $fbtSites, array $group, array $options, array $requiredHashes = []): array
     {
         $config = TranslationConfig::fromFBLocale($group['fb-locale']);
         $translations = FbtUtils::objMap(
-            self::checkAndFilterTranslations($group['fb-locale'], $group['translations'], $options),
+            self::checkAndFilterTranslations($group['fb-locale'], $group['translations'], $options, $requiredHashes),
             [TranslationData::class, 'fromJSON']
         );
 
