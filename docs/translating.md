@@ -29,6 +29,9 @@ Without `--translations`, the missing translations are written to the `--transla
 The translations are merged with the collected strings like `prepare-translations` of [fbtee](https://github.com/nkzw-tech/fbtee):
 new strings are added with their source text, their description and `"status": "new"`, and translations of strings that are no longer collected are removed.
 
+Entries marked as `new` are not translated yet, so `translate` skips them (remove the `status` once an entry is translated).
+The translations by hash (`--jenkins`, `--fbt-hash-module` and `translatedFbts.json`) omit the strings without a translation, so the source string is used.
+
 ## Command to convert provided translations to jenkins:
 ```shell
 php ./vendor/bin/fbt translate --path=./path/to/fbt/ --stdin < translation_input.json

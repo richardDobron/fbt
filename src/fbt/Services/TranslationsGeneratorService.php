@@ -203,7 +203,9 @@ class TranslationsGeneratorService
                     $idx
                 );
                 $hash = $fbtHash($phrase['jsfbt']['t']);
-                $localeToHashToFbt[$group['fb-locale']][$hash] = $translatedFbt;
+                if ($translatedFbt !== null) {
+                    $localeToHashToFbt[$group['fb-locale']][$hash] = $translatedFbt;
+                }
             }
         }
 
@@ -227,6 +229,10 @@ class TranslationsGeneratorService
 
                 continue;
             }
+            // Entries still marked as new are not translated yet (like fbtee)
+            if (($translation['status'] ?? null) === 'new') {
+                continue;
+            }
             $filteredTranslations[$hash] = $translation;
         }
 
@@ -247,11 +253,32 @@ class TranslationsGeneratorService
         // js~php diff: translations of the fallback locale are used for missing translations
         $fallback = FbtHooks::getFallback($group['fb-locale']);
         $fallbackTranslations = FbtUtils::objMap(
-            array_filter($fallback !== null ? ($options['fallback'][$fallback]['translations'] ?? []) : [], 'is_array'),
+            array_filter($fallback !== null ? ($options['fallback'][$fallback]['translations'] ?? []) : [], function ($translation) {
+                return is_array($translation) && ($translation['status'] ?? null) !== 'new';
+            }),
             [TranslationData::class, 'fromJSON']
         );
 
-        $translatedPhrases = array_map(function (FbtSite $fbtSite) use ($translations, $fallbackTranslations, $config, $options) {
+        $useJenkins = $options['jenkins'] || ($options['hashModule'] !== false && $options['hashModule'] !== null);
+        $translatedPhrases = array_map(function (FbtSite $fbtSite) use ($translations, $fallbackTranslations, $config, $options, $useJenkins) {
+            // Keep runtime dictionaries sparse so missing messages can fall back to
+            // another locale. Positional (non-Jenkins) output retains its source fallback.
+            // js~php diff: translations of the fallback locale are translations too
+            if ($useJenkins) {
+                $isTranslated = false;
+                foreach (array_keys($fbtSite->getHashToLeaf()) as $hash) {
+                    $data = $translations[$hash] ?? $fallbackTranslations[$hash] ?? null;
+                    if ($data !== null && $data->translations !== []) {
+                        $isTranslated = true;
+
+                        break;
+                    }
+                }
+                if (! $isTranslated) {
+                    return null;
+                }
+            }
+
             return (new TranslationBuilder($translations, $config, $fbtSite, $options['inclHash'], $fallbackTranslations))->build();
         }, $fbtSites);
 

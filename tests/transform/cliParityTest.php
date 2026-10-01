@@ -183,6 +183,43 @@ PHP
         );
     }
 
+    /**
+     * fbtee: runtime_catalogs_omit_untranslated_messages
+     *
+     * @dataProvider untranslatedMessagesProvider
+     */
+    public function testRuntimeCatalogsOmitUntranslatedMessages(array $translations)
+    {
+        $input = self::translationInput();
+        $input['translationGroups'][0]['translations'] = $translations;
+
+        $this->assertSame(['sk_SK' => []], TranslationsGeneratorService::processJSON($input, ['jenkins' => true]));
+        // positional (non-Jenkins) output retains its source fallback
+        $this->assertSame(
+            [['fb-locale' => 'sk_SK', 'translatedPhrases' => ['Hello']]],
+            TranslationsGeneratorService::processJSON($input)
+        );
+    }
+
+    public function untranslatedMessagesProvider(): array
+    {
+        return [
+            'missing' => [[]],
+            'new' => [['h1' => ['status' => 'new', 'translations' => [['translation' => 'A', 'variations' => []]]]]],
+            'no translations' => [['h1' => ['translations' => []]]],
+        ];
+    }
+
+    // fbtee: explicit_translations_equal_to_source_are_preserved
+    public function testExplicitTranslationsEqualToSourceArePreserved()
+    {
+        $input = self::translationInput();
+        $input['translationGroups'][0]['translations']['h1']['translations'][0]['translation'] = 'Hello';
+        $hk = fbtHash::fbtHashKey($input['phrases'][0]['jsfbt']['t']);
+
+        $this->assertSame(['sk_SK' => [$hk => 'Hello']], TranslationsGeneratorService::processJSON($input, ['jenkins' => true]));
+    }
+
     public function testTranslateStrictMode()
     {
         $input = self::translationInput();
