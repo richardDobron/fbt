@@ -14,6 +14,7 @@ use fbt\Transform\FbtTransform\FbtConstants;
 use fbt\Transform\FbtTransform\FbtNodeChecker;
 use fbt\Transform\FbtTransform\FbtNodes\FbtElementNode;
 use fbt\Transform\FbtTransform\FbtNodes\FbtImplicitParamNode;
+use fbt\Transform\FbtTransform\FbtNodes\FbtListNode;
 use fbt\Transform\FbtTransform\FbtNodes\FbtNode;
 use fbt\Transform\FbtTransform\FbtNodes\FbtNodeType;
 use fbt\Transform\FbtTransform\FbtNodes\FbtParamNode;
@@ -368,6 +369,7 @@ class FbtFunctionCallProcessor
         FbtCallExpression::traverse($this->node, function ($node, array $parentPath) use ($nodeChecker) {
             $constructs = [
                 FbtNodeType::ENUM,
+                FbtNodeType::LIST,
                 FbtNodeType::NAME,
                 FbtNodeType::PARAM,
                 FbtNodeType::PLURAL,
@@ -477,9 +479,11 @@ class FbtFunctionCallProcessor
         $fbtRuntimeArgs = [];
         foreach ($fbtNode->children as $child) {
             if (
-                $child instanceof FbtParamNode &&
-                $child->options['gender'] === null &&
-                $child->options['number'] === null
+                $child instanceof FbtListNode || (
+                    $child instanceof FbtParamNode &&
+                    $child->options['gender'] === null &&
+                    $child->options['number'] === null
+                )
             ) {
                 $fbtRuntimeArgs[] = $child->getFbtRuntimeArg();
             }

@@ -229,6 +229,24 @@ class fbt implements \JsonSerializable, HtmlStringable
         return self::createConstruct('pronoun', [$usage, new FbtExpression($gender)], self::checkOptionValues($options));
     }
 
+    /**
+     * A list of items, e.g. `fbt::list('locations', ['Tokyo', 'London', 'Vienna'])` (from fbtee)
+     *
+     * @param string $name
+     * @param array $items
+     * @param string|null $conjunction - see IntlList::CONJUNCTIONS (default: AND)
+     * @param string|null $delimiter - see IntlList::DELIMITERS (default: COMMA)
+     */
+    public static function list(string $name, $items, ?string $conjunction = null, ?string $delimiter = null): FbtCallExpression
+    {
+        return self::createConstruct('list', [
+            $name,
+            new FbtExpression($items),
+            $conjunction !== null ? new FbtExpression($conjunction) : null,
+            $delimiter !== null ? new FbtExpression($delimiter) : null,
+        ]);
+    }
+
     public static function sameParam(string $name): FbtCallExpression
     {
         return self::createConstruct('sameParam', [$name]);
@@ -334,7 +352,7 @@ class fbt implements \JsonSerializable, HtmlStringable
         }
 
         $args = $part->arguments;
-        $options = $part->name !== 'name' ? $this->toMarkupAttributes($args[2] ?? []) : [];
+        $options = ! in_array($part->name, ['name', 'list'], true) ? $this->toMarkupAttributes($args[2] ?? []) : [];
         $tag = static::$moduleName . ':' . ($part->name === 'sameParam' ? 'same-param' : $part->name);
 
         switch ($part->name) {
@@ -350,6 +368,15 @@ class fbt implements \JsonSerializable, HtmlStringable
                     'name' => $args[0],
                     'gender' => $this->toMarkupValue($args[2]),
                 ]);
+            case 'list':
+                return createElement($tag, null, array_filter([
+                    'name' => $args[0],
+                    'items' => json_encode($this->values[$args[1]->index]),
+                    'conjunction' => $args[2] !== null ? $this->toMarkupValue($args[2]) : null,
+                    'delimiter' => $args[3] !== null ? $this->toMarkupValue($args[3]) : null,
+                ], function ($value) {
+                    return $value !== null;
+                }));
             case 'plural':
                 return createElement($tag, $args[0], ['count' => $this->toMarkupValue($args[1])] + $options);
             case 'pronoun':

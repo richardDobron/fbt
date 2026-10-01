@@ -188,6 +188,36 @@ class GetNamespacedArgs
     }
 
     /**
+     * <fbt:list> (from fbtee)
+     *
+     * @throws \fbt\Exceptions\FbtParserException
+     */
+    public function list(Node $node): array
+    {
+        if (! $node->isSelfClosing()) {
+            throw FbtUtils::errorAt($node, "<$this->moduleName:list> must be self-closing.");
+        }
+
+        $name = self::getAttributeOrThrow($node, 'name');
+        $items = json_decode(self::getAttributeOrThrow($node, 'items'), true);
+
+        // js~php diff: the items are a JSON array (a JSX expression in fbtee)
+        if (! is_array($items)) {
+            throw FbtUtils::errorAt($node, "<$this->moduleName:list> attribute 'items' must be a JSON array.");
+        }
+
+        $conjunction = FbtUtils::getAttributeByName($node, 'conjunction');
+        $delimiter = FbtUtils::getAttributeByName($node, 'delimiter');
+
+        return [
+            $name,
+            $items,
+            $conjunction,
+            $delimiter,
+        ];
+    }
+
+    /**
      * <fbt:enum>
      *
      * @throws \fbt\Exceptions\FbtParserException

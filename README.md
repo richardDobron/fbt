@@ -38,6 +38,7 @@ $ composer require richarddobron/fbt:^5
 - [x] Plurals
 - [x] Enumerations
 - [x] Pronouns
+- [x] Lists
 - [x] Number formatting
 - [x] Phrase extracting
 - [x] Inline translating

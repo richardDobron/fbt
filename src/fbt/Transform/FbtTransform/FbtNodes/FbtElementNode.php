@@ -248,6 +248,7 @@ class FbtElementNode extends FbtNode implements IFbtElementNode
         $fbtChildNode = null;
         $fbtChildNodeClasses = [
             FbtEnumNode::class,
+            FbtListNode::class,
             FbtNameNode::class,
             FbtParamNode::class,
             FbtPluralNode::class,

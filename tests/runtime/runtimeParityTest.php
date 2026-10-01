@@ -13,7 +13,6 @@ use fbt\Runtime\Shared\fbs;
 use fbt\Runtime\Shared\fbt;
 use fbt\Runtime\Shared\FbtHooks;
 use fbt\Transform\FbtTransform\FbtTransform;
-use fbt\Transform\FbtTransform\Translate\IntlVariations;
 
 /**
  * Runtime behaviors aligned with upstream fbt, and ported upstream tests

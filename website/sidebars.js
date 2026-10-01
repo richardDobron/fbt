@@ -13,6 +13,7 @@ module.exports = {
       "implicit_params",
       "plurals",
       "enums",
+      "lists",
       "pronouns",
       "autoparam",
       "common",

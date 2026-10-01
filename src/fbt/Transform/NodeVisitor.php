@@ -2,8 +2,8 @@
 
 namespace fbt\Transform;
 
-use fbt\Services\CollectFbtsService;
 use fbt\Lib\IntlVariations;
+use fbt\Services\CollectFbtsService;
 use PhpParser\Node;
 use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Expr\ConstFetch;
@@ -65,6 +65,12 @@ class NodeVisitor extends NodeVisitorAbstract
                             ? new String_((string)$key->value)
                             : new StaticCall(new Name\FullyQualified(CollectFbtsService::class), 'firstKey', [new Node\Arg($range)])
                     );
+                }
+
+                break;
+            case 'list':
+                if (isset($node->args[1]) && ! $node->args[1]->value instanceof Array_) {
+                    $node->args[1] = new Node\Arg(new Array_([]));
                 }
 
                 break;

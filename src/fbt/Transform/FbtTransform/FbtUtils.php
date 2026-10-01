@@ -89,6 +89,7 @@ class FbtUtils
             if ($namespace === $moduleName) {
                 $valid =
                     $handlerName === 'enum' ||
+                    $handlerName === 'list' ||
                     $handlerName === 'param' ||
                     $handlerName === 'plural' ||
                     $handlerName === 'pronoun' ||

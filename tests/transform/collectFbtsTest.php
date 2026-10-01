@@ -57,6 +57,23 @@ class collectFbtsTest extends \tests\TestCase
         return json_decode(file_get_contents($this->dir . '/.source_strings.json'), true);
     }
 
+    public function testCollectsLists()
+    {
+        $output = $this->collect([
+            'list.php' => "<?php\n"
+                . "echo fbt(['Available Locations: ', \\fbt\\fbt::list('locations', \$locations, \$conjunction), '.'], 'Lists');\n"
+                . "echo fbt('Tags: <fbt:list name=\"tags\" items=\\'[\"a\",\"b\"]\\' />', 'Tags');\n",
+        ]);
+
+        // the strings of intlList() are collected when a list is rendered
+        $this->assertSame(
+            ['Available Locations: {locations}.', 'Tags: {tags}', '{list of items} and {last item}'],
+            array_map(function (array $phrase) {
+                return $phrase['jsfbt']['t']['text'];
+            }, $output['phrases'])
+        );
+    }
+
     public function testCollectsPhrasesFromSourceFiles()
     {
         $output = $this->collect([

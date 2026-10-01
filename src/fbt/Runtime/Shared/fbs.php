@@ -7,6 +7,12 @@ use function fbt\invariant;
 class fbs extends fbt
 {
     /**
+     * @see fbt::$listRuntime
+     * @var string
+     */
+    protected static $listRuntime = \fbt\fbs::class;
+
+    /**
      * @see fbt::_param()
      *
      * @param string $label

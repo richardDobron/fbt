@@ -7,6 +7,7 @@ class FbtNodeType
     public const ELEMENT = 'element';
     public const ENUM = 'enum';
     public const IMPLICIT_PARAM = 'implicitParam';
+    public const LIST = 'list';
     public const NAME = 'name';
     public const PARAM = 'param';
     public const PLURAL = 'plural';
@@ -23,6 +24,7 @@ class FbtNodeType
             self::ELEMENT,
             self::ENUM,
             self::IMPLICIT_PARAM,
+            self::LIST,
             self::NAME,
             self::PARAM,
             self::PLURAL,

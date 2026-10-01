@@ -18,6 +18,13 @@ class fbt
     private static $_cachedFbtResults = [];
 
     /**
+     * The fbt API used by fbt::_list() (`listRuntime ?? runtime` of fbtee)
+     * js~php diff: the class of the fbt API
+     * @var string
+     */
+    protected static $listRuntime = \fbt\fbt::class;
+
+    /**
      * fbt::_() iterates through all indices provided in `args` and accesses
      * the relevant entry in the `table` resulting in the appropriate
      * pattern string.  It then substitutes all relevant substitutions.
@@ -348,6 +355,29 @@ class fbt
         }
 
         return FbtTableAccessor::getNumberResult($variation, $substitution, $count);
+    }
+
+    /**
+     * fbt::_list() takes a `label`, the `items` and an optional `conjunction` and `delimiter`
+     * (see IntlList) and returns a tuple in the format (from fbtee):
+     * [null, {label: "replaces {label} in pattern string"}]
+     *
+     * @throws FbtException
+     */
+    public static function _list(string $label, array $items, ?string $conjunction = null, ?string $delimiter = null): array
+    {
+        return [
+            null,
+            [
+                $label => IntlList::listWithRuntime(
+                    $items,
+                    $conjunction,
+                    $delimiter,
+                    null,
+                    static::$listRuntime
+                ),
+            ],
+        ];
     }
 
     /**
