@@ -76,8 +76,6 @@ class FbtElementNode extends FbtNode implements IFbtElementNode
                 'preserveWhitespace' => FbtUtils::enforceBooleanOrNull($rawOptions['preserveWhitespace'] ?? null) ?: false,
                 'project' => FbtUtils::enforceString(($rawOptions['project'] ?? null) ?: ''),
                 'subject' => $rawOptions['subject'] ?? null,
-                // js~php diff: whether the result can be inlined (see FbtHooks::inlineMode())
-                'reporting' => FbtUtils::enforceBooleanOrNull($rawOptions['reporting'] ?? null) ?? true,
                 'extraOptions' => $extraOptions,
             ];
         } catch (\Throwable $error) {

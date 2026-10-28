@@ -4,6 +4,10 @@ All notable changes to `fbt` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## Unreleased
+### Removed
+- `reporting` option of `fbt()` / `<fbt>` (and the `reporting` input of the `getFbtResult` / `getFbsResult` hooks), use `fbs()` / `<fbs>` for strings that must not be inlined
+
 ## v5.1.0 - 2026-10-01
 Ports features and fixes of [fbtee](https://github.com/nkzw-tech/fbtee), the maintained fork of Facebook's fbt.
 ### Added

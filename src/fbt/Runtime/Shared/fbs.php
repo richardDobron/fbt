@@ -68,7 +68,6 @@ class fbs extends fbt
      * @param string $translation
      * @param string|null $hash
      * @param array|null $extraOptions
-     * @param bool $reporting
      *
      * @return FbtPureStringResult|mixed
      */
@@ -76,8 +75,7 @@ class fbs extends fbt
         $fbtContent,
         string $translation,
         ?string $hash,
-        ?array $extraOptions = null,
-        bool $reporting = true
+        ?array $extraOptions = null
     ) {
         $contents = is_string($fbtContent) ? [$fbtContent] : $fbtContent;
         $errorListener = FbtHooks::getErrorListener([
@@ -91,7 +89,6 @@ class fbs extends fbt
             'extraOptions' => $extraOptions,
             'patternHash' => $hash,
             'patternString' => $translation,
-            'reporting' => $reporting,
         ]);
     }
 }

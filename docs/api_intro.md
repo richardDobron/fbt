@@ -26,7 +26,6 @@ Let's start with a simple example:
 * **subject** `IntlVariations::GENDER_*`: Pass an [implicit subject](implicit_params.md) gender to a partially formed text
 * **common** `bool`: Use a "common" string repository
 * **doNotExtract** `bool`: Informs [collection](collection.md) to skip this string (useful for tests/mocks)
-* **reporting** `bool`: (Default: `true`) Set to `false` to exclude the string from [inline translating](inline_translating.md)
 
 --------------------------------------------------------------------------------
 

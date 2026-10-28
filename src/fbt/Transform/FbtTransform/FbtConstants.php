@@ -98,7 +98,6 @@ class FbtConstants
         'preserveWhitespace' => true,
         'project' => true,
         'subject' => true,
-        'reporting' => true, // js~php diff: whether the result can be inlined
     ];
 
     public const FBT_BOOLEAN_OPTIONS = [

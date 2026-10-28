@@ -113,8 +113,7 @@ class FbtHooks
      *   errorListener: IFbtErrorListener|null,
      *   extraOptions: array|null,
      *   patternString: string,
-     *   patternHash: string|null,
-     *   reporting: bool
+     *   patternHash: string|null
      * } $input
      *
      * @return mixed
@@ -127,7 +126,7 @@ class FbtHooks
 
         $inlineMode = self::inlineMode();
 
-        if ($input['reporting'] && $inlineMode && $inlineMode !== 'NO_INLINE') {
+        if ($inlineMode && $inlineMode !== 'NO_INLINE') {
             return new InlineFbtResult(
                 $input['contents'],
                 $inlineMode,
@@ -146,8 +145,7 @@ class FbtHooks
      *   errorListener: IFbtErrorListener|null,
      *   extraOptions: array|null,
      *   patternString: string,
-     *   patternHash: string|null,
-     *   reporting: bool
+     *   patternHash: string|null
      * } $input
      *
      * @return mixed

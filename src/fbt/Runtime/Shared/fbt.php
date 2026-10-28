@@ -51,13 +51,11 @@ class fbt
      * hk stands for hash key which is used to look up the translated payload in
      * FbtTranslations. eo stands for extra options.
      *
-     * @param bool $reporting - js~php diff: whether the result can be inlined
-     *
      * @return FbtResultBase|mixed - result of the getFbtResult/getFbsResult hook
      * @throws FbtException
      * @throws \fbt\Exceptions\FbtInvalidConfigurationException
      */
-    public function _($inputTable, ?array $inputArgs, ?array $options = [], bool $reporting = true)
+    public function _($inputTable, ?array $inputArgs, ?array $options = [])
     {
         $options = $options ?? [];
 
@@ -135,7 +133,7 @@ class fbt
         // js~php diff: results that can be inlined depend on the inline mode (and the
         // callsite), so they are never cached
         $inlineMode = FbtHooks::inlineMode();
-        $cacheable = ! $reporting || ! $inlineMode || $inlineMode === 'NO_INLINE';
+        $cacheable = ! $inlineMode || $inlineMode === 'NO_INLINE';
         $hashKey = $options['hk'] ?? null;
         $cachedFbt = self::$_cachedFbtResults[$cacheKey][(string)$hashKey] ?? null;
         $hasSubstitutions = self::_hasKeys($allSubstitutions);
@@ -155,8 +153,7 @@ class fbt
                 $fbtContent,
                 $patternString,
                 $patternHash,
-                $options['eo'] ?? null,
-                $reporting
+                $options['eo'] ?? null
             );
             if (! $hasSubstitutions && $cacheable) {
                 self::$_cachedFbtResults[$cacheKey][(string)$hashKey] = $result;
@@ -491,7 +488,6 @@ class fbt
      * @param string $translation
      * @param string|null $hash
      * @param array|null $extraOptions
-     * @param bool $reporting
      *
      * @return FbtResultBase|mixed
      */
@@ -499,8 +495,7 @@ class fbt
         $fbtContent,
         string $translation,
         ?string $hash,
-        ?array $extraOptions = null,
-        bool $reporting = true
+        ?array $extraOptions = null
     ) {
         $contents = is_string($fbtContent) ? [$fbtContent] : $fbtContent;
         $errorListener = FbtHooks::getErrorListener([
@@ -514,7 +509,6 @@ class fbt
             'extraOptions' => $extraOptions,
             'patternHash' => $hash,
             'patternString' => $translation,
-            'reporting' => $reporting,
         ]);
     }
 

@@ -114,7 +114,6 @@ class FbtUtils
         'doNotExtract' => 'doNotExtract',
         'number' => 'number',
         'preserveWhitespace' => 'preserveWhitespace',
-        'reporting' => 'reporting', // js~php diff: whether the result can be inlined
     ];
 
     private static function canBeShortBoolAttr(string $name): bool

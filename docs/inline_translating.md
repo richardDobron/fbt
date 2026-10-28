@@ -29,17 +29,15 @@ The inlined strings are wrapped in `<em class="intlInlineMode_...">` elements, w
 
 ## Excluded translations
 Strings created with `fbs()` / `<fbs>` are never inlined, since they are meant to be used as plain text
-(e.g. in HTML attributes).
-
-If you need to turn off inline mode for specific phrases, you can use option `reporting`:
+(e.g. in HTML attributes or the page title):
 
 ```php
 <title>
-    <?=fbt('Account Settings', 'page title', ['reporting' => false])?>
+    <?=fbs('Account Settings', 'page title')?>
 </title>
 ```
 
-or using `canInline` hook:
+You can also turn off inline mode for specific phrases using `canInline` hook:
 
 ```php
 FbtHooks::register('canInline', function ($backtrace) {

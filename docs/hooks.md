@@ -41,7 +41,6 @@ FbtHooks::register('getFbtResult', function (array $input) {
     //   'extraOptions' => ?array,
     //   'patternString' => string,
     //   'patternHash' => ?string,
-    //   'reporting' => bool,
     // ]
     return \fbt\Runtime\Shared\FbtResult::get($input);
 });

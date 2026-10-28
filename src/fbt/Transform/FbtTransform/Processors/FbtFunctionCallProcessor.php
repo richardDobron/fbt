@@ -119,9 +119,7 @@ class FbtFunctionCallProcessor
         return $runtime->_(
             $runtimeInput['table'],
             count($fbtRuntimeArgs) > 0 ? $fbtRuntimeArgs : null,
-            $runtimeInput['options'],
-            // js~php diff: whether the result can be inlined
-            (bool)$this->_getFbtElement($metaPhrases)->options['reporting']
+            $runtimeInput['options']
         );
     }
 
@@ -139,21 +137,6 @@ class FbtFunctionCallProcessor
             $stringVariationRuntimeArgs,
             $scope
         );
-    }
-
-    /**
-     * @throws \fbt\Exceptions\FbtException
-     */
-    private function _getFbtElement(array $metaPhrases): FbtElementNode
-    {
-        $fbtElement = $metaPhrases[0]['fbtNode'];
-        invariant(
-            $fbtElement instanceof FbtElementNode,
-            'Expected a FbtElementNode for top level string but received: %s',
-            get_class($fbtElement)
-        );
-
-        return $fbtElement;
     }
 
     /**

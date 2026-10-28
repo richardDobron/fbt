@@ -391,7 +391,7 @@ FBT
             ],
         ]);
         $fbt = <<<FBT
-<title><fbt desc="page title" reporting="false">Product name</fbt></title>
+<title><fbs desc="page title">Product name</fbs></title>
 FBT;
 
         $this->assertSame(<<<FBT
